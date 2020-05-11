@@ -24,7 +24,7 @@ class Fc(Interface):
     :type name: str
     :raises InvalidInterface: when interface name is incorrect
     :example:
-    >>> fcobj = Fc(switch = switch_obj, name = "fc1/1")
+        >>> fcobj = Fc(switch = switch_obj, name = "fc1/1")
 
     """
 

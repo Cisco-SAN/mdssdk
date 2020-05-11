@@ -38,8 +38,16 @@ class Interface(object):
     @property
     def name(self):
         """
+        get name of the interface
 
-        :return:
+        :return: name of the interface
+        :rtype: str
+        :example:
+            >>>
+            >>> print(int_obj.name)
+            fc1/1
+            >>>
+
         """
         return self._name
 
@@ -289,6 +297,7 @@ class Interface(object):
         def clear(self):
             """
             Clear the counters on the interface
+            
             :return: None
             :example:
                 >>>

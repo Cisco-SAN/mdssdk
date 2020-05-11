@@ -41,8 +41,8 @@ This library will be useful for automating day to day tasks or developing new to
         requests   2.22.0    
         setuptools 45.1.0    
         urllib3    1.25.8   
-        wheel      0.33.6  `
+        wheel      0.33.6  
         
 ## Documentation
 
-* http://mdslib.readthedocs.io
+* http://mdssdk.readthedocs.io
