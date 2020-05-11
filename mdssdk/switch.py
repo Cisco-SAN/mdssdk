@@ -493,6 +493,7 @@ class Switch(SwitchUtils):
 
         """
         Enable or disable a feature or get the status of the feature
+        
         :param name: Name of the feature
         :param enable: Set to True to enable the feature or set to False to disable the feature or set to None (deafault) to get the status of the feature
         :return: Returns True of False if enable is set to None
