@@ -31,11 +31,3 @@ class TestZoneAttrEffectivedbSize(unittest.TestCase):
             z.effectivedb_size = "asdf"
         self.assertEqual('can\'t set attribute',str(e.exception))
         v.delete()
-
-
-
-
-
-
-
-

@@ -7,7 +7,7 @@ class TestVsanAttrName(unittest.TestCase):
 
     def test_name_read(self):
         v = Vsan(switch=self.switch, id=self.vsan_id[0])
-         name ="test___vsan___name"
+        name ="test___vsan___name"
         v.create(name)
         self.assertEqual(name, v.name)
         v.delete()

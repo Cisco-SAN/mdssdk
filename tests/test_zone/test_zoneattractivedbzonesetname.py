@@ -37,11 +37,3 @@ class TestZoneAttrActivedbZonesetName(unittest.TestCase):
             z.activedb_zoneset_name = "asdf"
         self.assertEqual('can\'t set attribute',str(e.exception))
         v.delete()
-
-
-
-
-
-
-
-

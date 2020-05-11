@@ -37,11 +37,3 @@ class TestZoneAttrStatus(unittest.TestCase):
             z.status = "asdf"
         self.assertEqual('can\'t set attribute',str(e.exception))
         v.delete()
-
-
-
-
-
-
-
-

@@ -31,10 +31,3 @@ class TestZoneAttrFulldbZoneCount(unittest.TestCase):
             z.fulldb_zone_count = "asdf"
         self.assertEqual('can\'t set attribute',str(e.exception))
         v.delete()
-
-
-
-
-
-
-

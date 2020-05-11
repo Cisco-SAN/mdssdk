@@ -141,7 +141,7 @@ class TestVsanAddInterfaces(unittest.TestCase):
             str(e.exception))
         v.delete()
 
-     @classmethod
+    @classmethod
     def tearDownClass(self):
         v = Vsan(switch=self.switch, id=1)
         for i in self.fc_name:

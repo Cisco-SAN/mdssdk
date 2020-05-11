@@ -29,11 +29,3 @@ class TestZoneAttrMaxdbSize(unittest.TestCase):
             z.maxdb_size = "asdf"
         self.assertEqual('can\'t set attribute',str(e.exception))
         v.delete()
-
-
-
-
-
-
-
-
