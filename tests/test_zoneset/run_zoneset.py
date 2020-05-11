@@ -27,7 +27,7 @@ members_dict = [{'pwwn': '50:08:01:60:08:9f:4d:00'},
                 {'fcid': '0x123456'},
                 {'symbolic-nodename': 'testsymnode'}]
 
-vsan_id = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+vsan_id = range(3,12)
 zone_name = ["zone" + str(i) for i in range(2, 9)]
 zoneset_name = ["zoneset" + str(i) for i in range(2, 9)]
 
@@ -40,7 +40,7 @@ TestZoneSetCreate.zoneset_name_invalid = "zoneset1*!"
 TestZoneSetCreate.zoneset_name_invalidfirstchar = "1zoneset"
 TestZoneSetCreate.zoneset_name_beyondmax = 'zo123456789123456789123456789123456789123456789123456789123456789'
 TestZoneSetCreate.zoneset_name_max = 'z123456789123456789123456789123456789123456789123456789123456789'
-TestZoneSetCreate.zoneset_max_range = range(0, 1000)
+TestZoneSetCreate.zoneset_max_range = range(0, 1000)  #
 
 from tests.test_zoneset.test_zonesetdelete import *
 
@@ -98,4 +98,4 @@ TestZoneSetAttrVsan.vsan_id = vsan_id
 TestZoneSetAttrVsan.zoneset_name = zoneset_name
 
 suite = unittest.TestLoader().discover('tests.test_zoneset', 'test_zoneset*.py')
-unittest.TextTestRunner(verbosity=2).run(suite)
+unittest.TextTestRunner(verbosity=2, failfast=True).run(suite)

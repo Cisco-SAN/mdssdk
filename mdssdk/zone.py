@@ -9,6 +9,7 @@ from .fc import Fc
 from .nxapikeys import zonekeys
 from .portchannel import PortChannel
 from .utility.utils import get_key
+from .parsers.zone import ShowZone,ShowZoneStatus
 
 log = logging.getLogger(__name__)
 
@@ -73,6 +74,11 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone name " + self._name + " vsan " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzone = ShowZone(outlines)
+            return shzone.name
         out = self.__show_zone_name()
         if out:
             return out[get_key(zonekeys.NAME, self._SW_VER)]
@@ -120,6 +126,11 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone name " + self._name + " vsan " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzone = ShowZone(outlines)
+            return shzone.members
         out = self.__show_zone_name()
         if out:
             try:
@@ -186,8 +197,14 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        out = self.__show_zone_status()
-        self._lock_details = out[get_key(zonekeys.SESSION, self._SW_VER)]
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            self._lock_details = shzonest.locked
+        else:
+            out = self.__show_zone_status()
+            self._lock_details = out[get_key(zonekeys.SESSION, self._SW_VER)]
         if "none" in self._lock_details:
             return False
         else:
@@ -221,6 +238,11 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            return shzonest.mode
         out = self.__show_zone_status()
         return out[get_key(zonekeys.MODE, self._SW_VER)]
 
@@ -267,6 +289,11 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            return shzonest.default_zone
         out = self.__show_zone_status()
         return out[get_key(zonekeys.DEFAULT_ZONE, self._SW_VER)]
 
@@ -312,6 +339,11 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            return shzonest.smart_zone
         out = self.__show_zone_status()
         return out[get_key(zonekeys.SMART_ZONE, self._SW_VER)]
 
@@ -344,8 +376,14 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        out = self.__show_zone_status()
-        retout = out.get(get_key(zonekeys.FULLDB_SIZE, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            retout = shzonest.fulldb_size
+        else:
+            out = self.__show_zone_status()
+            retout = out.get(get_key(zonekeys.FULLDB_SIZE, self._SW_VER), None)
         if retout is not None:
             return int(retout)
         return None
@@ -366,8 +404,14 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        out = self.__show_zone_status()
-        retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            retout = shzonest.fulldb_zone_count
+        else:
+            out = self.__show_zone_status()
+            retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), None)
         if retout is not None:
             return int(retout)
         return None
@@ -388,8 +432,14 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        out = self.__show_zone_status()
-        retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            retout = shzonest.fulldb_zoneset_count
+        else:
+            out = self.__show_zone_status()
+            retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), None)
         if retout is not None:
             return int(retout)
         return None
@@ -410,8 +460,14 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        out = self.__show_zone_status()
-        retout = out.get(get_key(zonekeys.ACTIVEDB_SIZE, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            retout = shzonest.activedb_size
+        else:
+            out = self.__show_zone_status()
+            retout = out.get(get_key(zonekeys.ACTIVEDB_SIZE, self._SW_VER), None)
         if retout is not None:
             return int(retout)
         return None
@@ -432,8 +488,14 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        out = self.__show_zone_status()
-        retout = out.get(get_key(zonekeys.ACTIVEDB_ZC, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            retout = shzonest.activedb_zone_count
+        else:
+            out = self.__show_zone_status()
+            retout = out.get(get_key(zonekeys.ACTIVEDB_ZC, self._SW_VER), None)
         if retout is not None:
             return int(retout)
         return None
@@ -454,8 +516,14 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        out = self.__show_zone_status()
-        retout = out.get(get_key(zonekeys.ACTIVEDB_ZSC, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            retout = shzonest.activedb_zoneset_count
+        else:
+            out = self.__show_zone_status()
+            retout = out.get(get_key(zonekeys.ACTIVEDB_ZSC, self._SW_VER), None)
         if retout is not None:
             return int(retout)
         return None
@@ -476,6 +544,11 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            return shzonest.activedb_zoneset_name
         out = self.__show_zone_status()
         return out.get(get_key(zonekeys.ACTIVEDB_ZSN, self._SW_VER), None)
 
@@ -495,8 +568,14 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        out = self.__show_zone_status()
-        retout = out.get(get_key(zonekeys.MAXDB_SIZE, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            retout = shzonest.maxdb_size
+        else:
+            out = self.__show_zone_status()
+            retout = out.get(get_key(zonekeys.MAXDB_SIZE, self._SW_VER), None)
         if retout is not None:
             return int(retout)
         return None
@@ -517,8 +596,14 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        out = self.__show_zone_status()
-        retout = out.get(get_key(zonekeys.EFFDB_SIZE, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            retout = shzonest.effectivedb_size
+        else:
+            out = self.__show_zone_status()
+            retout = out.get(get_key(zonekeys.EFFDB_SIZE, self._SW_VER), None)
         if retout is not None:
             return int(retout)
         return None
@@ -539,8 +624,14 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        out = self.__show_zone_status()
-        retout = out.get(get_key(zonekeys.EFFDB_PER, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            retout = shzonest.effectivedb_size_percentage
+        else:
+            out = self.__show_zone_status()
+            retout = out.get(get_key(zonekeys.EFFDB_PER, self._SW_VER), None)
         if retout is not None:
             return str(retout) + "%"
         return None
@@ -561,6 +652,11 @@ class Zone(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zone status vsan  " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzonest = ShowZoneStatus(outlines)
+            return shzonest.status
         out = self.__show_zone_status()
         return out.get(get_key(zonekeys.STATUS, self._SW_VER), None)
 
@@ -578,7 +674,10 @@ class Zone(object):
         cmd = "terminal dont-ask ; clear zone lock vsan  " + str(self._vsan) + " ; no terminal dont-ask"
         out = self.__swobj.config(cmd)
         if out is not None:
-            msg = out['msg']
+            if self.__swobj.is_connection_type_ssh():
+                msg = out
+            else:
+                msg = out['msg']
             if msg:
                 if "Zone database not locked" in msg:
                     log.debug(msg)
@@ -732,7 +831,7 @@ class Zone(object):
     def __get_cmd_list(self, mem, removeflag):
         key = list(mem.keys())[0]
         val = list(mem.values())[0]
-        valid_zone_members = get_key(zonekeys.VALID_MEMBERS, self._SW_VER)
+        valid_zone_members = get_key(zonekeys.VALID_MEMBERS, self._SW_VER) 
         if key in list(valid_zone_members.keys()):
             cmd = "member " + key + " " + val
             if removeflag:
@@ -761,6 +860,8 @@ class Zone(object):
         return out['TABLE_zone_status']['ROW_zone_status']
 
     def _send_zone_cmd(self, cmd):
+        out = None
+        msg = ""
         if self.locked:
             raise CLIError(cmd, "ERROR!! Zone lock is acquired. Lock details are: " + self._lock_details)
         try:
@@ -769,40 +870,45 @@ class Zone(object):
         except CLIError as c:
             if "Duplicate member" in c.message:
                 return False, None
-            log.error(c)
-            raise CLIError(cmd, c.message)
-
-        if out is not None:
+            if not self.__swobj.is_connection_type_ssh():
+                log.error(c)
+                raise CLIError(cmd, c.message)
+            self._check_msg(c.message, cmd) 
+      
+        if out is not None and not self.__swobj.is_connection_type_ssh():
             msg = out['msg'].strip()
             log.debug("------" + msg)
             if msg:
-                if "Current zoning mode same as specified zoning mode" in msg:
-                    log.debug(msg)
-                elif "Set zoning mode command initiated. Check zone status" in msg:
-                    log.debug(msg)
-                elif "Enhanced zone session has been created" in msg:
-                    log.debug(msg)
-                elif "No zone policy change" in msg:
-                    log.debug(msg)
-                elif "Smart Zoning distribution initiated. check zone status" in msg:
-                    log.debug(msg)
-                elif "Smart-zoning is already enabled" in msg:
-                    log.debug(msg)
-                elif "Smart-zoning is already disabled" in msg:
-                    log.debug(msg)
-                elif "Duplicate member" in msg:
-                    log.debug(msg)
-                elif "Zoneset activation initiated" in msg:
-                    log.debug(msg)
-                elif "Specified zoneset already active and unchanged" in msg:
-                    log.debug(msg)
-                elif "Zoneset deactivation initiated" in msg:
-                    log.debug(msg)
-                else:
-                    log.error(msg)
-                    self._clear_lock_if_enhanced()
-                    raise CLIError(cmd, msg)
+                self._check_msg(msg, cmd)
         self.__commit_config_if_locked()
+    
+    def _check_msg(self, msg, cmd):
+        if "Current zoning mode same as specified zoning mode" in msg:
+            log.debug(msg)
+        elif "Set zoning mode command initiated. Check zone status" in msg:
+            log.debug(msg)
+        elif "Enhanced zone session has been created" in msg:
+            log.debug(msg)
+        elif "No zone policy change" in msg:
+            log.debug(msg)
+        elif "Smart Zoning distribution initiated. check zone status" in msg:
+            log.debug(msg)
+        elif "Smart-zoning is already enabled" in msg:
+            log.debug(msg)
+        elif "Smart-zoning is already disabled" in msg:
+            log.debug(msg)
+        elif "Duplicate member" in msg:
+            log.debug(msg)
+        elif "Zoneset activation initiated" in msg:
+            log.debug(msg)
+        elif "Specified zoneset already active and unchanged" in msg:
+            log.debug(msg)
+        elif "Zoneset deactivation initiated" in msg:
+            log.debug(msg)
+        else:
+            log.error(msg)
+            self._clear_lock_if_enhanced()
+            raise CLIError(cmd, msg)
 
     def _clear_lock_if_enhanced(self):
         time.sleep(2)

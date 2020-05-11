@@ -7,6 +7,7 @@ from .fc import Fc
 from .nxapikeys import vsankeys
 from .portchannel import PortChannel
 from .utility.utils import get_key
+from .parsers.vsan import ShowVsan,ShowVsanMembership
 
 log = logging.getLogger(__name__)
 
@@ -43,6 +44,10 @@ class Vsan(object):
         :range: 1 to 4094
 
         """
+        if self.__swobj.is_connection_type_ssh():
+            outlines = self.__swobj.show("show vsan")
+            shvsan = ShowVsan(outlines,self._id)
+            return shvsan.id
         try:
             out = self.__get_facts()
         except VsanNotPresent:
@@ -76,7 +81,10 @@ class Vsan(object):
             >>> vsan_obj.name = "vsan_2"
 
         """
-
+        if self.__swobj.is_connection_type_ssh():
+            outlines = self.__swobj.show("show vsan")
+            shvsan = ShowVsan(outlines,self._id)
+            return shvsan.name
         try:
             out = self.__get_facts()
         except VsanNotPresent:
@@ -99,7 +107,10 @@ class Vsan(object):
         :values: return values are either 'active' or 'suspended'
 
         """
-
+        if self.__swobj.is_connection_type_ssh():
+            outlines = self.__swobj.show("show vsan")
+            shvsan = ShowVsan(outlines,self._id)
+            return shvsan.state
         try:
             out = self.__get_facts()
         except VsanNotPresent:
@@ -110,15 +121,20 @@ class Vsan(object):
 
     @property
     def interfaces(self):
-        try:
-            out = self.__get_facts()
-        except VsanNotPresent:
+        if self.id is None:
             return None
         cmd = "show vsan " + str(self._id) + " membership"
-        out = self.__swobj.show(cmd)
-        out = out['TABLE_vsan_membership']['ROW_vsan_membership']
-        log.debug(out)
-        allint = out.get('interfaces', None)
+        allint = []
+        if self.__swobj.is_connection_type_ssh():
+            outlines = self.__swobj.show(cmd)
+            log.debug(outlines)
+            shvsan = ShowVsanMembership(outlines)
+            allint = shvsan.interfaces
+        else:
+            out = self.__swobj.show(cmd)
+            out = out['TABLE_vsan_membership']['ROW_vsan_membership']
+            log.debug(out)
+            allint = out.get('interfaces', None)
         if allint is None:
             return None
         else:

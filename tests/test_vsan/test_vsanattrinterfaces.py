@@ -29,7 +29,8 @@ class TestVsanAttrInterfaces(unittest.TestCase):
         self.assertEqual("can't set attribute", str(e.exception))
         v.delete()
 
+    @classmethod
     def tearDown(self):
-        v = Vsan(switch=self.switch, id=1)
+        v = Vsan(switch=self.switch, id= 1)
         for i in self.fc_name:
-            v.add_interfaces([Fc(switch=self.switch, name=i)])
+            v.add_interfaces([Fc(switch=self.switch, name= i)])

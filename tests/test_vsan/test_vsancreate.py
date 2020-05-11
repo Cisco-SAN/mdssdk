@@ -36,23 +36,25 @@ class TestVsanCreate(unittest.TestCase):
         v = []
         with self.assertRaises(CLIError) as e:
             for i in self.max_vsan_fail:
-                v.append(Vsan(switch=self.switch, id=i))
-                v[i - 2].create()
+                vsan_obj = Vsan(switch=self.switch, id=i)
+                vsan_obj.create()
+                v.append(vsan_obj)
         self.assertEqual('The command " vsan database ; vsan ' + str(i) + ' " gave the error " vsan ' + str(
             i) + ':maximum number of vsans already configured ".', str(e.exception))
-        for j in range(2, i):
-            v[j - 2].delete()
+        for i in v:
+            i.delete()
 
     def test_create_max_vsans_success(self):
         v = []
         ctr = len(self.switch.vsans)
         for i in self.max_vsan_success:
-            if (ctr == 256):
+            if(ctr == 256):
                 break
-            v.append(Vsan(switch=self.switch, id=i))
-            v[i - 2].create()
-            self.assertEqual(i, v[i - 2].id)
-            ctr += 1
+            vsan_obj = Vsan(switch=self.switch, id=i)
+            vsan_obj.create()
+            self.assertEqual(i, vsan_obj.id)
+            v.append(vsan_obj)
+            ctr+=1
         for i in v:
             i.delete()
 

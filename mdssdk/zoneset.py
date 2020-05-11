@@ -6,6 +6,7 @@ from .connection_manager.errors import CLIError, CustomException
 from .nxapikeys import zonekeys
 from .utility.utils import get_key
 from .zone import Zone, VsanNotPresent
+from .parsers.zoneset import ShowZoneset, ShowZonesetActive
 
 log = logging.getLogger(__name__)
 
@@ -64,6 +65,11 @@ class ZoneSet(object):
         """
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zoneset name " + self._name + " vsan " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzoneset = ShowZoneset(outlines)
+            return shzoneset.name
         out = self.__show_zoneset_name()
         if out:
             out = out.get('TABLE_zoneset').get('ROW_zoneset')
@@ -113,6 +119,17 @@ class ZoneSet(object):
         retlist = {}
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        if self.__swobj.is_connection_type_ssh():
+            cmd = "show zoneset name " + self._name + " vsan " + str(self._vsan)
+            outlines = self.__swobj.show(cmd)
+            shzoneset = ShowZoneset(outlines)
+            out = shzoneset.members
+            if out is not None:
+                for eachzdb in out:
+                    zname = eachzdb['name']
+                    retlist[zname] = Zone(self.__swobj, self._vsanobj, eachzdb)
+                return retlist
+            return None
         out = self.__show_zoneset_name()
         if out:
             zonesetdata = out.get('TABLE_zoneset', None).get('ROW_zoneset', None)
@@ -250,6 +267,12 @@ class ZoneSet(object):
         if self._vsanobj.id is None:
             raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
         cmd = "show zoneset active vsan " + str(self._vsan)
+        if self.__swobj.is_connection_type_ssh():
+            outlines = self.__swobj.show(cmd)
+            shzoneset = ShowZonesetActive(outlines)
+            if shzoneset.active == self._name:
+                return True
+            return False   
         out = self.__swobj.show(cmd)
         log.debug(out)
         if out:
