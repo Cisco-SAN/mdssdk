@@ -664,8 +664,8 @@ class Switch(SwitchUtils):
             for cmd in commands:
                 outlines, error = self._ssh_handle.show(cmd)
                 if error is not None:
-                    raise CLIError(command, error)
-                return outlines
+                    raise CLIError(cmd, error)
+                # return outlines
                 retdict[cmd] = outlines
             log.debug("Show commands sent are :")
             log.debug(commands)
@@ -714,7 +714,7 @@ class Switch(SwitchUtils):
         list_result = self.config_list(commands, rpc, method)
         return list_result[0]
 
-    def config_list(self, commands, rpc=u'2.0', method=u'cli'):
+    def config_list(self, commands, rpc=u'2.0', method=u'cli', use_ssh=False):
         """
         Send any list of commands to run from the config mode
 
@@ -724,7 +724,21 @@ class Switch(SwitchUtils):
         :return: command output
 
         """
-        log.debug("Show cmds to be sent are " + ' -- '.join(commands))
+        log.debug("Config cmds to be sent are " + ' -- '.join(commands))
+        if self.is_connection_type_ssh() or use_ssh:
+            retdict = {}
+            for cmd in commands:
+                outlines, error = self._ssh_handle.config(cmd)
+                if error is not None:
+                    raise CLIError(cmd, error)
+                #return outlines
+                retdict[cmd] = outlines
+            log.debug("Config commands sent are :")
+            log.debug(commands)
+            log.debug("Result got via ssh was :")
+            log.debug(retdict)
+            return retdict
+            
         return_list = self._cli_command(commands, rpc=rpc, method=method)
 
         log.debug("Config commands sent are :")

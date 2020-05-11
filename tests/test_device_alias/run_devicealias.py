@@ -79,7 +79,7 @@ print("Clearing device-alias database before tests")
 d.clear_database()
 print("Running tests...")
 suite = unittest.TestLoader().discover('tests.test_device_alias', 'test_devicealias*.py')
-unittest.TextTestRunner(verbosity=2).run(suite)
+unittest.TextTestRunner(verbosity=2, failfast=True).run(suite)
 
 print("Clearing device-alias database after tests")
 d.clear_database()

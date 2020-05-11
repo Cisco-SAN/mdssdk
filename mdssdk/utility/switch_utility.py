@@ -9,6 +9,7 @@ from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys
 from ..portchannel import PortChannel
 from ..vsan import Vsan
 from ..zone import Zone
+from ..parsers.vsan import ShowVsan
 
 log = logging.getLogger(__name__)
 
@@ -80,6 +81,15 @@ class SwitchUtils:
         """
         retlist = {}
         cmd = "show vsan"
+        if self.is_connection_type_ssh():
+            outlines = self.show(cmd)
+            shvsan = ShowVsan(outlines)
+            out = shvsan.vsans
+            for eachele in out:
+                id = eachele.get('vsan')
+                vobj = Vsan(switch=self, id=id)
+                retlist[id] = vobj
+            return retlist  
         out = self.show(cmd)['TABLE_vsan']['ROW_vsan']
         for eachele in out:
             id = eachele.get(get_key(vsankeys.VSAN_ID, self._SW_VER))

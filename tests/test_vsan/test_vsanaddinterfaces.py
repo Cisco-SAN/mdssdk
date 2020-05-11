@@ -96,7 +96,7 @@ class TestVsanAddInterfaces(unittest.TestCase):
         v = []
         idx = 0
         fcidx = 8
-        for i in self.vsan_id[10:]:
+        for i in self.vsan_id[10:20]:
             v.append(Vsan(switch=self.switch, id=i))
             v[idx].create()
             fc = Fc(switch=self.switch, name=self.fc_name[fcidx])
@@ -141,7 +141,8 @@ class TestVsanAddInterfaces(unittest.TestCase):
             str(e.exception))
         v.delete()
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(self):
         v = Vsan(switch=self.switch, id=1)
         for i in self.fc_name:
             v.add_interfaces([Fc(switch=self.switch, name=i)])

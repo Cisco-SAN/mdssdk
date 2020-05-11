@@ -19,7 +19,7 @@ import sys
 
 sys.stdout = open('test_zone_output.txt', 'wt')
 
-vsan_id = [2, 3, 4, 5, 6, 7, 8, 9]
+vsan_id = range(2,10)
 zone_name = ["zone" + str(i) for i in range(1, 9)]
 
 from mdssdk.fc import Fc
@@ -191,6 +191,6 @@ TestZoneAttrStatus.vsan_id = vsan_id
 TestZoneAttrStatus.zone_name = zone_name
 
 suite = unittest.TestLoader().discover('tests.test_zone', 'test_zone*.py')
-unittest.TextTestRunner(verbosity=2).run(suite)
+unittest.TextTestRunner(verbosity=2, failfast=True).run(suite)
 
 d.delete(da_name)

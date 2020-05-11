@@ -70,4 +70,4 @@ TestFcAttrTrunk.fc_name = ["fc1/46", "fc1/47", "fc1/48"]
 TestFcAttrTrunk.trunk_values = ['on', 'off', 'auto']
 
 suite = unittest.TestLoader().discover('tests.test_fc', 'test_fc*.py')
-unittest.TextTestRunner(verbosity=2).run(suite)
+unittest.TextTestRunner(verbosity=2, failfast=True).run(suite)

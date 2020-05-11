@@ -18,7 +18,7 @@ sw = Switch(ip_address=data['ip_address'], username=data['username'], password=d
 default_id = 1
 boundary_id = [0, 4095]
 reserved_id = [4079, 4094]
-vsan_id = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 4090, 4091, 4092, 4093]
+vsan_id = range(4050,4075)
 
 from tests.test_vsan.test_vsancreate import *
 
@@ -42,7 +42,7 @@ TestVsanDelete.reserved_id = reserved_id
 from tests.test_vsan.test_vsanaddinterfaces import *
 
 TestVsanAddInterfaces.switch = sw
-TestVsanAddInterfaces.vsan_id = [i for i in range(2, 22)]
+TestVsanAddInterfaces.vsan_id = vsan_id
 TestVsanAddInterfaces.fc_name = ['fc1/' + str(i) for i in range(31, 49)]
 TestVsanAddInterfaces.pc_id = [i for i in range(247, 257)]
 TestVsanAddInterfaces.invalid_fc = ["fc2/1"]
@@ -73,8 +73,6 @@ TestVsanAttrName.boundary_id = boundary_id
 TestVsanAttrName.reserved_id = reserved_id
 TestVsanAttrName.max32_name = "12345678912345678912345678912345"
 TestVsanAttrName.beyondmax_name = "123456789123456789123456789123456"
-TestVsanAttrName.repeated_name = "VSAN0001"
-TestVsanAttrName.specialchar_name = "vsan?"
 
 from tests.test_vsan.test_vsanattrsuspend import *
 

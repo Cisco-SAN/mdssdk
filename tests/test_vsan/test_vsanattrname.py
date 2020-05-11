@@ -7,8 +7,9 @@ class TestVsanAttrName(unittest.TestCase):
 
     def test_name_read(self):
         v = Vsan(switch=self.switch, id=self.vsan_id[0])
-        v.create()
-        self.assertEqual("VSAN0002", v.name)
+        name ="test___vsan___name"
+        v.create(name)
+        self.assertEqual(name, v.name)
         v.delete()
 
     def test_name_read_nonexistingvsan(self):
@@ -16,7 +17,7 @@ class TestVsanAttrName(unittest.TestCase):
         if v.id is not None:
             v.delete()
         self.assertIsNone(v.name)
-        id_list = [0, 4095, 4079, 4094]
+        id_list = self.boundary_id + self.reserved_id
         for i in id_list:
             v = Vsan(switch=self.switch, id=i)
             self.assertIsNone(v.name)
@@ -50,7 +51,7 @@ class TestVsanAttrName(unittest.TestCase):
         i = self.vsan_id[5]
         v = Vsan(switch=self.switch, id=i)
         v.create()
-        name = self.specialchar_name
+        name = "vsan?123"
         with self.assertRaises(CLIError) as e:
             v.name = name
         self.assertEqual('The command " vsan database ; vsan ' + str(i) + ' name \'' + str(
@@ -58,18 +59,20 @@ class TestVsanAttrName(unittest.TestCase):
         v.delete()
 
     def test_name_write_repeated(self):
-        i = self.vsan_id[6]
+        name = "test___repeated___name"
+        v1 = Vsan(switch=self.switch, id=self.vsan_id[6])
+        v1.create(name)
+        i= self.vsan_id[7]
         v = Vsan(switch=self.switch, id=i)
         v.create()
-        name = self.repeated_name
         with self.assertRaises(CLIError) as e:
             v.name = name
-        self.assertEqual('The command " vsan database ; vsan ' + str(i) + ' name \'' + str(
-            name) + '\' " gave the error " vsan ' + str(i) + ':vsan name is already in use ".', str(e.exception))
+        self.assertEqual('The command " vsan database ; vsan '+str(i)+' name \'' + str(name) + '\' " gave the error " vsan '+str(i)+':vsan name is already in use ".', str(e.exception))
         v.delete()
+        v1.delete()
 
     def test_name_write_nonexistingvsan(self):
-        i = self.vsan_id[7]
+        i = self.vsan_id[8]
         v = Vsan(switch=self.switch, id=i)
         if v.id is not None:
             v.delete()

@@ -102,4 +102,4 @@ from tests.test_switch.test_switchattranalytics import *
 TestSwitchAttrAnalytics.switch = sw
 
 suite = unittest.TestLoader().discover('tests.test_switch', 'test_switch*.py')
-unittest.TextTestRunner(verbosity=2).run(suite)
+unittest.TextTestRunner(verbosity=2, failfast=True).run(suite)
