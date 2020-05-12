@@ -23,8 +23,8 @@ class TestDeviceAliasDelete(unittest.TestCase):
         d.delete(keys[0])
         with self.assertRaises(CLIError) as e:
             d.delete(keys[0])
-        self.assertEqual('The command " device-alias database ; no device-alias name ' + str(keys[
-                                                                                                 0]) + ' " gave the error " Device Alias not present\nPlease use \'show device-alias session rejected\' to display the rejected set of commands and for the device-alias best-practices recommendation. ".',
+        self.assertIn('The command " device-alias database ; no device-alias name ' + str(keys[
+                                                                                                 0]) + ' " gave the error " Device Alias not present',
                          str(e.exception))
         keys.remove(keys[0])
         for k in keys:
@@ -35,6 +35,6 @@ class TestDeviceAliasDelete(unittest.TestCase):
         d.clear_database()
         with self.assertRaises(CLIError) as e:
             d.delete(self.nonexisting)
-        self.assertEqual('The command " device-alias database ; no device-alias name ' + str(
-            self.nonexisting) + ' " gave the error " Device Alias not present\nPlease use \'show device-alias session rejected\' to display the rejected set of commands and for the device-alias best-practices recommendation. ".',
+        self.assertIn('The command " device-alias database ; no device-alias name ' + str(
+            self.nonexisting) + ' " gave the error " Device Alias not present',
                          str(e.exception))

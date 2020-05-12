@@ -5,7 +5,7 @@ import logging
 logging.basicConfig(filename='test_portchannel.log', filemode='w', level=logging.DEBUG, format="[%(asctime)s] [%(module)-14.14s] [%(levelname)-5.5s] %(message)s")
 
 import json
-with open('tests/switch_details.json', 'r') as j:
+with open('../switch_details.json', 'r') as j:
 		data = json.load(j)
 
 sw = Switch(ip_address = data['ip_address'], username = data['username'], password = data['password'], connection_type = data['connection_type'], port = data['port'], timeout = data['timeout'], 

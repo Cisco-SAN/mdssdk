@@ -230,25 +230,32 @@ class DeviceAlias(object):
             log.debug("Creating device alias with name:pwwn  " + name + " : " + pwwn)
             cmd = "device-alias database ; "
             cmd = cmd + " device-alias name " + name + " pwwn " + pwwn + " ; "
-            out = self.__swobj.config(cmd)
+            out = []
+            try:
+                out = self.__swobj.config(cmd)
+            except CLIError as c:
+                if not self.__swobj.is_connection_type_ssh():
+                    raise CLIError(cmd, c.message)  
+                self._check_msg(c.message, cmd, mode)
             if out and out is not None:
-                if self.__swobj.is_connection_type_ssh():
-                    msg = out[0].strip("\n").strip()
-                else:
-                    msg = out['msg']
-                self.__clear_lock_if_enhanced(mode)
-                dist = self.distribute
-                if dist and dist is not None:
-                    self.__send_commit(mode)
-                if "Device Alias already present" in msg:
-                    log.info("The command : " + cmd + " was not executed because Device Alias already present")
-                elif "Another device-alias already present with the same pwwn" in msg:
-                    log.info("The command : " + cmd + " was not executed because Device Alias already present")
-                else:
-                    raise CLIError(cmd, msg)
+                msg = out['msg']
+                if msg:
+                    self._check_msg(msg, cmd, mode)
         dist = self.distribute
         if dist and dist is not None:
             self.__send_commit(mode)
+
+    def _check_msg(self, msg, cmd, mode):
+        self.__clear_lock_if_enhanced(mode)
+        dist = self.distribute
+        if dist and dist is not None:
+            self.__send_commit(mode)
+        if "Device Alias already present" in msg:
+            log.info("The command : " + cmd + " was not executed because Device Alias already present")
+        elif "Another device-alias already present with the same pwwn" in msg:
+            log.info("The command : " + cmd + " was not executed because Device Alias already present")
+        else:
+            raise CLIError(cmd, msg)
 
     def delete(self, name):
         """

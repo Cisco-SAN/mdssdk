@@ -71,7 +71,7 @@ class SSHSession(object):
             eachline = eachline.replace("^", "")
             if re.match(r'^\s*$', eachline):
                 continue
-            if cmd in eachline:
+            if cmd.strip() in eachline:
                 start = True
                 continue
             if "# end" in eachline:

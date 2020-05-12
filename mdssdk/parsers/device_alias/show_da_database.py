@@ -10,7 +10,7 @@ class ShowDeviceAliasDatabase(object):
         self.process(outlines)
 
     def process(self, outlines):
-        PAT = "device-alias name\s+(\S+)\s+(\S+)"
+        PAT = "device-alias name\s+(\S+)\s+pwwn\s+(\S+)"
         for eachline in outlines:
             eachline = eachline.strip().strip("\n")
             regex = re.compile(PAT)
@@ -21,4 +21,6 @@ class ShowDeviceAliasDatabase(object):
 
     @property
     def database(self):
-        return self._da_pwwn
+        if self._da_pwwn:
+            return self._da_pwwn
+        return None
