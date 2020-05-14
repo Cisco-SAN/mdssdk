@@ -4,6 +4,7 @@ import re
 from .constants import PAT_PC, PAT_FC
 from .nxapikeys import interfacekeys
 from .utility.utils import get_key
+from .parsers.interface import ShowInterfaceBrief, ShowInterfaceDescription, ShowInterfaceCountersBrief, ShowInterfaceCountersDetailed
 
 log = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ class Interface(object):
         self.__swobj = switch
         self._name = name
         self._SW_VER = switch._SW_VER
+        self._swobj = switch
 
     # Interface is the base class for Fc and PortChannel.
     # So you cannot instantiate the base class(Interface), you have to instantiate the derived/child class (Fc,PortChannel)
@@ -74,8 +76,12 @@ class Interface(object):
             >>> int_obj.description = "This is an ISL connected to sw2"
             >>>
         """
-
-        out = self.__swobj.show("show interface  " + self._name + " description")
+        cmd = "show interface  " + self._name + " description"
+        if self.__swobj.is_connection_type_ssh():
+            outlines = self.__swobj.show(cmd)
+            shint = ShowInterfaceDescription(outlines)
+            return shint.description
+        out = self.__swobj.show(cmd)
         desc = out['TABLE_interface']['ROW_interface']['description']
         # IF the string is a big one then the return element is of type list
         if type(desc) is list:
@@ -114,6 +120,10 @@ class Interface(object):
             >>> int_obj.mode = "F"
             >>>
         """
+        if self.__swobj.is_connection_type_ssh():
+            outlines = self.__swobj.show("show interface brief")
+            shintbr = ShowInterfaceBrief(outlines, self._name)
+            return shintbr.mode
         out = self.__parse_show_int_brief()
         if out is not None:
             return out[get_key(interfacekeys.INT_OPER_MODE, self._SW_VER)]
@@ -149,6 +159,10 @@ class Interface(object):
             >>> int_obj.speed = 32000
             >>>
         """
+        if self.__swobj.is_connection_type_ssh():
+            outlines = self.__swobj.show("show interface brief")
+            shintbr = ShowInterfaceBrief(outlines, self._name)
+            return shintbr.speed
         out = self.__parse_show_int_brief()
         if out is not None:
             return out[get_key(interfacekeys.INT_OPER_SPEED, self._SW_VER)]
@@ -183,6 +197,10 @@ class Interface(object):
             >>> int_obj.trunk = "on"
             >>>
         """
+        if self.__swobj.is_connection_type_ssh():
+            outlines = self.__swobj.show("show interface brief")
+            shintbr = ShowInterfaceBrief(outlines, self._name)
+            return shintbr.trunk
         out = self.__parse_show_int_brief()
         if out is not None:
             return out[get_key(interfacekeys.INT_ADMIN_TRUNK_MODE, self._SW_VER)]
@@ -218,6 +236,10 @@ class Interface(object):
             >>> int_obj.status = "no shutdown"
             >>>
         """
+        if self.__swobj.is_connection_type_ssh():
+            outlines = self.__swobj.show("show interface brief")
+            shintbr = ShowInterfaceBrief(outlines, self._name)
+            return shintbr.status
         out = self.__parse_show_int_brief()
         if out is not None:
             return out[get_key(interfacekeys.INT_STATUS, self._SW_VER)]
@@ -244,7 +266,7 @@ class Interface(object):
 
     def __parse_show_int_brief(self):
         log.debug("Getting sh int brief output")
-        out = self.__swobj.show("show interface brief ")
+        out = self.__swobj.show("show interface brief")
         log.debug(out)
         # print(out)
         fcmatch = re.match(PAT_FC, self._name)
@@ -273,14 +295,18 @@ class Interface(object):
         cmd = "show interface " + self._name + " counters detailed"
         log.debug("Sending the cmd")
         log.debug(cmd)
-        out = self.__swobj.config(cmd)
+        out = self.__swobj.show(cmd)
+        if self.__swobj.is_connection_type_ssh():
+            return out
         return out['body']['TABLE_counters']['ROW_counters']
 
     def _execute_counters_brief_cmd(self):
         cmd = "show interface " + self._name + " counters brief"
         log.debug("Sending the cmd")
         log.debug(cmd)
-        out = self.__swobj.config(cmd)
+        out = self.__swobj.show(cmd)
+        if self.__swobj.is_connection_type_ssh():
+            return out
         return out['body']["TABLE_counters_brief"]["ROW_counters_brief"]
 
     def _execute_clear_counters_cmd(self):
@@ -293,6 +319,7 @@ class Interface(object):
         def __init__(self, intobj):
             self.__intobj = intobj
             self._SW_VER = intobj._SW_VER
+            self.__swobj = intobj._swobj
 
         def clear(self):
             """
@@ -322,6 +349,9 @@ class Interface(object):
                 >>>
             """
             out = self.__intobj._execute_counters_brief_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shintcb = ShowInterfaceCountersBrief(out)
+                return shintcb.brief
             out.pop(get_key(interfacekeys.INTERFACE, self._SW_VER))
             return out
 
@@ -345,6 +375,9 @@ class Interface(object):
                 >>>
             """
             out = self.__intobj._execute_counters_detailed_cmd()
+            if self.__swobj.is_connection_type_ssh():
+	            shintcd = ShowInterfaceCountersDetailed(out)
+	            return shintcd.total_stats
             total = out.get('TABLE_total', None)
             if total is not None:
                 return total.get('ROW_total', None)
@@ -369,6 +402,9 @@ class Interface(object):
                 >>>
             """
             out = self.__intobj._execute_counters_detailed_cmd()
+            if self.__swobj.is_connection_type_ssh():
+	            shintcd = ShowInterfaceCountersDetailed(out)
+	            return shintcd.link_stats
             total = out.get('TABLE_link', None)
             if total is not None:
                 return total.get('ROW_link', None)
@@ -389,6 +425,9 @@ class Interface(object):
                 >>>
             """
             out = self.__intobj._execute_counters_detailed_cmd()
+            if self.__swobj.is_connection_type_ssh():
+	            shintcd = ShowInterfaceCountersDetailed(out)
+	            return shintcd.loop_stats
             total = out.get('TABLE_loop', None)
             if total is not None:
                 return total.get('ROW_loop', None)
@@ -411,6 +450,9 @@ class Interface(object):
                 >>>
             """
             out = self.__intobj._execute_counters_detailed_cmd()
+            if self.__swobj.is_connection_type_ssh():
+	            shintcd = ShowInterfaceCountersDetailed(out)
+	            return shintcd.congestion_stats
             total = out.get('TABLE_congestion', None)
             if total is not None:
                 return total.get('ROW_congestion', None)
@@ -432,6 +474,9 @@ class Interface(object):
                 >>>
             """
             out = self.__intobj._execute_counters_detailed_cmd()
+            if self.__swobj.is_connection_type_ssh():
+	            shintcd = ShowInterfaceCountersDetailed(out)
+	            return shintcd.other_stats
             total = out.get('TABLE_others', None)
             if total is not None:
                 return total.get('ROW_others', None)
