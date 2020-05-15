@@ -1,0 +1,9 @@
+# PyCharm stuff...
+.idea
+# Mac OS X stuff...
+.DS_Store
+# build products...
+*.py[co]
+# Vim swap files
+*.swp
+*.swo

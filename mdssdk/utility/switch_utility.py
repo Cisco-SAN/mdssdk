@@ -10,6 +10,7 @@ from ..portchannel import PortChannel
 from ..vsan import Vsan
 from ..zone import Zone
 from ..parsers.vsan import ShowVsan
+from ..parsers.interface import ShowInterfaceBrief
 
 log = logging.getLogger(__name__)
 
@@ -37,6 +38,19 @@ class SwitchUtils:
         out = self.show(cmd)
         log.debug(out)
 
+        if self.is_connection_type_ssh():
+            allfc, allpc = ShowInterfaceBrief(out).interfaces
+            for fcname in allfc:
+                fcobj = Fc(switch=self, name=fcname)
+                retlist[fcname] = fcobj
+            for pcname in allpc:
+                match = re.match(constants.PAT_PC, pcname)
+                if match:
+                    pcid = int(match.group(1))
+                    pcobj = PortChannel(switch=self, id=pcid)
+                    retlist[pcname] = pcobj
+            return retlist
+            
         # Get FC related data
         fcout = out.get('TABLE_interface_brief_fc', None)
         if fcout is not None:

@@ -6,6 +6,7 @@ from .constants import SHUTDOWN, NO_SHUTDOWN, PAT_FC
 from .interface import Interface
 from .nxapikeys import interfacekeys
 from .utility.utils import get_key
+from .parsers.interface import ShowInterfaceTransceiverDetail
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +37,7 @@ class Fc(Interface):
                     name) + " is not correct, name must be 'fc' interface. Example: 'fc1/2'.. fcobj = Fc(switch_obj,'fc1/2') ")
         super().__init__(switch, name)
         self.__swobj = switch
+        self._swobj = switch
 
     # property for out_of_service
     def _set_out_of_service(self, value):
@@ -152,6 +154,8 @@ class Fc(Interface):
         cmd = "show interface " + self.name + " transceiver detail"
         log.debug("Sending the cmd")
         log.debug(cmd)
+        if self.__swobj.is_connection_type_ssh():
+            return self.__swobj.show(cmd)
         out = self.__swobj.config(cmd)['body']['TABLE_interface_trans']['ROW_interface_trans']['TABLE_calib'][
             'ROW_calib']
         if type(out) is list:
@@ -174,6 +178,7 @@ class Fc(Interface):
         def __init__(self, fcobj):
             self.__fcobj = fcobj
             self._SW_VER = fcobj._SW_VER
+            self.__swobj = fcobj._swobj
 
         @property
         def sfp_present(self):
@@ -189,8 +194,10 @@ class Fc(Interface):
                 True
                 >>>
             """
-
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.sfp_present
             retout = out.get(get_key(interfacekeys.SFP, self._SW_VER))
             return ("sfp is present" in retout)
 
@@ -209,6 +216,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.name
             name = get_key(interfacekeys.NAME, self._SW_VER)
             return out.get(name, None)
 
@@ -227,6 +237,9 @@ class Fc(Interface):
                  >>>
              """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.part_number
             partnum = get_key(interfacekeys.PART_NUM, self._SW_VER)
             return out.get(partnum, None)
 
@@ -245,6 +258,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.cisco_id
             ciscoid = get_key(interfacekeys.CISCO_ID, self._SW_VER)
             return out.get(ciscoid, None)
 
@@ -263,6 +279,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.cisco_part_number
             partnum = get_key(interfacekeys.CISCO_PART_NUM, self._SW_VER)
             return out.get(partnum, None)
 
@@ -281,6 +300,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.cisco_product_id
             prod_id = get_key(interfacekeys.CISCO_PRODUCT_ID, self._SW_VER)
             return out.get(prod_id, None)
 
@@ -299,6 +321,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.bit_rate
             bitrate = get_key(interfacekeys.BIT_RATE, self._SW_VER)
             return out.get(bitrate, None)
 
@@ -317,6 +342,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.min_speed
             supported_speed = get_key(interfacekeys.SUPP_SPEED, self._SW_VER)
             supp_speed = out.get(supported_speed, None)
             if supp_speed is not None:
@@ -341,6 +369,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.max_speed
             supported_speed = get_key(interfacekeys.SUPP_SPEED, self._SW_VER)
             supp_speed = out.get(supported_speed, None)
             if supp_speed is not None:
@@ -365,6 +396,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.temperature
             try:
                 calibdetails = out['TABLE_calibration']['ROW_calibration']['TABLE_detail']['ROW_detail']
                 temp = get_key(interfacekeys.TEMPERATURE, self._SW_VER)
@@ -387,6 +421,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.voltage
             try:
                 calibdetails = out['TABLE_calibration']['ROW_calibration']['TABLE_detail']['ROW_detail']
                 vol = get_key(interfacekeys.VOLTAGE, self._SW_VER)
@@ -409,6 +446,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.current
             try:
                 calibdetails = out['TABLE_calibration']['ROW_calibration']['TABLE_detail']['ROW_detail']
                 curr = get_key(interfacekeys.CURRENT, self._SW_VER)
@@ -431,6 +471,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.tx_power
             try:
                 calibdetails = out['TABLE_calibration']['ROW_calibration']['TABLE_detail']['ROW_detail']
                 txpow = get_key(interfacekeys.TX_POWER, self._SW_VER)
@@ -453,6 +496,9 @@ class Fc(Interface):
                 >>>
             """
             out = self.__fcobj._execute_transceiver_cmd()
+            if self.__swobj.is_connection_type_ssh():
+                shitd = ShowInterfaceTransceiverDetail(out)
+                return shitd.rx_power
             try:
                 calibdetails = out['TABLE_calibration']['ROW_calibration']['TABLE_detail']['ROW_detail']
                 rxpow = get_key(interfacekeys.RX_POWER, self._SW_VER)

@@ -26,8 +26,8 @@ class TestDeviceAliasRename(unittest.TestCase):
         newname = self.rename_2['newname']
         with self.assertRaises(CLIError) as e:
             d.rename(oldname=oldname, newname=newname)
-        self.assertEqual('The command " device-alias database ; device-alias rename ' + str(oldname) + ' ' + str(
-            newname) + ' " gave the error " Target device-alias name already in use. Please specify a new name.\nPlease use \'show device-alias session rejected\' to display the rejected set of commands and for the device-alias best-practices recommendation. ".',
+        self.assertIn('The command " device-alias database ; device-alias rename ' + str(oldname) + ' ' + str(
+            newname) + ' " gave the error " Target device-alias name already in use. Please specify a new name.',
                          str(e.exception))
         for k in self.new_2.keys():
             d.delete(k)
@@ -39,8 +39,8 @@ class TestDeviceAliasRename(unittest.TestCase):
         newname = self.rename_3['newname']
         with self.assertRaises(CLIError) as e:
             d.rename(oldname=oldname, newname=newname)
-        self.assertEqual('The command " device-alias database ; device-alias rename ' + str(oldname) + ' ' + str(
-            newname) + ' " gave the error " Device Alias not present\nPlease use \'show device-alias session rejected\' to display the rejected set of commands and for the device-alias best-practices recommendation. ".',
+        self.assertIn('The command " device-alias database ; device-alias rename ' + str(oldname) + ' ' + str(
+            newname) + ' " gave the error " Device Alias not present',
                          str(e.exception))
         for k in self.new_3.keys():
             d.delete(k)
@@ -50,6 +50,6 @@ class TestDeviceAliasRename(unittest.TestCase):
         d.clear_database()
         with self.assertRaises(CLIError) as e:
             d.rename(oldname='da2', newname='da3')
-        self.assertEqual(
-            'The command " device-alias database ; device-alias rename da2 da3 " gave the error " Device Alias not present\nPlease use \'show device-alias session rejected\' to display the rejected set of commands and for the device-alias best-practices recommendation. ".',
+        self.assertIn(
+            'The command " device-alias database ; device-alias rename da2 da3 " gave the error " Device Alias not present',
             str(e.exception))
