@@ -79,6 +79,7 @@ class Interface(object):
         cmd = "show interface  " + self._name + " description"
         if self.__swobj.is_connection_type_ssh():
             outlines = self.__swobj.show(cmd)
+            print(outlines)
             shint = ShowInterfaceDescription(outlines)
             return shint.description
         out = self.__swobj.show(cmd)

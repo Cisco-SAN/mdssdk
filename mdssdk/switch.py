@@ -12,7 +12,7 @@ from .connection_manager.connect_nxapi import ConnectNxapi
 from .connection_manager.errors import CLIError, CustomException
 from .constants import DEFAULT
 from .nxapikeys import versionkeys, featurekeys
-from .parsers.switch import ShowVersion, ShowFeature, ShowTopology
+from .parsers.switch import ShowFeature, ShowTopology
 from .utility.switch_utility import SwitchUtils
 from .utility.utils import get_key
 
@@ -58,7 +58,7 @@ def log_exception(logger):
 
 def print_and_log(msg):
     log.info(msg)
-    print(msg)
+    # print(msg)
 
 
 class Switch(SwitchUtils):
@@ -90,26 +90,28 @@ class Switch(SwitchUtils):
 
         self.__ip_address = ip_address
         self.__username = username
-        # self.__password = password
+        self.__password = password
         self.connection_type = connection_type
         self.port = port
         self.timeout = timeout
         self.__verify_ssl = verify_ssl
 
         if self.connection_type != 'ssh':
-            log.info("Opening up a connection for switch with ip " + ip_address)
+            log.info("Opening up a nxapi connection for switch with ip " + ip_address)
             self.__connection = ConnectNxapi(ip_address, username, password, transport=connection_type, port=port,
                                              verify_ssl=verify_ssl)
 
-        self._ssh_handle = SSHSession(host=ip_address, username=username, password=password, timeout=timeout)
+        # Connect to ssh
+        self.connect_to_ssh()
         self.can_connect = False
-        # Get version of the switch and log it
-        # self._log_version()
 
-        # Verify that version is 8.4(2) and above
         # self._verify_supported_version()
-
         self._set_connection_type_based_on_version()
+
+    def connect_to_ssh(self):
+        log.info("Opening up a cssh onnection for switch with ip " + self.__ip_address)
+        self._ssh_handle = SSHSession(host=self.__ip_address, username=self.__username, password=self.__password,
+                                      timeout=self.timeout)
 
     def _set_connection_type_based_on_version(self):
         try:
@@ -142,6 +144,7 @@ class Switch(SwitchUtils):
             self.connection_type = "ssh"
 
     def _verify_supported_version(self):
+        # Verify that version is 8.4(2) and above
         ver = self.version
         PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>.*)\)"
         RE_COMP = re.compile(PAT_VER)
@@ -170,20 +173,6 @@ class Switch(SwitchUtils):
 
     def is_connection_type_ssh(self):
         return self.connection_type == 'ssh'
-
-    @log_exception(log)
-    def _log_version(self):
-        """
-
-        :return:
-        """
-        try:
-            log.debug(self.version)
-            self.can_connect = True
-        except requests.exceptions.ConnectionError as e:
-            msg = "ERROR!! Unable to get the switch version or may be connection refused for the switch : " + self.ipaddr + \
-                  " Verify that the switch has " + self.connection_type + " configured with port " + str(self.port)
-            log.error(msg)
 
     @property
     def ipaddr(self):
@@ -271,11 +260,11 @@ class Switch(SwitchUtils):
         """
 
         cmd = "show version"
-
+        log.debug("Running version API")
         if self.is_connection_type_ssh():
             outlines = self.show(cmd)
-            shver = ShowVersion(outlines)
-            ver = shver.version
+            # print(outlines)
+            ver = outlines[0]['version']
         else:
             out = self.show(cmd)
             if not out:
@@ -312,12 +301,14 @@ class Switch(SwitchUtils):
         cmd = "show version"
         if self.is_connection_type_ssh():
             outlines = self.show(cmd)
-            shver = ShowVersion(outlines)
-            return shver.model
-        out = self.show(cmd)
-        if not out:
-            return None
-        return out[get_key(versionkeys.CHASSIS_ID, self._SW_VER)]
+            return outlines[0]['model']
+            # shver = ShowVersion(outlines)
+            # return shver.model
+        else:
+            out = self.show(cmd)
+            if not out:
+                return None
+            return out[get_key(versionkeys.CHASSIS_ID, self._SW_VER)]
 
     @property
     def form_factor(self):
@@ -438,9 +429,9 @@ class Switch(SwitchUtils):
         cmd = "show version"
         if self.is_connection_type_ssh():
             outlines = self.show(cmd)
-
-            shver = ShowVersion(outlines)
-            return shver.kickstart_image
+            return outlines[0]['kickstart_image']
+            # shver = ShowVersion(outlines)
+            # return shver.kickstart_image
 
         out = self.show(cmd)
         if not out:
@@ -466,8 +457,9 @@ class Switch(SwitchUtils):
         cmd = "show version"
         if self.is_connection_type_ssh():
             outlines = self.show(cmd)
-            shver = ShowVersion(outlines)
-            return shver.system_image
+            return outlines[0]['system_image']
+            # shver = ShowVersion(outlines)
+            # return shver.system_image
 
         out = self.show(cmd)
         if not out:
@@ -620,7 +612,14 @@ class Switch(SwitchUtils):
                         text_response_list.append(eachoutput[u'body'])
         return text_response_list
 
-    def show(self, command, raw_text=False, use_ssh=False):
+    def _show_ssh(self, command, timeout, expect_string):
+        log.debug("_show_ssh : Show cmd to be sent is " + ' -- ' + command)
+        outlines, error = self._ssh_handle.show(command, timeout, expect_string)
+        if error is not None:
+            raise CLIError(command, error)
+        return outlines
+
+    def show(self, command, raw_text=False, use_ssh=False, timeout=60):
         """
         Send a show command to the switch
 
@@ -634,9 +633,11 @@ class Switch(SwitchUtils):
         """
         log.debug("Show cmd to be sent is " + ' -- ' + command)
         if self.is_connection_type_ssh() or use_ssh:
-            outlines, error = self._ssh_handle.show(command)
+            outlines, error = self._ssh_handle.show(command, timeout)
             if error is not None:
                 raise CLIError(command, error)
+            if raw_text:
+                return '\n'.join(outlines)
             return outlines
 
         commands = [command]
@@ -731,7 +732,7 @@ class Switch(SwitchUtils):
                 outlines, error = self._ssh_handle.config(cmd)
                 if error is not None:
                     raise CLIError(cmd, error)
-                #return outlines
+                # return outlines
                 retdict[cmd] = outlines
             log.debug("Config commands sent are :")
             log.debug(commands)
@@ -796,13 +797,12 @@ class Switch(SwitchUtils):
         out = self._verify_basic_stuff(cmd, action_string, timeout)
         return out
 
-    def issu(self, kickstart, system, timeout=600, post_issu_checks=True):
-        print_and_log("Doing basic checks before starting ISSU")
+    def issu(self, kickstart, system, timeout=1800, post_issu_checks=True):
+        self.issu_status = None
         # Set the switch timeout
-        if timeout < 600:
-            log.info("Timeout for ISSU cannot be less than 10 mins (600 sec)")
-            timeout = 600
-        self.timeout = timeout
+        if timeout < 1800:
+            log.info(self.ipaddr + ": Timeout for ISSU cannot be less than 10 mins (600 sec)")
+            timeout = 1800
 
         # Check if any compatibilty issues
         # show incompatibility-all system bootflash:/m9700-sf4ek9-mz.8.4.1.bin
@@ -814,10 +814,10 @@ class Switch(SwitchUtils):
             if "No incompatible configurations" in eachline:
                 noincompat += 1
         if noincompat != 2:
-            log.error("Incompatibilty check failed, please fix the incompatibilities")
+            log.error(self.ipaddr + ": Incompatibilty check failed, please fix the incompatibilities. Skipping upgrade")
             log.error(out)
-            return {'FAILED': out}
-        print_and_log("There are no incompatible configurations so continuing with ISSU checks")
+            return ('FAILED', out)
+        print_and_log(self.ipaddr + ": No incompatible configurations, so continuing with ISSU checks")
 
         # Check impact status to determine if its disruptive or non-disruptive
         # show install all impact kickstart m9700-sf4ek9-kickstart-mz.8.4.1.bin system m9700-sf4ek9-mz.8.4.1.bin
@@ -828,43 +828,48 @@ class Switch(SwitchUtils):
         for eachline in alllines:
             if "non-disruptive" in eachline:
                 nondisruptive = True
-                print_and_log("'show install all impact' was success, continuing with non-disruptive ISSU ")
+                log.debug(self.ipaddr + ": 'show install all impact' was success, continuing with non-disruptive ISSU ")
                 break
         if not nondisruptive:
-            log.error("Cannot do non-disruptive upgrade")
+            log.error(self.ipaddr + ": ERROR!!! Cannot do non-disruptive upgrade. Skipping upgrade")
             log.error(out)
-            return {'FAILED': out}
+            return ('FAILED', out)
 
-        cmd = "terminal dont-ask ; install all kickstart " + kickstart + " switch " + system
+        log.info(self.ipaddr + ": Starting install all cmd for non-disruptive ISSU")
+        cmd = "terminal dont-ask ; install all kickstart " + kickstart + " system " + system
         if post_issu_checks:
-            out = self._verify_basic_stuff(cmd, "install all", timeout)
+            status, out = self._verify_basic_stuff(cmd, "install all", timeout)
         else:
-            out = self._execute_install_all(cmd, timeout)
-        return out
+            status, out = self._execute_install_all(cmd, timeout)
+        self.issu_status = status
+        return status, out
 
     def _execute_install_all(self, cmd, timeout):
         # Send install all cmd
         try:
-            out = self.config(cmd)
+            out = self._show_ssh(cmd, timeout, "All telnet and ssh connections will now be temporarily terminated")
         except CLIError as e:
             if "Installer will perform compatibility check first. Please wait" not in e.message:
                 raise CLIError
+        print_and_log(self.ipaddr + ": Please wait for install all to complete. This will take a while...")
 
-        # Wait for install all to start
-        print_and_log("Sent install command. Please wait for install all to complete. This will take a while...")
-        time.sleep(1800)
+        # Wait for switch reboot after install all so that you can reconnect back to switch via ssh
+        time.sleep(240)
+        log.debug(self.ipaddr + ": Reconnecting back to switch via ssh after upgrade")
+        log.info(self.ipaddr + ": Ignore the error 'Socket exception: Connection reset by peer' if seen")
+        self.connect_to_ssh()
 
-        # Wait for atleast half hr
-        # Wait every 5 mins and check if install is a success
+        # Wait for atleast half hr for ISSU to complete, means all LC to be upgraded
+        # Wait every 2 mins and check if install is a success
         if timeout < 1800:
             waittime = 1800
         else:
             waittime = timeout
 
-        timestocheck = int(waittime / 300)
+        timestocheck = int(waittime / 120)
 
         for i in range(timestocheck):
-            print_and_log("Checking if install is complete and successful. Please wait...")
+            print_and_log(self.ipaddr + ": Checking if install is complete and successful. Please wait...")
 
             # show install all status - Install has been successful
             cmd = "show install all status"
@@ -873,75 +878,78 @@ class Switch(SwitchUtils):
             alllines = out.splitlines()
             for eachline in alllines:
                 if "Install has been successful" in eachline:
-                    print_and_log("Install has been successful")
+                    print_and_log(self.ipaddr + ": Upgrade has been successfully done")
                     return ('SUCCESS', None)
-            time.sleep(300)
+            time.sleep(120)
 
         log.error(
-            "Could not get install all success message from show install all status cmd, please check the log file for more details")
+            self.ipaddr + ": ERROR!!!Could not get install all success message from show install all status cmd, please check the log file for more details")
         log.info(out)
         return ('FAILED', out)
 
     def _verify_basic_stuff(self, cmd, action_string, timeout):
+        print_and_log(self.ipaddr + ": Collecting basic info before '" + action_string + "'")
         shmod_before = self.show("show module", raw_text=True).split("\n")
         shintb_before = self.show("show interface brief", raw_text=True).split("\n")
-        print_and_log("Doing " + action_string + " . Please wait...")
+        print_and_log(self.ipaddr + ": Started " + action_string + " . Please wait...")
         if "install all" in action_string:
             status, error = self._execute_install_all(cmd, timeout)
             if status == "FAILED":
                 return status, error
         else:
             out = self.config(cmd)
-            print_and_log("Please wait for " + str(timeout) + "secs..")
+            print_and_log(self.ipaddr + ": Please wait for " + str(timeout) + "secs..")
             time.sleep(timeout)
+        print_and_log(self.ipaddr + ": Collecting basic info after '" + action_string + "'")
         shmod_after = self.show("show module", raw_text=True).split("\n")
         shintb_after = self.show("show interface brief", raw_text=True).split("\n")
 
         cores = self.cores
         if cores is not None:
             log.error(
-                "Cores present on the switch, please check the switch and also the log file")
+                self.ipaddr + ": Cores present on the switch, please check the switch and also the log file")
             log.error(cores)
-            return {'FAILED': out}
+            return ('FAILED', out)
 
         if shmod_before == shmod_after:
-            log.info("'show module' is correct after " + action_string)
+            log.debug(self.ipaddr + ": 'show module' is correct after " + action_string)
         else:
             log.error(
-                "'show module' output is different from before and after " + action_string + ", please check the log file")
-            log.debug("'show module' before " + action_string)
+                self.ipaddr + ": 'show module' output is different from before and after " + action_string + ", please check the log file")
+            log.debug(self.ipaddr + ": 'show module' before " + action_string)
             log.debug(shmod_before)
-            log.debug("'show module' after " + action_string)
+            log.debug(self.ipaddr + ": 'show module' after " + action_string)
             log.debug(shmod_after)
 
             bset = set(shmod_before)
             aset = set(shmod_after)
             bef = list(bset - aset)
             aft = list(aset - bset)
-            log.debug("diff of before after " + action_string)
+            log.debug(self.ipaddr + ": diff of before after " + action_string)
             log.debug(bef)
             log.debug(aft)
-            return {'FAILED': [bef, aft]}
+            return ('FAILED', [bef, aft])
 
         if shintb_before == shintb_after:
-            log.info("'show interface brief' is correct after " + action_string)
+            log.debug(self.ipaddr + ": 'show interface brief' is correct after " + action_string)
         else:
             log.error(
-                "'show interface brief' output is different from before and after " + action_string + ", please check the log file")
-            log.debug("'show interface brief' before " + action_string)
+                self.ipaddr + ": 'show interface brief' output is different from before and after " + action_string + ", please check the log file")
+            log.debug(self.ipaddr + ": 'show interface brief' before " + action_string)
             log.debug(shintb_before)
-            log.debug("'show interface brief' after " + action_string)
+            log.debug(self.ipaddr + ": 'show interface brief' after " + action_string)
             log.debug(shintb_after)
 
             bset = set(shintb_before)
             aset = set(shintb_after)
             bef = list(bset - aset)
             aft = list(aset - bset)
-            log.debug("diff of before after " + action_string)
+            log.debug(self.ipaddr + ": diff of before after " + action_string)
             log.debug(bef)
             log.debug(aft)
-            return {'FAILED': [bef, aft]}
-        return {'SUCCESS': None}
+            return ('FAILED', [bef, aft])
+        log.info(self.ipaddr + ": Basic info is correct after " + action_string)
+        return ('SUCCESS', None)
 
     def get_peer_switches(self):
         peer_sw_list = []

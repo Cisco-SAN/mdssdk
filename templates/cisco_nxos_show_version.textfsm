@@ -1,0 +1,13 @@
+Value VERSION (\S+)
+Value KICKSTART_IMAGE (\S+)
+Value SYSTEM_IMAGE (\S+)
+Value FORM_FACTOR (.*)
+Value TYPE (\S+)
+Value MODEL (MDS\s+.*Chassis)
+
+Start
+  ^\s+system:\s+version\s+${VERSION}
+  ^\s+kickstart image file is:\s+${KICKSTART_IMAGE}
+  ^\s+system image file is:\s+${SYSTEM_IMAGE}
+  ^\s+cisco\s+MDS\s+${TYPE}.*\(${FORM_FACTOR}\).*Chassis -> Continue
+  ^\s+cisco\s+${MODEL}\s+.* -> Record

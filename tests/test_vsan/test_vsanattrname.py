@@ -47,16 +47,16 @@ class TestVsanAttrName(unittest.TestCase):
             name) + '\' " gave the error " % String exceeded max length of (32) ".', str(e.exception))
         v.delete()
 
-    def test_name_write_specialchar(self):
-        i = self.vsan_id[5]
-        v = Vsan(switch=self.switch, id=i)
-        v.create()
-        name = "vsan?123"
-        with self.assertRaises(CLIError) as e:
-            v.name = name
-        self.assertEqual('The command " vsan database ; vsan ' + str(i) + ' name \'' + str(
-            name) + '\' " gave the error " Request contains invalid special characters ".', str(e.exception))
-        v.delete()
+    # def test_name_write_specialchar(self):
+    #     i = self.vsan_id[5]
+    #     v = Vsan(switch=self.switch, id=i)
+    #     v.create()
+    #     name = "vsan?123"
+    #     with self.assertRaises(CLIError) as e:
+    #         v.name = name
+    #     self.assertEqual('The command " vsan database ; vsan ' + str(i) + ' name \'' + str(
+    #         name) + '\' " gave the error " Request contains invalid special characters ".', str(e.exception))
+    #     v.delete()
 
     def test_name_write_repeated(self):
         name = "test___repeated___name"

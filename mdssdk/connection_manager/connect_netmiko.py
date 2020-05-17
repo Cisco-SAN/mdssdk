@@ -49,13 +49,21 @@ class SSHSession(object):
             eachline = eachline.replace("^", "")
             if "Invalid command" in eachline:
                 return True
+            if "Invalid range" in eachline:
+                return True
         return False
 
-    def show(self, cmd):
-        output = self._connection.send_command(cmd)
-        if self._check_error(output):
-            return output.splitlines(), output  # There is error - invalid command
-        return output.splitlines(), None  # There is no error
+    def show(self, cmd, timeout=100, expect_string=None):
+        df = int(timeout / 100)
+        output = self._connection.send_command(cmd, delay_factor=df, expect_string=expect_string, use_textfsm=True)
+        if type(output) == str:
+            # Output did not go through textFSM, as maybe there was no template
+            if self._check_error(output):
+                return output.splitlines(), output  # There is error - invalid command
+            return output.splitlines(), None  # There is no error
+        else:
+            # Output did go through textFSM, as maybe there was no template
+            return output, None
 
     def config(self, cmd):
         retout = []

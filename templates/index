@@ -1,0 +1,18 @@
+# First line is the header fields for columns and is mandatory.
+# Regular expressions are supported in all fields except the first.
+# Last field supports variable length command completion.
+# abc[[xyz]] is expanded to abc(x(y(z)?)?)?, regexp inside [[]] is not supported
+#
+# Rules of Ordering:
+#  - OS in alphbetical order
+#  - Command in length other
+#  - When Length is the same, use alphabetical order
+#  - Keep space between OS's
+#
+Template, Hostname, Platform, Command
+cisco_nxos_show_flogi_database.textfsm, .*, cisco_nxos, sh[[ow]] fl[[ogi]] d[[atabase]]
+cisco_nxos_show_version.textfsm, .*, cisco_nxos, sh[[ow]] ve[[rsion]]
+cisco_nxos_show_feature.textfsm, .*, cisco_nxos, sh[[ow]] fe[[ature]]
+cisco_nxos_show_cores.textfsm, .*, cisco_nxos, sh[[ow]] cor[[es]]
+cisco_nxos_show_incompat_all_system.textfsm, .*, cisco_nxos, sh[[ow]] incompatibility-[[all]] [[system]] (\S+)
+cisco_nxos_show_install_all_impact.textfsm, .*, cisco_nxos, sh[[ow]] in[[stall]] al[[l]] im[[pact]].*

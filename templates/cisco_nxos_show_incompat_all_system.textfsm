@@ -1,0 +1,14 @@
+Value SERVICE (\S+)
+Value CAPABILITY (\S+)
+Value DESCRIPTION (.*)
+Value CAP_REQUIREMENT (\S+)
+Value EN_DIS_CMD (.*)
+
+Start
+  ^.*Service :\s+${SERVICE}.*Capability :\s+${CAPABILITY}
+  ^Description :\s+${DESCRIPTION}
+  ^Capability requirement :\s+${CAP_REQUIREMENT}
+  ^Enable/Disable command :\s+${EN_DIS_CMD} -> Record
+
+
+

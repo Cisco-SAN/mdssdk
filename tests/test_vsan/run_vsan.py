@@ -4,21 +4,21 @@ import unittest
 import logging
 
 logging.basicConfig(filename='test_vsan.log', filemode='w', level=logging.DEBUG,
-					format="[%(asctime)s] [%(module)-14.14s] [%(levelname)-5.5s] %(message)s")
+                    format="[%(asctime)s] [%(module)-14.14s] [%(levelname)-5.5s] %(message)s")
 
 import json
 
 with open('../switch_details.json', 'r') as j:
-	data = json.load(j)
+    data = json.load(j)
 
 sw = Switch(ip_address=data['ip_address'], username=data['username'], password=data['password'],
-			connection_type=data['connection_type'], port=data['port'], timeout=data['timeout'],
-			verify_ssl=False)
+            connection_type=data['connection_type'], port=data['port'], timeout=data['timeout'],
+            verify_ssl=False)
 
 default_id = 1
 boundary_id = [0, 4095]
 reserved_id = [4079, 4094]
-vsan_id = range(4050,4075)
+vsan_id = range(3052, 3075)
 
 from tests.test_vsan.test_vsancreate import *
 
@@ -43,7 +43,7 @@ from tests.test_vsan.test_vsanaddinterfaces import *
 
 TestVsanAddInterfaces.switch = sw
 TestVsanAddInterfaces.vsan_id = vsan_id
-TestVsanAddInterfaces.fc_name = ['fc1/' + str(i) for i in range(31, 49)]
+TestVsanAddInterfaces.fc_name = ['fc1/' + str(i) for i in range(3, 5)]
 TestVsanAddInterfaces.pc_id = [i for i in range(247, 257)]
 TestVsanAddInterfaces.invalid_fc = ["fc2/1"]
 
@@ -63,7 +63,7 @@ from tests.test_vsan.test_vsanattrinterfaces import *
 
 TestVsanAttrInterfaces.switch = sw
 TestVsanAttrInterfaces.vsan_id = vsan_id
-TestVsanAttrInterfaces.fc_name = ["fc1/47", "fc1/48"]
+TestVsanAttrInterfaces.fc_name = ["fc1/4", "fc1/5"]
 
 from tests.test_vsan.test_vsanattrname import *
 
@@ -82,4 +82,14 @@ TestVsanAttrSuspend.boundary_id = boundary_id
 TestVsanAttrSuspend.reserved_id = reserved_id
 
 suite = unittest.TestLoader().discover('tests.test_vsan', 'test_vsan*.py')
-unittest.TextTestRunner(verbosity=2, failfast=True).run(suite)
+runner = unittest.TextTestRunner(verbosity=2, failfast=True)
+for ts in suite:
+    for ta in ts._tests:
+        for t in ta._tests:
+            try:
+                z = t.id()
+            except AttributeError as e:
+                continue
+            if "AddInterfaces" in z:
+                setattr(t, 'setUp', lambda: t.skipTest('SkippingAddInterface'))
+runner.run(suite)
