@@ -1,0 +1,34 @@
+Value Filldown VSAN (\d+)
+Value Filldown ZONE_NAME (\S+)
+Value Required MEMBER_TYPE (pwwn|fcid|fcalias|symbolic-nodename|fwwn|ip-address|interface|device-alias)
+Value PWWN (([a-f0-9][a-f0-9]:){7}([a-f0-9][a-f0-9]))
+Value FWWN (([a-f0-9][a-f0-9]:){7}([a-f0-9][a-f0-9]))
+Value DEVICE_ALIAS (\S+)
+Value SMART_ZONE_TYPE (init|target|both)
+Value FCID (0x[0-9a-f]+)
+Value FCALIAS (\S+)
+Value SYMBOLIC_NODENAME (\S+)
+Value IPADDRESS (.*)
+Value INTERFACE (.*)
+Value DOMAIN_ID (\d+)
+Value SWWN (([a-f0-9][a-f0-9]:){7}([a-f0-9][a-f0-9]))
+
+
+Start
+  ^zone\s+name\s+${ZONE_NAME}\s+vsan\s+${VSAN}
+  ^\s+${MEMBER_TYPE}.* -> Continue
+  ^\s+pwwn\s+${PWWN}\s*$$ -> Record
+  ^\s+pwwn\s+${PWWN}\s+\[${DEVICE_ALIAS}\]\s*$$ -> Record
+  ^\s+pwwn\s+${PWWN}\s+\[${DEVICE_ALIAS}\]\s+${SMART_ZONE_TYPE}\s*$$ -> Record
+  ^\s+pwwn\s+${PWWN}\s+${SMART_ZONE_TYPE}\s*$$ -> Record
+  ^\s+fcid\s+${FCID}\s*$$ -> Record
+  ^\s+fcid\s+${FCID}\s*${SMART_ZONE_TYPE}\s*$$ -> Record
+  ^\s+fcalias\s+name\s+${FCALIAS}\s+vsan\s+\d+\s*$$ -> Record
+  ^\s+symbolic-nodename\s+${SYMBOLIC_NODENAME}\s*$$ -> Record
+  ^\s+fwwn\s+${FWWN}\s*$$ -> Record
+  ^\s+ip-address\s+${IPADDRESS}\s*$$ -> Record
+  ^\s+interface\s+${INTERFACE}\s+domain-id\s+${DOMAIN_ID}\s*$$ -> Record
+  ^\s+interface\s+${INTERFACE}\s+swwn\s+${SWWN}\s*$$ -> Record
+  ^\s+device-alias\s+${DEVICE_ALIAS}\s*$$ -> Record
+  ^\s+device-alias\s+${DEVICE_ALIAS}\s*${SMART_ZONE_TYPE}\s*$$ -> Record
+

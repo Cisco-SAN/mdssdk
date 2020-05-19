@@ -5,9 +5,9 @@ from .connection_manager.errors import CLIError, VsanNotPresent, InvalidInterfac
 from .constants import PAT_FC, PAT_PC
 from .fc import Fc
 from .nxapikeys import vsankeys
+from .parsers.vsan import ShowVsan, ShowVsanMembership
 from .portchannel import PortChannel
 from .utility.utils import get_key
-from .parsers.vsan import ShowVsan,ShowVsanMembership
 
 log = logging.getLogger(__name__)
 
@@ -264,7 +264,7 @@ class Vsan(object):
                                            " is not supported, and hence cannot be added to the vsan, "
                                            "supported interface types are 'fc' amd 'port-channel'")
             try:
-                self.__swobj.config_list(cmdlist)
+                self.__swobj._config_list(cmdlist)
             except CLIError as c:
                 if "membership being configured is already configured for the interface" in c.message:
                     return

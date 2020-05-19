@@ -6,11 +6,11 @@ from .. import constants
 from ..fc import Fc
 from ..module import Module
 from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys
+from ..parsers.interface import ShowInterfaceBrief
+from ..parsers.vsan import ShowVsan
 from ..portchannel import PortChannel
 from ..vsan import Vsan
 from ..zone import Zone
-from ..parsers.vsan import ShowVsan
-from ..parsers.interface import ShowInterfaceBrief
 
 log = logging.getLogger(__name__)
 
@@ -194,17 +194,21 @@ class SwitchUtils:
 
         mlist = []
         out = self.show("show module")
-        if not out:
-            return None
-        modinfo = out['TABLE_modinfo']['ROW_modinfo']
-        # For 1RU switch modinfo is a dict
-        if type(modinfo) is dict:
-            modinfo = [modinfo]
+        if self.is_connection_type_ssh():
+            for eachrow in out:
+                modnum = eachrow['module']
+                m = Module(self, modnum, eachrow)
+                mlist.append(m)
+        else:
+            modinfo = out['TABLE_modinfo']['ROW_modinfo']
+            # For 1RU switch modinfo is a dict
+            if type(modinfo) is dict:
+                modinfo = [modinfo]
 
-        for eachmodinfo in modinfo:
-            modnumkey = get_key(modulekeys.MOD_NUM, self._SW_VER)
-            m = Module(self, eachmodinfo[modnumkey], eachmodinfo)
-            mlist.append(m)
+            for eachmodinfo in modinfo:
+                modnumkey = get_key(modulekeys.MOD_NUM, self._SW_VER)
+                m = Module(self, eachmodinfo[modnumkey], eachmodinfo)
+                mlist.append(m)
         return mlist
 
     @property

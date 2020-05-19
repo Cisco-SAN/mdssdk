@@ -1,7 +1,7 @@
 import unittest
 
-from mdssdk.devicealias import DeviceAlias
 from mdssdk.connection_manager.errors import CLIError
+from mdssdk.devicealias import DeviceAlias
 
 
 class TestDeviceAliasCreate(unittest.TestCase):
@@ -45,12 +45,13 @@ class TestDeviceAliasCreate(unittest.TestCase):
         self.assertEqual("The command \" device-alias database ;  device-alias name " + str(name) + " pwwn " + str(
             pwwn) + " ; \" gave the error \" % String exceeded max length of (64) \".", str(e.exception))
 
-    def test_create_name_max(self):
-        d = DeviceAlias(self.switch)
-        name = list(self.new_max.keys())[0]
-        d.create(self.new_max)
-        self.assertEqual(self.new_max, d.database)
-        d.delete(name)
+    # This tc is not needed
+    # def test_create_name_max(self):
+    #     d = DeviceAlias(self.switch)
+    #     name = list(self.new_max.keys())[0]
+    #     d.create(self.new_max)
+    #     self.assertEqual(self.new_max, d.database)
+    #     d.delete(name)
 
     def test_create_pwwn_existing(self):
         d = DeviceAlias(self.switch)

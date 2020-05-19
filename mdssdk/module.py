@@ -26,10 +26,16 @@ class Module(object):
         self._SW_VER = switch._SW_VER
 
         self.__mod_num = mod_num
-        self.__mod_ports = self.__modinfo[get_key(modulekeys.MOD_PORTS, self._SW_VER)]
-        self.__mod_modtype = self.__modinfo[get_key(modulekeys.MOD_TYPE, self._SW_VER)]
-        self.__mod_model = self.__modinfo[get_key(modulekeys.MOD_MODEL, self._SW_VER)]
-        self.__mod_status = self.__modinfo[get_key(modulekeys.MOD_STATUS, self._SW_VER)]
+        if self.__swobj.is_connection_type_ssh():
+            self.__mod_ports = self.__modinfo['ports']
+            self.__mod_modtype = self.__modinfo['type']
+            self.__mod_model = self.__modinfo['model']
+            self.__mod_status = self.__modinfo['status']
+        else:
+            self.__mod_ports = self.__modinfo[get_key(modulekeys.MOD_PORTS, self._SW_VER)]
+            self.__mod_modtype = self.__modinfo[get_key(modulekeys.MOD_TYPE, self._SW_VER)]
+            self.__mod_model = self.__modinfo[get_key(modulekeys.MOD_MODEL, self._SW_VER)]
+            self.__mod_status = self.__modinfo[get_key(modulekeys.MOD_STATUS, self._SW_VER)]
 
     @property
     def module_number(self):
@@ -48,9 +54,10 @@ class Module(object):
 
         """
 
-        if self.__mod_num is None:
-            self.__modinfo = self.__get_modinfo()
-        self.__mod_num = self.__modinfo[get_key(modulekeys.MOD_NUM, self._SW_VER)]
+        if self.__swobj.is_connection_type_ssh():
+            self.__mod_num = self.__modinfo['module']
+        else:
+            self.__mod_num = self.__modinfo[get_key(modulekeys.MOD_NUM, self._SW_VER)]
         return int(self.__mod_num)
 
     @property
@@ -71,7 +78,10 @@ class Module(object):
 
         if self.__mod_ports is None:
             self.__modinfo = self.__get_modinfo()
-        self.__mod_ports = self.__modinfo[get_key(modulekeys.MOD_PORTS, self._SW_VER)]
+        if self.__swobj.is_connection_type_ssh():
+            self.__mod_ports = self.__modinfo['ports']
+        else:
+            self.__mod_ports = self.__modinfo[get_key(modulekeys.MOD_PORTS, self._SW_VER)]
         return int(self.__mod_ports)
 
     @property
@@ -91,7 +101,10 @@ class Module(object):
         """
         if self.__mod_modtype is None:
             self.__modinfo = self.__get_modinfo()
-        self.__mod_modtype = self.__modinfo[get_key(modulekeys.MOD_TYPE, self._SW_VER)]
+        if self.__swobj.is_connection_type_ssh():
+            self.__mod_modtype = self.__modinfo['type']
+        else:
+            self.__mod_modtype = self.__modinfo[get_key(modulekeys.MOD_TYPE, self._SW_VER)]
         return self.__mod_modtype
 
     @property
@@ -111,7 +124,10 @@ class Module(object):
         """
         if self.__mod_model is None:
             self.__modinfo = self.__get_modinfo()
-        self.__mod_model = self.__modinfo[get_key(modulekeys.MOD_MODEL, self._SW_VER)]
+        if self.__swobj.is_connection_type_ssh():
+            self.__mod_model = self.__modinfo['model']
+        else:
+            self.__mod_model = self.__modinfo[get_key(modulekeys.MOD_MODEL, self._SW_VER)]
         return self.__mod_model
 
     @property
@@ -130,13 +146,19 @@ class Module(object):
             >>>
         """
         self.__modinfo = self.__get_modinfo()
-        self.__mod_status = self.__modinfo[get_key(modulekeys.MOD_STATUS, self._SW_VER)]
+        if self.__swobj.is_connection_type_ssh():
+            self.__mod_status = self.__modinfo['status']
+        else:
+            self.__mod_status = self.__modinfo[get_key(modulekeys.MOD_STATUS, self._SW_VER)]
         return self.__mod_status
 
     def __get_modinfo(self):
         cmd = "show module " + str(self.__mod_num)
         out = self.__swobj.show(cmd)
-        out = out['TABLE_modinfo']['ROW_modinfo']
+        if self.__swobj.is_connection_type_ssh():
+            retout = out[0]
+        else:
+            retout = out['TABLE_modinfo']['ROW_modinfo']
         log.debug("Output of the cmd " + cmd)
-        log.debug(out)
-        return out
+        log.debug(retout)
+        return retout

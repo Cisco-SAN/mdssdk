@@ -2,8 +2,6 @@ __author__ = 'Suhas Bharadwaj (subharad)'
 
 import logging
 import re
-
-import requests
 import time
 
 from .analytics import Analytics
@@ -12,7 +10,7 @@ from .connection_manager.connect_nxapi import ConnectNxapi
 from .connection_manager.errors import CLIError, CustomException
 from .constants import DEFAULT
 from .nxapikeys import versionkeys, featurekeys
-from .parsers.switch import ShowFeature, ShowTopology
+from .parsers.switch import ShowTopology
 from .utility.switch_utility import SwitchUtils
 from .utility.utils import get_key
 
@@ -226,7 +224,14 @@ class Switch(SwitchUtils):
         :param swname:
         :return:
         """
-        self.config("switchname " + swname)
+
+        cmd = "switchname " + swname
+        if self.is_connection_type_ssh():
+            outlines, error = self._ssh_handle.config_change_switch_name(cmd)
+            if error is not None:
+                raise CLIError(cmd, error)
+        else:
+            self.config(cmd)
 
     @property
     def npv(self):
@@ -519,10 +524,15 @@ class Switch(SwitchUtils):
             log.debug("Get the status of the feature " + name)
             cmd = "show feature"
             out = self.show(cmd)
-
+            # Bug doesnt work on npv, NXOS needs to fix
             if self.is_connection_type_ssh():
-                shfea = ShowFeature(out)
-                return shfea.is_enabled(name)
+                for eachrow in out:
+                    if eachrow['feature'] == name:
+                        if eachrow['state'] == 'enabled':
+                            return True
+                        else:
+                            return False
+                return False
 
             list_of_features = out['TABLE_cfcFeatureCtrl2Table']['ROW_cfcFeatureCtrl2Table']
             for eachfeature in list_of_features:
@@ -534,18 +544,17 @@ class Switch(SwitchUtils):
         elif enable:
             log.debug("Trying to enable the feature " + name)
             cmd = "feature " + name
-            try:
-                self.config(cmd)
-            except CLIError as c:
-                if "Invalid command" in c.message:
-                    raise UnsupportedFeature("This feature '" + name + "' is not supported on this switch ")
         else:
             # if we try to disable ssh or nxapi via this SDK then throw an exception
             if name == 'ssh' or name == 'nxapi':
                 raise UnsupportedConfig("Disabling the feature '" + name + "' via this SDK API is not allowed!!")
             log.debug("Trying to disable the feature " + name)
             cmd = "no feature " + name
-            self.config(cmd)
+        try:
+            out = self.config(cmd)
+        except CLIError as c:
+            if "Invalid command" in c.message:
+                raise UnsupportedFeature("This feature '" + name + "' is not supported on this switch ")
 
     @property
     def cores(self):
@@ -556,19 +565,12 @@ class Switch(SwitchUtils):
         :rtype: list or None
 
         """
-        retval = []
-        PAT = "(?P<module>\d+)\s+(?P<instance>\d+)\s+(?P<process_name>\S+)\s+(?P<pid>\d+)\s+(?P<date_time>.*)"
-        PAT_COMP = re.compile(PAT)
-        cmd = "show cores"
-        out = self.show(cmd, raw_text=True)
-        alllines = out.splitlines()
-        for line in alllines:
-            result = PAT_COMP.match(line)
-            if result:
-                d = result.groupdict()
-                retval.append(d)
-        if retval:
-            return retval
+
+        out = self.show("show cores", use_ssh=True)
+        log.debug(out)
+        if type(out[0]) == str:
+            return None
+        return out
 
     def _cli_error_check(self, command_response):
         error = command_response.get(u'error')
@@ -641,13 +643,13 @@ class Switch(SwitchUtils):
             return outlines
 
         commands = [command]
-        list_result = self.show_list(commands, raw_text)
+        list_result = self._show_list(commands, raw_text)
         if list_result:
             return list_result[0]
         else:
             return {}
 
-    def show_list(self, commands, raw_text=False, use_ssh=False):
+    def _show_list(self, commands, raw_text=False, use_ssh=False):
         """
         Send a list of show commands to the switch
 
@@ -707,15 +709,14 @@ class Switch(SwitchUtils):
         if self.is_connection_type_ssh() or use_ssh:
             outlines, error = self._ssh_handle.config(command)
             if error is not None:
-                # raise Exception(command, error)
                 raise CLIError(command, error)
             return outlines
 
         commands = [command]
-        list_result = self.config_list(commands, rpc, method)
+        list_result = self._config_list(commands, rpc, method)
         return list_result[0]
 
-    def config_list(self, commands, rpc=u'2.0', method=u'cli', use_ssh=False):
+    def _config_list(self, commands, rpc=u'2.0', method=u'cli', use_ssh=False):
         """
         Send any list of commands to run from the config mode
 

@@ -1,15 +1,14 @@
-from mdssdk.switch import Switch
-import unittest
-
 import logging
 
+from mdssdk.switch import Switch
+
 logging.basicConfig(filename='test_switch.log', filemode='w', level=logging.DEBUG,
-					format="[%(asctime)s] [%(module)-14.14s] [%(levelname)-5.5s] %(message)s")
+                    format="[%(asctime)s] [%(module)-14.14s] [%(levelname)-5.5s] %(message)s")
 
 import json
 
 with open('../switch_details.json', 'r') as j:
-	data = json.load(j)
+    data = json.load(j)
 
 sw = Switch(ip_address=data['ip_address'], username=data['username'], password=data['password'],
 			connection_type=data['connection_type'], port=data['port'], timeout=data['timeout'],
@@ -24,10 +23,10 @@ from tests.test_switch.test_switchshow import *
 TestSwitchShow.switch = sw
 TestSwitchShow.commands = "show vsan usage"
 
-from tests.test_switch.test_switchshowlist import *
-
-TestSwitchShowList.switch = sw
-TestSwitchShowList.commands = ["show vsan usage", "show module"]
+# from tests.test_switch._test_switchshowlist import *
+#
+# TestSwitchShowList.switch = sw
+# TestSwitchShowList.commands = ["show vsan usage", "show module"]
 
 from tests.test_switch.test_switchconfig import *
 
@@ -35,11 +34,11 @@ TestSwitchConfig.switch = sw
 TestSwitchConfig.commands = "vsan database ; vsan 2 ; terminal dont-ask ; no vsan 2 ; no terminal dont-ask"
 TestSwitchConfig.commands_clierror = "terminal dont-ask ; vsan database ; no vsan 2 "
 
-from tests.test_switch.test_switchconfiglist import *
-
-TestSwitchConfigList.switch = sw
-TestSwitchConfigList.commands = ["vsan database ; vsan 2 ; terminal dont-ask ; no vsan 2 ", "no terminal dont-ask"]
-TestSwitchConfigList.commands_clierror = ["vsan database ; terminal dont-ask ; no vsan 2 "]
+# from tests.test_switch._test_switchconfiglist import *
+#
+# TestSwitchConfigList.switch = sw
+# TestSwitchConfigList.commands = ["vsan database ; vsan 2 ; terminal dont-ask ; no vsan 2 ", "no terminal dont-ask"]
+# TestSwitchConfigList.commands_clierror = ["vsan database ; terminal dont-ask ; no vsan 2 "]
 
 from tests.test_switch.test_switchattripaddr import *
 
@@ -102,4 +101,4 @@ from tests.test_switch.test_switchattranalytics import *
 TestSwitchAttrAnalytics.switch = sw
 
 suite = unittest.TestLoader().discover('tests.test_switch', 'test_switch*.py')
-unittest.TextTestRunner(verbosity=2, failfast=True).run(suite)
+unittest.TextTestRunner(verbosity=2, failfast=False).run(suite)
