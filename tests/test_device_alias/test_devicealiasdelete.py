@@ -35,7 +35,7 @@ class TestDeviceAliasDelete(unittest.TestCase):
         newdb = self.d.database
         if newdb is not None:
             self.assertNotIn(self.name, newdb.keys())
-            self.assertNotIn(self.pwwn, newdb[self.name])
+            self.assertNotIn(self.pwwn, newdb.values())
 
     def test_delete_nonexisting(self):
         db = self.d.database

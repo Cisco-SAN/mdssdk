@@ -40,7 +40,7 @@ class TestDeviceAliasAttrMode(unittest.TestCase):
             self.d.mode = ENHANCED
             self.assertEqual(ENHANCED, self.d.mode.lower())
         self.d.mode = self.oldmode
-        self.assertEqual(self.oldmode, self.d.mode.lower())
+        self.assertEqual(self.oldmode.lower(), self.d.mode.lower())
 
     def test_mode_write_invalid(self):
         mode = 'asdf'

@@ -80,7 +80,6 @@ class TestDeviceAliasRename(unittest.TestCase):
         self.d.delete(self.name)
         chkdb = self.d.database
         if chkdb is not None:
-            self.assertNotIn(self.newname_to_replace, chkdb.keys())
             self.assertNotIn(self.pwwn, chkdb.values())
             self.assertNotIn(self.name, chkdb.keys())
 
@@ -99,7 +98,6 @@ class TestDeviceAliasRename(unittest.TestCase):
         self.d.delete(self.name)
         chkdb = self.d.database
         if chkdb is not None:
-            self.assertNotIn(self.newname_to_replace, chkdb.keys())
             self.assertNotIn(self.pwwn, chkdb.values())
             self.assertNotIn(self.name, chkdb.keys())
 
