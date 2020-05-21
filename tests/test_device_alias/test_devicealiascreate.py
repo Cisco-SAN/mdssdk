@@ -2,79 +2,112 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.devicealias import DeviceAlias
+from tests.test_device_alias.da_vars import *
+
+log = logging.getLogger(__name__)
 
 
 class TestDeviceAliasCreate(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.d = DeviceAlias(self.switch)
+        self.olddb = self.d.database
+        if self.olddb is None:
+            self.name = get_random_string()
+            self.pwwn = get_random_pwwn()
+        else:
+            while True:
+                self.name = get_random_string()
+                self.pwwn = get_random_pwwn()
+                if self.name not in self.olddb.keys() and self.pwwn not in self.olddb.values():
+                    break
+        log.info({self.name: self.pwwn})
+
     def test_create(self):
-        d = DeviceAlias(self.switch)
-        d.create(self.new)
-        self.assertEqual(self.new, d.database)
-        keys = list(self.new.keys())
-        for k in keys:
-            d.delete(k)
+        self.d.create({self.name: self.pwwn})
+        newdb = self.d.database
+        self.assertIn(self.name, newdb.keys())
+        self.assertEqual(self.pwwn, newdb[self.name])
+        self.d.delete(self.name)
+        newdb = self.d.database
+        if newdb is not None:
+            self.assertNotIn(self.name, newdb.keys())
+            self.assertNotIn(self.pwwn, newdb.values())
 
     def test_create_name_invalid(self):
-        d = DeviceAlias(self.switch)
-        name = list(self.new_invalidname.keys())[0]
-        pwwn = list(self.new_invalidname.values())[0]
+        invalid_name = {'da1&': get_random_pwwn()}  # da name a-zA-Z1-9 - _ $ ^    64chars max
+        name = list(invalid_name.keys())[0]
+        pwwn = list(invalid_name.values())[0]
         with self.assertRaises(CLIError) as e:
-            d.create(self.new_invalidname)
+            self.d.create(invalid_name)
         self.assertEqual("The command \" device-alias database ;  device-alias name " + str(name) + " pwwn " + str(
             pwwn) + " ; \" gave the error \" Illegal character present in the name \".", str(e.exception))
-        d.clear_lock()
+        self.d.clear_lock()
 
     def test_create_name_invalidfirstchar(self):
-        d = DeviceAlias(self.switch)
-        name = list(self.new_invalidfirstchar.keys())[0]
-        pwwn = list(self.new_invalidfirstchar.values())[0]
+        invalidfirstchar = {'1da': '53:66:61:01:0e:00:01:ff'}
+        name = list(invalidfirstchar.keys())[0]
+        pwwn = list(invalidfirstchar.values())[0]
         with self.assertRaises(CLIError) as e:
-            d.create(self.new_invalidfirstchar)
+            self.d.create(invalidfirstchar)
         self.assertEqual("The command \" device-alias database ;  device-alias name " + str(name) + " pwwn " + str(
             pwwn) + " ; \" gave the error \" Illegal first character. Name must start with a letter \".",
                          str(e.exception))
-        d.clear_lock()
+        self.d.clear_lock()
 
     def test_create_name_beyondmax(self):
-        d = DeviceAlias(self.switch)
-        name = list(self.new_beyondmax.keys())[0]
-        pwwn = list(self.new_beyondmax.values())[0]
+        beyondmax = {
+            'da123456789123456789123456789123456789123456789123456789123456789': get_random_pwwn()}
+        name = list(beyondmax.keys())[0]
+        pwwn = list(beyondmax.values())[0]
         with self.assertRaises(CLIError) as e:
-            d.create(self.new_beyondmax)
-        self.maxDiff = 1000
+            self.d.create(beyondmax)
         self.assertEqual("The command \" device-alias database ;  device-alias name " + str(name) + " pwwn " + str(
             pwwn) + " ; \" gave the error \" % String exceeded max length of (64) \".", str(e.exception))
 
-    # This tc is not needed
-    # def test_create_name_max(self):
-    #     d = DeviceAlias(self.switch)
-    #     name = list(self.new_max.keys())[0]
-    #     d.create(self.new_max)
-    #     self.assertEqual(self.new_max, d.database)
-    #     d.delete(name)
-
     def test_create_pwwn_existing(self):
-        d = DeviceAlias(self.switch)
-        d.create(self.new_existingpwwn)
-        name = list(self.existingpwwn.keys())[0]
-        pwwn = list(self.existingpwwn.values())[0]
-        with self.assertLogs(level='INFO') as l:
-            d.create(self.existingpwwn)
-        self.assertEqual('INFO:mdssdk.devicealias:The command : device-alias database ;  device-alias name ' + str(
-            name) + ' pwwn ' + str(pwwn) + ' ;  was not executed because Device Alias already present', l.output[0])
-        keys = list(self.new_existingpwwn.keys())
-        for k in keys:
-            d.delete(k)
+        self.d.create({self.name: self.pwwn})
+        newdb = self.d.database
+        self.assertIn(self.name, newdb.keys())
+        self.assertEqual(self.pwwn, newdb[self.name])
+
+        newname = get_random_string()
+        with self.assertRaises(CLIError) as e:
+            self.d.create({newname: self.pwwn})
+        self.assertIn("Another device-alias already present with the same pwwn", str(e.exception))
+
+        # DB should not be updated with the new name
+        self.assertIn(self.name, newdb.keys())
+        self.assertEqual(self.pwwn, newdb[self.name])
+
+        self.d.delete(self.name)
 
     def test_create_name_existing(self):
-        d = DeviceAlias(self.switch)
-        d.create(self.new_existingname)
-        name = list(self.existingname.keys())[0]
-        pwwn = list(self.existingname.values())[0]
-        with self.assertLogs(level='INFO') as l:
-            d.create(self.existingname)
-        self.assertEqual('INFO:mdssdk.devicealias:The command : device-alias database ;  device-alias name ' + str(
-            name) + ' pwwn ' + str(pwwn) + ' ;  was not executed because Device Alias already present', l.output[0])
-        keys = list(self.new_existingname.keys())
-        for k in keys:
-            d.delete(k)
+        self.d.create({self.name: self.pwwn})
+        newdb = self.d.database
+        self.assertIn(self.name, newdb.keys())
+        self.assertEqual(self.pwwn, newdb[self.name])
+
+        newpwwn = get_random_pwwn()
+        with self.assertRaises(CLIError) as e:
+            self.d.create({self.name: newpwwn})
+        self.assertIn("Device Alias already present", str(e.exception))
+
+        # DB should not be updated with the new pwwn
+        self.assertIn(self.name, newdb.keys())
+        self.assertEqual(self.pwwn, newdb[self.name])
+
+        self.d.delete(self.name)
+
+    def tearDown(self) -> None:
+        try:
+            self.d.delete(self.name)
+        except CLIError as c:
+            if "Device Alias not present" not in c.message:
+                self.fail("Tear down failed: " + c.message)
+        enddb = self.d.database
+        if enddb is not None:
+            self.assertEqual(enddb, self.olddb)

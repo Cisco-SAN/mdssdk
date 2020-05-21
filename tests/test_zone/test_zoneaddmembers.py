@@ -1,8 +1,8 @@
 import unittest
 
-from mdssdk.zone import Zone
-from mdssdk.vsan import Vsan
 from mdssdk.connection_manager.errors import CLIError
+from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
 
 
 class TestZoneAddMembers(unittest.TestCase):
@@ -16,8 +16,9 @@ class TestZoneAddMembers(unittest.TestCase):
         members = self.members_dict
         self.switch.config('fcalias name somefcalias vsan ' + str(i))
         z.add_members(members)
-        self.assertEqual(len(members), len(z.members))
+        print("Zone Members : " + str(members))
         print("Zone Members : " + str(z.members))
+        self.assertEqual(len(members), len(z.members))
         z.delete()
         v.delete()
 

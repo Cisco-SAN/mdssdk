@@ -1,5 +1,4 @@
 import logging
-
 import time
 
 from .connection_manager.errors import CLIError, CustomException
@@ -66,7 +65,6 @@ class DeviceAlias(object):
             outlines = self.__swobj.show(cmd)
             shdasta = ShowDeviceAliasStatus(outlines)
             return shdasta.mode.lower()
-
         facts_out = self.__get_facts()
         return self.__get_mode(facts_out)
 
@@ -78,21 +76,15 @@ class DeviceAlias(object):
         elif mode.lower() == BASIC:
             cmd = "device-alias database ; no device-alias mode enhanced"
         else:
-            raise InvalidMode("Invalid device alias mode: " + str(
-                mode) + ". Valid values are " + ENHANCED + "," + BASIC)
-        out = self.__swobj.config(cmd)
-        if out and out is not None:
-            if self.__swobj.is_connection_type_ssh():
-                msg = out[0].strip("\n").strip()
-            else:
-                msg = out['msg']
-            dist = self.distribute
-            if dist and dist is not None:
-                self.__send_commit(mode)
-            raise CLIError(cmd, msg)
-        dist = self.distribute
-        if dist and dist is not None:
-            self.__send_commit(mode)
+            raise InvalidMode(
+                "Invalid device alias mode: " + str(mode) + ". Valid values are " + ENHANCED + "," + BASIC)
+        try:
+            out = self.__swobj.config(cmd)
+        except CLIError as c:
+            self.__clear_lock_if_distribute()
+            raise CLIError(*c.args)
+        # There is no error
+        self.__send_commit()
 
     @property
     def distribute(self):
@@ -150,13 +142,13 @@ class DeviceAlias(object):
             cmd = "device-alias database ; no device-alias distribute"
             log.debug("Setting device alias mode to 'Disabled'")
             log.debug(cmd)
-        out = self.__swobj.config(cmd)
-        if out and out is not None:
-            if self.__swobj.is_connection_type_ssh():
-                msg = out[0].strip("\n").strip()
-            else:
-                msg = out['msg']
-            raise CLIError(cmd, msg)
+        try:
+            out = self.__swobj.config(cmd)
+        except CLIError as c:
+            self.__clear_lock_if_distribute()
+            raise CLIError(*c.args)
+        # There is no error
+        self.__send_commit()
 
     @property
     def locked(self):
@@ -225,37 +217,17 @@ class DeviceAlias(object):
             >>>
          """
 
-        mode = self.mode
         for name, pwwn in namepwwn.items():
             log.debug("Creating device alias with name:pwwn  " + name + " : " + pwwn)
             cmd = "device-alias database ; "
             cmd = cmd + " device-alias name " + name + " pwwn " + pwwn + " ; "
-            out = []
             try:
                 out = self.__swobj.config(cmd)
             except CLIError as c:
-                if not self.__swobj.is_connection_type_ssh():
-                    raise CLIError(cmd, c.message)  
-                self._check_msg(c.message, cmd, mode)
-            if out and out is not None:
-                msg = out['msg']
-                if msg:
-                    self._check_msg(msg, cmd, mode)
-        dist = self.distribute
-        if dist and dist is not None:
-            self.__send_commit(mode)
-
-    def _check_msg(self, msg, cmd, mode):
-        self.__clear_lock_if_enhanced(mode)
-        dist = self.distribute
-        if dist and dist is not None:
-            self.__send_commit(mode)
-        if "Device Alias already present" in msg:
-            log.info("The command : " + cmd + " was not executed because Device Alias already present")
-        elif "Another device-alias already present with the same pwwn" in msg:
-            log.info("The command : " + cmd + " was not executed because Device Alias already present")
-        else:
-            raise CLIError(cmd, msg)
+                self.__clear_lock_if_distribute()
+                raise CLIError(*c.args)
+            # There is no error
+            self.__send_commit()
 
     def delete(self, name):
         """
@@ -273,23 +245,15 @@ class DeviceAlias(object):
 
         """
 
-        mode = self.mode
         log.debug("Deleting device alias with args " + name)
         cmd = "device-alias database ; no device-alias name " + name
-        out = self.__swobj.config(cmd)
-        if out and out is not None:
-            if self.__swobj.is_connection_type_ssh():
-                msg = out[0].strip("\n").strip()
-            else:
-                msg = out['msg']
-            self.__clear_lock_if_enhanced(mode)
-            dist = self.distribute
-            if dist and dist is not None:
-                self.__send_commit(mode)
-            raise CLIError(cmd, msg)
-        dist = self.distribute
-        if dist and dist is not None:
-            self.__send_commit(mode)
+        try:
+            out = self.__swobj.config(cmd)
+        except CLIError as c:
+            self.__clear_lock_if_distribute()
+            raise CLIError(*c.args)
+        # There is no error
+        self.__send_commit()
 
     def rename(self, oldname, newname):
         """
@@ -310,24 +274,15 @@ class DeviceAlias(object):
 
         """
 
-        mode = self.mode
         log.debug("Renaming device alias with args " + oldname + " " + newname)
         cmd = "device-alias database ; device-alias rename " + oldname + " " + newname
-        out = self.__swobj.config(cmd)
-        if out and out is not None:
-            if self.__swobj.is_connection_type_ssh():
-                msg = out[0].strip("\n").strip()
-            else:
-                msg = out['msg']
-            self.__clear_lock_if_enhanced(mode)
-            dist = self.distribute
-            if dist and dist is not None:
-                self.__send_commit(mode)
-            raise CLIError(cmd, msg)
-
-        dist = self.distribute
-        if dist and dist is not None:
-            self.__send_commit(mode)
+        try:
+            out = self.__swobj.config(cmd)
+        except CLIError as c:
+            self.__clear_lock_if_distribute()
+            raise CLIError(*c.args)
+        # There is no error
+        self.__send_commit()
 
     def clear_lock(self):
         """
@@ -364,24 +319,15 @@ class DeviceAlias(object):
 
         """
 
-        mode = self.mode
         log.debug("Sending the cmd clear device-alias database")
         cmd = "terminal dont-ask ; device-alias database ; clear device-alias database ; no terminal dont-ask "
-        out = self.__swobj.config(cmd)
-        if out and out is not None:
-            if self.__swobj.is_connection_type_ssh():
-                msg = out[0].strip("\n").strip()
-            else:
-                msg = out['msg']
-            self.__clear_lock_if_enhanced(mode)
-            dist = self.distribute
-            if dist and dist is not None:
-                self.__send_commit(mode)
-            raise CLIError(cmd, msg)
-
-        dist = self.distribute
-        if dist and dist is not None:
-            self.__send_commit(mode)
+        try:
+            out = self.__swobj.config(cmd)
+        except CLIError as c:
+            self.__clear_lock_if_distribute()
+            raise CLIError(*c.args)
+        # There is no error
+        self.__send_commit()
 
     def __get_facts(self):
         log.debug("Getting device alias facts")
@@ -411,70 +357,30 @@ class DeviceAlias(object):
         else:
             return None
 
-    def __send_device_alias_cmds(self, command, facts_out=None, mode=None, skipcommit=False):
-        if facts_out is None:
-            facts_out = self.__get_facts()
-        if mode is None:
-            mode = self.mode
+    def __send_commit(self):
+        if self.distribute:
+            cmd = "terminal dont-ask ; device-alias commit ; no terminal dont-ask "
+            log.debug(cmd)
+            msg = None
+            try:
+                out = self.__swobj.config(cmd)
+            except CLIError as c:
+                msg = c.message
+            if msg is not None:
+                if "There are no pending changes" in msg:
+                    self.clear_lock()
+                    log.debug("The commit command was not executed because Device Alias already present")
+                elif "Commit in progress. Check the status." in msg:
+                    log.info("Commit in progress...sleeping for 5 sec, please check again.")
+                    time.sleep(5)
+                    self.__send_commit()
+                elif "Device-alias enhanced zone member present" in msg:
+                    self.clear_lock()
+                    raise CLIError(cmd, msg)
+                else:
+                    self.clear_lock()
+                    raise CLIError(cmd, msg)
 
-        if 'distribute' in command:
-            dist = None
-        else:
-            dist = self.distribute
-        log.debug("mode is " + mode)
-        log.debug("distribute is " + str(dist))
-        lock_user = self.__locked_user(facts_out)
-        if lock_user is not None:
-            log.error("Switch has acquired cfs device-alias lock by user " + lock_user)
-            self.__clear_lock_if_enhanced(mode)
-            raise CLIError(command, "Switch has acquired cfs device-alias lock by user " + lock_user)
-
-        log.debug("Sending the command..")
-        log.debug(command)
-        out = self.__swobj.config(command)
-        if out and out is not None:
-            if self.__swobj.is_connection_type_ssh():
-                msg = out[0].strip("\n").strip()
-            else:
-                msg = out['msg']
-            if "Device Alias already present" in msg:
-                log.info("The command : " + command + " was not executed because Device Alias already present")
-            elif "Another device-alias already present with the same pwwn" in msg:
-                log.info("The command : " + command + " was not executed because Device Alias already present")
-            else:
-                log.error(msg)
-                self.__clear_lock_if_enhanced(mode)
-                raise CLIError(command, msg)
-            # self._clear_lock_if_enhanced(mode)
-
-        if skipcommit:
-            return False, None
-        else:
-            if dist and dist is not None:
-                self.__send_commit(mode)
-
-    def __send_commit(self, mode):
-        cmd = "terminal dont-ask ; device-alias commit ; no terminal dont-ask "
-        log.debug(cmd)
-        out = self.__swobj.config(cmd)
-        log.debug(out)
-        if out and out is not None:
-            if self.__swobj.is_connection_type_ssh():
-                msg = out[0].strip("\n").strip()
-            else:
-                msg = out['msg'].strip(".\n").strip()
-            if "There are no pending coiohanges" in msg:
-                log.debug("The commit command was not executed because Device Alias already present")
-            elif "Device-alias enhanced zone member present" in msg:
-                # log.error(msg)
-                self.__clear_lock_if_enhanced(mode)
-                raise CLIError(cmd, msg)
-            elif "Commit in progress. Check the status." in msg:
-                log.debug("Commit in progress...sleep for 5 sec")
-                time.sleep(5)
-            else:
-                raise CLIError(cmd, msg)
-
-    def __clear_lock_if_enhanced(self, mode):
-        if mode.lower() == ENHANCED:
+    def __clear_lock_if_distribute(self):
+        if self.distribute:
             self.clear_lock()

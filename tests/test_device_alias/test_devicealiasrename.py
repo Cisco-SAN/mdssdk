@@ -1,55 +1,114 @@
 import unittest
 
-from mdssdk.devicealias import DeviceAlias
 from mdssdk.connection_manager.errors import CLIError
+from mdssdk.devicealias import DeviceAlias
+from tests.test_device_alias.da_vars import *
+
+log = logging.getLogger(__name__)
 
 
 class TestDeviceAliasRename(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.d = DeviceAlias(self.switch)
+        self.olddb = self.d.database
+        if self.olddb is None:
+            self.name = get_random_string()
+            self.pwwn = get_random_pwwn()
+        else:
+            while True:
+                self.name = get_random_string()
+                self.pwwn = get_random_pwwn()
+                if self.name not in self.olddb.keys() and self.pwwn not in self.olddb.values():
+                    break
+        log.info({self.name: self.pwwn})
+
     def test_rename(self):
-        d = DeviceAlias(self.switch)
-        d.create(self.new_1)
-        oldname = self.rename_1['oldname']
-        newname = self.rename_1['newname']
-        d.rename(oldname=oldname, newname=newname)
-        self.assertEqual(self.new_1[oldname], d.database[newname])
-        for k in self.new_1.keys():
-            if (k == oldname):
-                d.delete(newname)
-                continue
-            d.delete(k)
+        self.d.create({self.name: self.pwwn})
+        newdb = self.d.database
+        self.assertIn(self.name, newdb.keys())
+        self.assertEqual(self.pwwn, newdb[self.name])
+        while True:
+            self.newname_to_replace = get_random_string()
+            if self.newname_to_replace not in newdb.keys():
+                break
+        self.d.rename(oldname=self.name, newname=self.newname_to_replace)
+        chkdb = self.d.database
+        self.assertIn(self.newname_to_replace, chkdb.keys())
+        self.assertEqual(self.pwwn, chkdb[self.newname_to_replace])
+        self.assertNotIn(self.name, chkdb.keys())
+        self.d.delete(self.newname_to_replace)
+        chkdb = self.d.database
+        if chkdb is not None:
+            self.assertNotIn(self.newname_to_replace, chkdb.keys())
+            self.assertNotIn(self.pwwn, chkdb.values())
+            self.assertNotIn(self.name, chkdb.keys())
 
-    def test_rename_existingnew(self):
-        d = DeviceAlias(self.switch)
-        d.create(self.new_2)
-        oldname = self.rename_2['oldname']
-        newname = self.rename_2['newname']
+    def test_rename_not_present(self):
+        self.d.create({self.name: self.pwwn})
+        newdb = self.d.database
+        self.assertIn(self.name, newdb.keys())
+        self.assertEqual(self.pwwn, newdb[self.name])
+        while True:
+            self.newname_to_replace = get_random_string()
+            if self.newname_to_replace not in newdb.keys():
+                break
         with self.assertRaises(CLIError) as e:
-            d.rename(oldname=oldname, newname=newname)
-        self.assertIn('The command " device-alias database ; device-alias rename ' + str(oldname) + ' ' + str(
-            newname) + ' " gave the error " Target device-alias name already in use. Please specify a new name.',
-                         str(e.exception))
-        for k in self.new_2.keys():
-            d.delete(k)
+            self.d.rename(oldname=self.newname_to_replace, newname=self.name)
+        self.assertIn("Device Alias not present", str(e.exception))
 
-    def test_rename_nonexistingold(self):
-        d = DeviceAlias(self.switch)
-        d.create(self.new_3)
-        oldname = self.rename_3['oldname']
-        newname = self.rename_3['newname']
-        with self.assertRaises(CLIError) as e:
-            d.rename(oldname=oldname, newname=newname)
-        self.assertIn('The command " device-alias database ; device-alias rename ' + str(oldname) + ' ' + str(
-            newname) + ' " gave the error " Device Alias not present',
-                         str(e.exception))
-        for k in self.new_3.keys():
-            d.delete(k)
+        self.d.delete(self.name)
+        chkdb = self.d.database
+        if chkdb is not None:
+            self.assertNotIn(self.newname_to_replace, chkdb.keys())
+            self.assertNotIn(self.pwwn, chkdb.values())
+            self.assertNotIn(self.name, chkdb.keys())
 
-    def test_rename_emptydb(self):
-        d = DeviceAlias(self.switch)
-        d.clear_database()
+    def test_rename_already_present(self):
+        self.d.create({self.name: self.pwwn})
+        newdb = self.d.database
+        self.assertIn(self.name, newdb.keys())
+        self.assertEqual(self.pwwn, newdb[self.name])
+
         with self.assertRaises(CLIError) as e:
-            d.rename(oldname='da2', newname='da3')
-        self.assertIn(
-            'The command " device-alias database ; device-alias rename da2 da3 " gave the error " Device Alias not present',
-            str(e.exception))
+            self.d.rename(oldname=self.name, newname=self.name)
+        self.assertIn("Target device-alias name already in use. Please specify a new name.", str(e.exception))
+
+        self.d.delete(self.name)
+        chkdb = self.d.database
+        if chkdb is not None:
+            self.assertNotIn(self.newname_to_replace, chkdb.keys())
+            self.assertNotIn(self.pwwn, chkdb.values())
+            self.assertNotIn(self.name, chkdb.keys())
+
+    def test_rename_invalid(self):
+        self.d.create({self.name: self.pwwn})
+        newdb = self.d.database
+        self.assertIn(self.name, newdb.keys())
+        self.assertEqual(self.pwwn, newdb[self.name])
+
+        invalid_name = 'da1&'  # da name a-zA-Z1-9 - _ $ ^    64chars max
+        with self.assertRaises(CLIError) as e:
+            self.d.rename(oldname=self.name, newname=invalid_name)
+        self.assertIn("Illegal character present in the name", str(e.exception))
+        self.d.clear_lock()
+
+        self.d.delete(self.name)
+        chkdb = self.d.database
+        if chkdb is not None:
+            self.assertNotIn(self.newname_to_replace, chkdb.keys())
+            self.assertNotIn(self.pwwn, chkdb.values())
+            self.assertNotIn(self.name, chkdb.keys())
+
+    def tearDown(self) -> None:
+        try:
+            self.d.delete(self.name)
+        except CLIError as c:
+            if "Device Alias not present" not in c.message:
+                self.fail("Tear down failed: " + c.message)
+        enddb = self.d.database
+        if enddb is not None:
+            self.assertEqual(enddb, self.olddb)

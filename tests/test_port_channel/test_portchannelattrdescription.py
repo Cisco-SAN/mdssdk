@@ -1,7 +1,8 @@
 import unittest
 
-from mdssdk.portchannel import PortChannel
 from mdssdk.connection_manager.errors import CLIError
+from mdssdk.portchannel import PortChannel
+
 
 class TestPortChannelAttrDescription(unittest.TestCase):
 
@@ -18,7 +19,7 @@ class TestPortChannelAttrDescription(unittest.TestCase):
             pc.delete()
         with self.assertRaises(CLIError) as e:
             print(pc.description)
-        self.assertEqual('The command " show interface  port-channel'+str(i)+' description " gave the error " Invalid range ".',str(e.exception))
+        self.assertIn("Invalid range", str(e.exception))
 
     def test_description_write_max254(self):
         pc = PortChannel(self.switch, self.pc_id[2])

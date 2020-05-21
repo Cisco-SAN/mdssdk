@@ -1,40 +1,58 @@
 import unittest
 
-from mdssdk.devicealias import DeviceAlias
 from mdssdk.connection_manager.errors import CLIError
+from mdssdk.devicealias import DeviceAlias
+from tests.test_device_alias.da_vars import *
+
+log = logging.getLogger(__name__)
 
 
 class TestDeviceAliasDelete(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.d = DeviceAlias(self.switch)
+        self.olddb = self.d.database
+        if self.olddb is None:
+            self.name = get_random_string()
+            self.pwwn = get_random_pwwn()
+        else:
+            while True:
+                self.name = get_random_string()
+                self.pwwn = get_random_pwwn()
+                if self.name not in self.olddb.keys() and self.pwwn not in self.olddb.values():
+                    break
+        log.info({self.name: self.pwwn})
+
     def test_delete(self):
-        d = DeviceAlias(self.switch)
-        d.create(self.new)
-        keys = list(self.new.keys())
-        d.delete(keys[0])
-        self.assertIsNone(d.database.get(keys[0]))
-        keys.remove(keys[0])
-        for k in keys:
-            d.delete(k)
+        self.d.create({self.name: self.pwwn})
+        newdb = self.d.database
+        self.assertIn(self.name, newdb.keys())
+        self.assertEqual(self.pwwn, newdb[self.name])
+        self.d.delete(self.name)
+        newdb = self.d.database
+        if newdb is not None:
+            self.assertNotIn(self.name, newdb.keys())
+            self.assertNotIn(self.pwwn, newdb[self.name])
 
     def test_delete_nonexisting(self):
-        d = DeviceAlias(self.switch)
-        d.create(self.new1)
-        keys = list(self.new1.keys())
-        d.delete(keys[0])
+        db = self.d.database
+        while True:
+            somename = get_random_string()
+            if db is None or somename not in db.keys():
+                break
         with self.assertRaises(CLIError) as e:
-            d.delete(keys[0])
-        self.assertIn('The command " device-alias database ; no device-alias name ' + str(keys[
-                                                                                                 0]) + ' " gave the error " Device Alias not present',
-                         str(e.exception))
-        keys.remove(keys[0])
-        for k in keys:
-            d.delete(k)
+            self.d.delete(somename)
+        self.assertIn("Device Alias not present", str(e.exception))
 
-    def test_delete_emptydb(self):
-        d = DeviceAlias(self.switch)
-        d.clear_database()
-        with self.assertRaises(CLIError) as e:
-            d.delete(self.nonexisting)
-        self.assertIn('The command " device-alias database ; no device-alias name ' + str(
-            self.nonexisting) + ' " gave the error " Device Alias not present',
-                         str(e.exception))
+    def tearDown(self) -> None:
+        try:
+            self.d.delete(self.name)
+        except CLIError as c:
+            if "Device Alias not present" not in c.message:
+                self.fail("Tear down failed: " + c.message)
+        enddb = self.d.database
+        if enddb is not None:
+            self.assertEqual(enddb, self.olddb)

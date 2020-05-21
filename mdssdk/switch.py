@@ -107,7 +107,7 @@ class Switch(SwitchUtils):
         self._set_connection_type_based_on_version()
 
     def connect_to_ssh(self):
-        log.info("Opening up a cssh onnection for switch with ip " + self.__ip_address)
+        log.info("Opening up a ssh connection for switch with ip " + self.__ip_address)
         self._ssh_handle = SSHSession(host=self.__ip_address, username=self.__username, password=self.__password,
                                       timeout=self.timeout)
 
@@ -714,6 +714,8 @@ class Switch(SwitchUtils):
 
         commands = [command]
         list_result = self._config_list(commands, rpc, method)
+        if list_result[0] is not None:
+            raise CLIError(command, list_result[0]['msg'])
         return list_result[0]
 
     def _config_list(self, commands, rpc=u'2.0', method=u'cli', use_ssh=False):

@@ -5,7 +5,7 @@ log = logging.getLogger(__name__)
 
 PAT_DIS = "Fabric Distribution :\s+(?P<distribute>.*)"
 PAT_MODE = "Database:- Device Aliases.*Mode:\s+(?P<mode>.*)"
-PAT_LOCKED = "Locked By:- User\s+(?P<lock_user>.*)\s+SWWN\s+(?P<locked_swwn>.*)"
+PAT_LOCKED = "Locked By:- User\s+(?P<locked_user>.*)\s+SWWN\s+(?P<locked_swwn>.*)"
 ALL_PATS = [
     PAT_DIS,
     PAT_MODE,
