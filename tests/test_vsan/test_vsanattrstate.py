@@ -1,30 +1,37 @@
 import unittest
 
 from mdssdk.vsan import Vsan
-from mdssdk.connection_manager.errors import CLIError
+from tests.test_vsan.vsan_vars import *
 
+log = logging.getLogger(__name__)
 
 class TestVsanAttrState(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if str(self.id) not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id) 
+
     def test_state_read(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[0])
-        v.create()
-        v.suspend = True
-        self.assertEqual("suspended", v.state)
-        v.suspend = False
-        self.assertEqual("active", v.state)
-        v.delete()
+        self.v.create()
+        self.assertIn(self.v.state, ["active", "suspended"])
+        self.v.delete()
 
     def test_state_read_nonexistingvsan(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[1])
-        if v.id is not None:
-            v.delete()
-        self.assertIsNone(v.state)
+        self.assertIsNone(self.v.state)
 
     def test_state_write_error(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[2])
-        v.create()
         with self.assertRaises(AttributeError) as e:
-            v.state = "active"
+            self.v.state = "active"
         self.assertEqual("can't set attribute", str(e.exception))
-        v.delete()
+
+    def tearDown(self) -> None:
+        if self.v.id is not None:
+            self.v.delete()
+        self.assertEqual(self.vsandb.keys(), sw.vsans.keys())

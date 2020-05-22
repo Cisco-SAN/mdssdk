@@ -106,7 +106,7 @@ class SwitchUtils:
             return retlist  
         out = self.show(cmd)['TABLE_vsan']['ROW_vsan']
         for eachele in out:
-            id = eachele.get(get_key(vsankeys.VSAN_ID, self._SW_VER))
+            id = str(eachele.get(get_key(vsankeys.VSAN_ID, self._SW_VER)))
             vobj = Vsan(switch=self, id=id)
             retlist[id] = vobj
         return retlist
