@@ -12,6 +12,7 @@ class TestSwitchReload(unittest.TestCase):
         log.info(sw.ipaddr)
 
     def test_reload(self):
+        self.skipTest("Skipping Reload")
         print(self.switch.reload())
 
     def tearDown(self) -> None:

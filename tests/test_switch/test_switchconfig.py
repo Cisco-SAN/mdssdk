@@ -15,8 +15,9 @@ class TestSwitchConfig(unittest.TestCase):
         self.commands_clierror = "terminal dont-ask ; vsan database ; no vsan 2 "
 
     def test_config(self):
-        print("Result of config : " + str(self.commands))
-        print(self.switch.config(self.commands))
+        out = self.switch.config(self.commands)
+        print("Result of config : " + str(self.commands) + "\n" + str(out))
+        self.assertFalse(out) 
 
     def test_config_error(self):
         with self.assertRaises(CLIError) as e:

@@ -12,7 +12,7 @@ class TestSwitchAttrNpv(unittest.TestCase):
         log.info(sw.ipaddr)
 
     def test_npv_read(self):
-        print("Npv switch : " + str(self.switch.npv))
+        self.assertIn(self.switch.npv, [True, False])
 
     def test_npv_write_error(self):
         with self.assertRaises(AttributeError) as e:

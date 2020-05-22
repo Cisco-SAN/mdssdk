@@ -13,6 +13,7 @@ class TestSwitchAttrImageString(unittest.TestCase):
 
     def test_image_string_read(self):
         print("Image String : " + str(self.switch.image_string))
+        self.skipTest("need to fix")
 
     def test_image_string_write_error(self):
         with self.assertRaises(AttributeError) as e:

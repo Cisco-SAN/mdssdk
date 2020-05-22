@@ -13,6 +13,7 @@ class TestSwitchAttrKickstartImage(unittest.TestCase):
 
     def test_kickstart_image_read(self):
         print("Kickstart Image : " + str(self.switch.kickstart_image))
+        self.skipTest("need to fix")
 
     def test_kickstart_image_write_error(self):
         with self.assertRaises(AttributeError) as e:
