@@ -1,8 +1,16 @@
 import unittest
 
+from tests.test_switch.switch_vars import *
+
+log = logging.getLogger(__name__)
 
 class TestSwitchAttrNpv(unittest.TestCase):
-    # npv - ro
+    
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+
     def test_npv_read(self):
         print("Npv switch : " + str(self.switch.npv))
 
@@ -10,3 +18,6 @@ class TestSwitchAttrNpv(unittest.TestCase):
         with self.assertRaises(AttributeError) as e:
             self.switch.npv = True
         self.assertEqual("can't set attribute", str(e.exception))
+
+    def tearDown(self) -> None:
+    	pass
