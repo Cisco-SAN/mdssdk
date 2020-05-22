@@ -99,7 +99,7 @@ class SwitchUtils:
             shvsan = ShowVsan(outlines)
             out = shvsan.vsans
             for eachele in out:
-                id = eachele.get('vsan')
+                id = int(eachele.get('vsan'))
                 vobj = Vsan(switch=self, id=id)
                 retlist[id] = vobj
             return retlist  

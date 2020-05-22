@@ -1,36 +1,36 @@
 import unittest
-from mdssdk.vsan import Vsan
-from mdssdk.fc import Fc
-from mdssdk.portchannel import PortChannel
 
+from mdssdk.vsan import Vsan
+from tests.test_vsan.vsan_vars import *
+
+log = logging.getLogger(__name__)
 
 class TestVsanAttrInterfaces(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id) 
+
     def test_interfaces_read(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[0])
-        v.create()
-        fc = [Fc(switch=self.switch, name=self.fc_name[0]), Fc(switch=self.switch, name=self.fc_name[1])]
-        v.add_interfaces(fc)
-        self.assertEqual(self.fc_name[0], v.interfaces[0].name)
-        self.assertEqual(self.fc_name[1], v.interfaces[1].name)
-        v.delete()
+        ## reading interfaces in default vsan 1
+        self.assertIsNotNone(self.vsandb[1].interfaces)
 
     def test_interfaces_read_nonexistingvsan(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[1])
-        if v.id is not None:
-            v.delete()
-        self.assertIsNone(v.interfaces)
+        self.assertIsNone(self.v.interfaces)
 
     def test_interfaces_write_error(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[2])
-        v.create()
         with self.assertRaises(AttributeError) as e:
-            v.interfaces = [Fc(switch=self.switch, name=self.fc_name[0]), Fc(switch=self.switch, name=self.fc_name[1])]
+            self.v.interfaces = "asdf"
         self.assertEqual("can't set attribute", str(e.exception))
-        v.delete()
 
-    @classmethod
-    def tearDown(self):
-        v = Vsan(switch=self.switch, id= 1)
-        for i in self.fc_name:
-            v.add_interfaces([Fc(switch=self.switch, name= i)])
+    def tearDown(self) -> None:
+        if self.v.id is not None:
+            self.v.delete()
+        self.assertEqual(self.vsandb.keys(), sw.vsans.keys())
