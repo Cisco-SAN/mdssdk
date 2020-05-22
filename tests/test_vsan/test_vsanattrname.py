@@ -1,98 +1,73 @@
 import unittest
+
 from mdssdk.vsan import Vsan
 from mdssdk.connection_manager.errors import CLIError
+from tests.test_vsan.vsan_vars import *
 
+log = logging.getLogger(__name__)
 
 class TestVsanAttrName(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id) 
+
     def test_name_read(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[0])
         name ="test___vsan___name"
-        v.create(name)
-        self.assertEqual(name, v.name)
-        v.delete()
+        self.v.create(name)
+        self.assertEqual(name, self.v.name)
+        self.v.delete()
 
     def test_name_read_nonexistingvsan(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[1])
-        if v.id is not None:
-            v.delete()
-        self.assertIsNone(v.name)
-        id_list = self.boundary_id + self.reserved_id
-        for i in id_list:
-            v = Vsan(switch=self.switch, id=i)
-            self.assertIsNone(v.name)
+        self.assertIsNone(self.v.name)
 
-    def test_name_change(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[2])
-        v.create()
-        v.name = "test__name"
-        self.assertEqual("test__name", v.name)
-        v.delete()
+    def test_name_write(self):
+        self.v.create()
+        self.v.name = "test__name"
+        self.assertEqual("test__name", self.v.name)
+        self.v.delete()
 
     def test_name_write_max32(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[3])
-        v.create()
-        name = self.max32_name
-        v.name = name
-        self.assertEqual(name, v.name)
-        v.delete()
+        self.v.create()
+        name = "12345678912345678912345678912345"
+        self.v.name = name
+        self.assertEqual(name, self.v.name)
+        self.v.delete()
 
     def test_name_write_beyondmax(self):
-        v = Vsan(switch=self.switch, id=self.vsan_id[4])
-        v.create()
-        name = self.beyondmax_name
+        self.v.create()
+        name = "123456789123456789123456789123456"
         with self.assertRaises(CLIError) as e:
-            v.name = name
-        self.assertEqual('The command " vsan database ; vsan ' + str(self.vsan_id[4]) + ' name \'' + str(
-            name) + '\' " gave the error " % String exceeded max length of (32) ".', str(e.exception))
-        v.delete()
-
-    # def test_name_write_specialchar(self):
-    #     i = self.vsan_id[5]
-    #     v = Vsan(switch=self.switch, id=i)
-    #     v.create()
-    #     name = "vsan?123"
-    #     with self.assertRaises(CLIError) as e:
-    #         v.name = name
-    #     self.assertEqual('The command " vsan database ; vsan ' + str(i) + ' name \'' + str(
-    #         name) + '\' " gave the error " Request contains invalid special characters ".', str(e.exception))
-    #     v.delete()
+            self.v.name = name
+        self.assertIn('String exceeded max length of (32)', str(e.exception))
+        self.v.delete()
 
     def test_name_write_repeated(self):
         name = "test___repeated___name"
-        v1 = Vsan(switch=self.switch, id=self.vsan_id[6])
-        v1.create(name)
-        i= self.vsan_id[7]
-        v = Vsan(switch=self.switch, id=i)
-        v.create()
+        self.v.create(name)
+        while True:
+            i = get_random_id()
+            if i not in self.switch.vsans.keys():
+                break
+        v1 = Vsan(switch=self.switch, id=i)
         with self.assertRaises(CLIError) as e:
-            v.name = name
-        self.assertEqual('The command " vsan database ; vsan '+str(i)+' name \'' + str(name) + '\' " gave the error " vsan '+str(i)+':vsan name is already in use ".', str(e.exception))
-        v.delete()
-        v1.delete()
+            v1.name = name
+        self.assertIn('vsan name is already in use', str(e.exception))
+        self.v.delete()
 
     def test_name_write_nonexistingvsan(self):
-        i = self.vsan_id[8]
-        v = Vsan(switch=self.switch, id=i)
-        if v.id is not None:
-            v.delete()
-        v.name = "vsantest"
-        self.assertEqual(i, v.id)
-        v.delete()
+        self.v.name = "vsantest"   ## writing name creates vsan on switch if it doesn't exist
+        self.assertEqual(self.id, self.v.id)
+        self.v.delete()
 
-    def test_name_write_boundary(self):
-        for i in self.boundary_id:
-            v = Vsan(switch=self.switch, id=i)
-            with self.assertRaises(CLIError) as e:
-                v.name = 'vsan'
-            self.assertEqual('The command " vsan database ; vsan ' + str(
-                i) + ' name \'vsan\' " gave the error " % Invalid command ".', str(e.exception))
-
-    def test_name_write_reserved(self):
-        for i in self.reserved_id:
-            v = Vsan(switch=self.switch, id=i)
-            with self.assertRaises(CLIError) as e:
-                v.name = 'vsan'
-            self.assertEqual(
-                'The command " vsan database ; vsan ' + str(i) + ' name \'vsan\' " gave the error " vsan ' + str(
-                    i) + ':vsan(s) reserved ".', str(e.exception))
+    def tearDown(self) -> None:
+        if self.v.id is not None:
+            self.v.delete()
+        self.assertEqual(self.vsandb.keys(), sw.vsans.keys())
