@@ -15,7 +15,7 @@ class TestVsanCreate(unittest.TestCase):
         self.vsandb = sw.vsans
         while True:
             self.id = get_random_id()
-            if str(self.id) not in self.vsandb.keys():
+            if self.id not in self.vsandb.keys():
                 break
         self.v = Vsan(switch=self.switch, id=self.id) 
         self.boundary_id = boundary_id

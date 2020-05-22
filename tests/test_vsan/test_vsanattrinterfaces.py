@@ -14,13 +14,13 @@ class TestVsanAttrInterfaces(unittest.TestCase):
         self.vsandb = sw.vsans
         while True:
             self.id = get_random_id()
-            if str(self.id) not in self.vsandb.keys():
+            if self.id not in self.vsandb.keys():
                 break
         self.v = Vsan(switch=self.switch, id=self.id) 
 
     def test_interfaces_read(self):
         ## reading interfaces in default vsan 1
-        self.assertIsNotNone(self.vsandb['1'].interfaces)
+        self.assertIsNotNone(self.vsandb[1].interfaces)
 
     def test_interfaces_read_nonexistingvsan(self):
         self.assertIsNone(self.v.interfaces)

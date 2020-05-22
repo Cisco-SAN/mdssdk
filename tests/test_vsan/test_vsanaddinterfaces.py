@@ -17,10 +17,10 @@ class TestVsanAddInterfaces(unittest.TestCase):
         self.vsandb = sw.vsans
         while True:
             self.id = get_random_id()
-            if str(self.id) not in self.vsandb.keys():
+            if self.id not in self.vsandb.keys():
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
-        self.fc = self.vsandb['1'].interfaces[1]   ## fc interface from vsan 1
+        self.fc = self.vsandb[1].interfaces[1]   ## fc interface from vsan 1
         self.interfaces = self.switch.interfaces
         while True:
             self.pc_id = get_random_id(1, 256)
@@ -69,6 +69,7 @@ class TestVsanAddInterfaces(unittest.TestCase):
         self.pc.create()
         self.v.add_interfaces([self.fc, self.fc, self.pc]) ## pc will not be added
         self.assertEqual(self.fc.name, self.v.interfaces[0].name)
+        self.assertEqual(1, len(self.v.interfaces))
         self.pc.delete()
         self.v.delete()
 
@@ -87,5 +88,5 @@ class TestVsanAddInterfaces(unittest.TestCase):
             self.v.delete()
         if self.pc.name is not None:
             self.pc.delete()
-        self.vsandb['1'].add_interfaces([self.fc])
+        self.vsandb[1].add_interfaces([self.fc])
         self.assertEqual(self.vsandb.keys(), sw.vsans.keys())
