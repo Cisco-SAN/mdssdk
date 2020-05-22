@@ -13,6 +13,16 @@ VALID_MEMBERS = {
         'fwwn': 'wwn',
         'fcid': 'fcid',
         'fcalias': 'fcalias_name'
+    },
+    'SSH': {
+        'pwwn': 'pwwn',
+        'interface': 'interface',
+        'device-alias': 'device_alias',
+        'ip-address': 'ip_address',
+        'symbolic-nodename': 'symbolic_nodename',
+        'fwwn': 'fwwn',
+        'fcid': 'fcid',
+        'fcalias': 'fcalias'
     }
 }
 
@@ -28,7 +38,8 @@ NAME = {
     DEFAULT: 'name'
 }
 VSAN_ID = {
-    DEFAULT: 'vsan_id'
+    DEFAULT: 'vsan_id',
+    '8.4(2a)': 'vsan'
 }
 DEFAULT_ZONE = {
     DEFAULT: 'default_zone'

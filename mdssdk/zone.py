@@ -1,15 +1,14 @@
 import logging
 import re
-
 import time
 
-from .connection_manager.errors import CLIError, CustomException, VsanNotPresent
+from .connection_manager.errors import CLIError, CustomException
 from .constants import ENHANCED, BASIC, PERMIT, DENY, PAT_WWN
 from .fc import Fc
 from .nxapikeys import zonekeys
 from .portchannel import PortChannel
 from .utility.utils import get_key
-from .parsers.zone import ShowZone,ShowZoneStatus
+from .vsan import Vsan
 
 log = logging.getLogger(__name__)
 
@@ -18,6 +17,9 @@ log = logging.getLogger(__name__)
 class InvalidZoneMode(CustomException):
     pass
 
+
+class InvalidDefaultZone(CustomException):
+    pass
 
 class InvalidZoneMemberType(CustomException):
     pass
@@ -29,28 +31,22 @@ class Zone(object):
 
     :param switch: switch object on which zone operations needs to be executed
     :type switch: Switch
-    :param vsan: vsan object on which zone operations needs to be executed
-    :type vsan: Vsan
+    :param vsan: vsan id on which zone operations needs to be executed
+    :type vsan: int
     :param name: zone name with which zone operations needs to be executed
     :type name: str
-    :raises VsanNotPresent: if vsan is not present on the switch
+    :raises CLIError: if vsan is not present on the switch
     :example:
         >>>
         >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password)
-        >>> vsan_obj = Vsan(switch = switch_obj, id = 2)
-        >>> vsan_obj.create()
-        >>> zoneObj = Zone(switch_obj,vsan_obj,"zone_fab_a")
+        >>> zoneObj = Zone(switch_obj,1,"zone_fab_a")
         >>>
     """
 
     def __init__(self, switch, vsan, name):
         self.__swobj = switch
         self._SW_VER = switch._SW_VER
-        self._vsanobj = vsan
-        self._vsan = self._vsanobj.id
-        if self._vsan is None:
-            raise VsanNotPresent(
-                "Vsan " + str(self._vsanobj._id) + " is not present on the switch. Please create the vsan first.")
+        self._vsan = vsan
         self._name = name
         self.__zones = None
         self.__rpc = None
@@ -63,25 +59,21 @@ class Zone(object):
 
         :return: name: Zone name
         :rtype: str
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
-            >>> zoneObj = Zone(switch_obj,vsan_obj,"zone_fab_a")
+            >>> zoneObj = Zone(switch_obj,1,"zone_fab_a")
             >>> zoneObj.create()
             >>> print(zoneObj.name)
             zone_fab_a
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone name " + self._name + " vsan " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzone = ShowZone(outlines)
-            return shzone.name
         out = self.__show_zone_name()
         if out:
-            return out[get_key(zonekeys.NAME, self._SW_VER)]
+            if self.__swobj.is_connection_type_ssh():
+                return out[0]['zone_name']
+            else:
+                return out[get_key(zonekeys.NAME, self._SW_VER)]
         return None
 
     @property
@@ -91,23 +83,36 @@ class Zone(object):
 
         :return: vsan: vsan of the zone
         :rtype: Vsan
-        :raises VsanNotPresent: if vsan is not present on the switch
         :example:
             >>>
-            >>> vsan_obj = Vsan(switch = switch_obj, id = 2)
-            >>> vsan_obj.create()
-            >>> zoneObj = Zone(switch_obj,vsan_obj,"zone_fab_a")
-            >>> vobj = zoneObj.vsan
-            >>> print(vobj)
+            >>> zoneObj = Zone(switch_obj,1,"zone_fab_a")
+            >>> print(zoneObj.vsan)
             <mdslib.vsan.Vsan object at 0x10d105550>
-            >>> print(vobj.id)
+            >>> print(zoneObj.vsan.id)
             2
             >>>
 
         """
-        if self.name is not None:
-            return self._vsanobj
-        return None
+        vsan_obj = Vsan(switch=self.__swobj, id=self._vsan)
+        return vsan_obj
+
+    @property
+    def vsan_id(self):
+        """
+        Get vsan id for the zone
+
+        :return: vsan: vsan id of the zone
+        :rtype: int
+        :example:
+            >>>
+            >>> zoneObj = Zone(switch_obj,1,"zone_fab_a")
+            >>> print(zoneObj.vsan_id)
+            1
+            >>>
+
+        """
+        vsan_obj = Vsan(switch=self.__swobj, id=self._vsan)
+        return vsan_obj
 
     @property
     def members(self):
@@ -116,7 +121,7 @@ class Zone(object):
 
         :return: members: members of the zone
         :rtype: list
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.members)
@@ -124,15 +129,11 @@ class Zone(object):
             >>>
 
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone name " + self._name + " vsan " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzone = ShowZone(outlines)
-            return shzone.members
+
         out = self.__show_zone_name()
         if out:
+            if self.__swobj.is_connection_type_ssh():
+                return out
             try:
                 retout = out['TABLE_zone_member']['ROW_zone_member']
             except KeyError:
@@ -142,6 +143,14 @@ class Zone(object):
                 return self.__format_members([retout])
             return self.__format_members(retout)
         return None
+
+    def __format_members_ssh(self, retout):
+        retvalues = []
+        for eachentry in retout:
+            type = eachentry['member_type']
+            temp = type.replace('-', '_')
+            val = eachentry[temp]
+            retvalues.append({})
 
     def __format_members(self, retout):
 
@@ -188,22 +197,17 @@ class Zone(object):
 
         :return: locked: True if zone lock is acquired else return False
         :rtype: bool
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.locked)
             False
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            self._lock_details = shzonest.locked
+            self._lock_details = out[0]['session']
         else:
-            out = self.__show_zone_status()
             self._lock_details = out[get_key(zonekeys.SESSION, self._SW_VER)]
         if "none" in self._lock_details:
             return False
@@ -229,27 +233,21 @@ class Zone(object):
         :param mode: set zone mode
         :type mode: str
         :values: ['basic', 'enhanced']
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
+        :raises InvalidZoneMode: if zone mode is not ['basic', 'enhanced']
         :example:
             >>>
             >>> zoneObj.mode = 'enhanced'
             >>>
 
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            return shzonest.mode
         out = self.__show_zone_status()
+        if self.__swobj.is_connection_type_ssh():
+            return out[0]['mode']
         return out[get_key(zonekeys.MODE, self._SW_VER)]
 
     @mode.setter
     def mode(self, value):
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
         cmd = "terminal dont-ask ; zone mode " + ENHANCED + " vsan " + str(
             self._vsan) + " ; no terminal dont-ask"
         if value.lower() == ENHANCED:
@@ -280,27 +278,21 @@ class Zone(object):
         :param default_zone: set default zone value
         :type default_zone: str
         :values: ['permit', 'deny']
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
+        :raises InvalidDefaultZone: if def zone value is not ['permit', 'deny']
         :example:
             >>>
             >>> zoneObj.default_zone = "deny"
             >>>
 
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            return shzonest.default_zone
         out = self.__show_zone_status()
+        if self.__swobj.is_connection_type_ssh():
+            return out[0]['default_zone']
         return out[get_key(zonekeys.DEFAULT_ZONE, self._SW_VER)]
 
     @default_zone.setter
     def default_zone(self, value):
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
         cmd = "terminal dont-ask ; zone default-zone " + PERMIT + " vsan " + str(
             self._vsan) + " ; no terminal dont-ask"
         if value.lower() == PERMIT:
@@ -309,8 +301,8 @@ class Zone(object):
             cmd = cmd.replace("zone default-zone", "no zone default-zone")
             self._send_zone_cmd(cmd)
         else:
-            raise CLIError("No cmd sent",
-                           "Invalid default-zone value " + value + " . Valid values are: " + PERMIT + "," + DENY)
+            raise InvalidDefaultZone(
+                "Invalid default-zone value " + value + " . Valid values are: " + PERMIT + "," + DENY)
 
     @property
     def smart_zone(self):
@@ -319,39 +311,39 @@ class Zone(object):
         get smart zone
 
         :getter:
-        :return: smart_zone : get smart zone status
-        :rtype: str
+        :return: smart_zone : True if smart zone is enabled, False otherwise
+        :rtype: bool
         :example:
             >>>
             >>> print(zoneObj.smart_zone)
-            disabled
+            True
             >>>
 
         :setter:
         :param smart_zone: enables smart zone if set to True, else disables it
         :type smart_zone: bool
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> zoneObj.smart_zone = True
             >>>
 
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            return shzonest.smart_zone
+
         out = self.__show_zone_status()
-        return out[get_key(zonekeys.SMART_ZONE, self._SW_VER)]
+        if self.__swobj.is_connection_type_ssh():
+            val = out[0]['smart_zoning']
+        else:
+            val = out[get_key(zonekeys.SMART_ZONE, self._SW_VER)]
+        if val.lower() == 'enabled':
+            return True
+        return False
 
     @smart_zone.setter
     def smart_zone(self, value):
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
         cmd = "zone smart-zoning enable vsan " + str(self._vsan)
+        if type(value) is not bool:
+            raise ValueError("Smart zone value must be of typr bool, True/False")
         if value:
             # If True then enable smart zoning
             cmd = "terminal dont-ask ; " + cmd + " ; no terminal dont-ask"
@@ -367,22 +359,17 @@ class Zone(object):
 
         :return: fulldb_size: full db size of the zone
         :rtype: int
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.fulldb_size)
             191
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            retout = shzonest.fulldb_size
+            retout = out[0]['fulldb_dbsize']
         else:
-            out = self.__show_zone_status()
             retout = out.get(get_key(zonekeys.FULLDB_SIZE, self._SW_VER), None)
         if retout is not None:
             return int(retout)
@@ -395,22 +382,17 @@ class Zone(object):
 
         :return: fulldb_zone_count:  full db zone count
         :rtype: int
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.fulldb_zone_count)
             1
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            retout = shzonest.fulldb_zone_count
+            retout = out[0]['fulldb_zone_count']
         else:
-            out = self.__show_zone_status()
             retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), None)
         if retout is not None:
             return int(retout)
@@ -423,22 +405,17 @@ class Zone(object):
 
         :return: fulldb_zoneset_count: full db zoneset count
         :rtype: int
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.fulldb_zoneset_count)
             0
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            retout = shzonest.fulldb_zoneset_count
+            retout = out[0]['fulldb_zoneset_count']
         else:
-            out = self.__show_zone_status()
             retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), None)
         if retout is not None:
             return int(retout)
@@ -451,22 +428,17 @@ class Zone(object):
 
         :return: activedb_size: active db size of the zone, None if no active db
         :rtype: int
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.activedb_size)
             None
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+        out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            retout = shzonest.activedb_size
+            retout = out[0]['activedb_dbsize']
         else:
-            out = self.__show_zone_status()
             retout = out.get(get_key(zonekeys.ACTIVEDB_SIZE, self._SW_VER), None)
         if retout is not None:
             return int(retout)
@@ -479,22 +451,18 @@ class Zone(object):
 
         :return: activedb_zone_count: active db zone count, None if no active db
         :rtype: int
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.activedb_zone_count)
             None
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+
+        out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            retout = shzonest.activedb_zone_count
+            retout = out[0]['activedb_zone_count']
         else:
-            out = self.__show_zone_status()
             retout = out.get(get_key(zonekeys.ACTIVEDB_ZC, self._SW_VER), None)
         if retout is not None:
             return int(retout)
@@ -507,22 +475,18 @@ class Zone(object):
 
         :return: activedb_zoneset_count: Returns active db zoneset count, None if no active db
         :rtype: int
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.activedb_zoneset_count)
             None
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+
+        out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            retout = shzonest.activedb_zoneset_count
+            retout = out[0]['activedb_zoneset_count']
         else:
-            out = self.__show_zone_status()
             retout = out.get(get_key(zonekeys.ACTIVEDB_ZSC, self._SW_VER), None)
         if retout is not None:
             return int(retout)
@@ -535,22 +499,22 @@ class Zone(object):
 
         :return: activedb_zoneset_name: name of the active zoneset, else None
         :rtype: str
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.activedb_zoneset_name)
             None
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            return shzonest.activedb_zoneset_name
+
         out = self.__show_zone_status()
-        return out.get(get_key(zonekeys.ACTIVEDB_ZSN, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            retout = out[0]['activedb_zoneset_name']
+            if not retout:
+                return None
+            return retout
+        else:
+            return out.get(get_key(zonekeys.ACTIVEDB_ZSN, self._SW_VER), None)
 
     @property
     def maxdb_size(self):
@@ -559,22 +523,18 @@ class Zone(object):
 
         :return: maxdb_size: max db size of the zone
         :rtype: int
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.maxdb_size)
             4000000
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+
+        out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            retout = shzonest.maxdb_size
+            retout = out[0]['maxdb_dbsize']
         else:
-            out = self.__show_zone_status()
             retout = out.get(get_key(zonekeys.MAXDB_SIZE, self._SW_VER), None)
         if retout is not None:
             return int(retout)
@@ -587,22 +547,18 @@ class Zone(object):
 
         :return: effectivedb_size: effective db size of the zone
         :rtype: int
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.effectivedb_size)
             191
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+
+        out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            retout = shzonest.effectivedb_size
+            retout = out[0]['effectivedb_dbsize']
         else:
-            out = self.__show_zone_status()
             retout = out.get(get_key(zonekeys.EFFDB_SIZE, self._SW_VER), None)
         if retout is not None:
             return int(retout)
@@ -615,22 +571,18 @@ class Zone(object):
 
         :return: effectivedb_size_percentage: Get effective db size of the zone in percentage terms
         :rtype: str
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.effectivedb_size_percentage)
             0%
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+
+        out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            retout = shzonest.effectivedb_size_percentage
+            retout = out[0]['percent_effectivedbsize']
         else:
-            out = self.__show_zone_status()
             retout = out.get(get_key(zonekeys.EFFDB_PER, self._SW_VER), None)
         if retout is not None:
             return str(retout) + "%"
@@ -643,34 +595,32 @@ class Zone(object):
 
         :return: status: the latest status of the zone
         :rtype: str
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> print(zoneObj.status)
             "Set Smart Zoning Policy complete at 16:03:19 IST Mar 19 2020
             >>>
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
-        if self.__swobj.is_connection_type_ssh():
-            cmd = "show zone status vsan  " + str(self._vsan)
-            outlines = self.__swobj.show(cmd)
-            shzonest = ShowZoneStatus(outlines)
-            return shzonest.status
+
         out = self.__show_zone_status()
-        return out.get(get_key(zonekeys.STATUS, self._SW_VER), None)
+        if self.__swobj.is_connection_type_ssh():
+            retout1 = out[0]['status']
+            retout2 = out[0]['status_at']
+            return retout1 + " " + retout2
+        else:
+            return out.get(get_key(zonekeys.STATUS, self._SW_VER), None)
 
     def clear_lock(self):
         """
         Clear zone lock if acquired
 
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> zoneObj.clear_lock()
         """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+
         cmd = "terminal dont-ask ; clear zone lock vsan  " + str(self._vsan) + " ; no terminal dont-ask"
         out = self.__swobj.config(cmd)
         if out is not None:
@@ -693,7 +643,7 @@ class Zone(object):
         """
         Create zone
 
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> zoneObj = Zone(switch_obj,vsan_obj,"zone_fab_a")
@@ -701,8 +651,6 @@ class Zone(object):
             >>>
          """
 
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
         cmd = "zone name " + self._name + " vsan " + str(self._vsan)
         self._send_zone_cmd(cmd)
 
@@ -710,15 +658,14 @@ class Zone(object):
         """
         Delete zone
 
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
             >>> zoneObj = Zone(switch_obj,vsan_obj,"zone_fab_a")
             >>> zoneObj.delete()
             >>>
          """
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+
         cmd = "no zone name " + self._name + " vsan " + str(self._vsan)
         self._send_zone_cmd(cmd)
 
@@ -731,7 +678,7 @@ class Zone(object):
             or
             (2) a dict of members - here key will be valid zone member type like "pwwn","device-alias","interface" etc..
         :type members: list or dict
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :raises InvalidZoneMemberType: if zone member type is invalid
         :example:
             >>>
@@ -766,7 +713,7 @@ class Zone(object):
             or
             (2) a dict of members - here key will be valid zone member type like "pwwn","device-alias","interface" etc..
         :type members: list or dict
-        :raises VsanNotPresent: if vsan is not present on the switch
+        :raises CLIError: if vsan is not present on the switch
         :raises InvalidZoneMemberType: if zone member type is invalid
         :example:
             >>>
@@ -790,12 +737,10 @@ class Zone(object):
             >>> zoneObj.remove_members(memlist)
             >>>
          """
-        # TODO docstring
         self.__add_remove_members(members, remove=True)
 
     def __add_remove_members(self, members, remove=False):
-        if self._vsanobj.id is None:
-            raise VsanNotPresent("Vsan " + str(self._vsanobj._id) + " is not present on the switch.")
+
         cmdlist = []
         cmdlist.append("zone name " + self._name + " vsan " + str(self._vsan))
         for eachmem in members:
@@ -843,11 +788,14 @@ class Zone(object):
                     list(valid_zone_members.keys())))
 
     def __show_zone_name(self):
-
         log.debug("Executing the cmd show zone name <> vsan <> ")
         cmd = "show zone name " + self._name + " vsan  " + str(self._vsan)
         out = self.__swobj.show(cmd)
         log.debug(out)
+        if self.__swobj.is_connection_type_ssh():
+            if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
+                raise CLIError(cmd, out[0])
+
         # print(out)
         return out
 
@@ -856,7 +804,10 @@ class Zone(object):
         cmd = "show zone status vsan  " + str(self._vsan)
         out = self.__swobj.show(cmd)
         log.debug(out)
-        # print(out)
+        if self.__swobj.is_connection_type_ssh():
+            if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
+                raise CLIError(cmd, out[0])
+            return out
         return out['TABLE_zone_status']['ROW_zone_status']
 
     def _send_zone_cmd(self, cmd):

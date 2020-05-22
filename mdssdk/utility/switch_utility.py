@@ -10,7 +10,6 @@ from ..parsers.interface import ShowInterfaceBrief
 from ..parsers.vsan import ShowVsan
 from ..portchannel import PortChannel
 from ..vsan import Vsan
-from ..zone import Zone
 
 log = logging.getLogger(__name__)
 
@@ -118,35 +117,81 @@ class SwitchUtils:
         # TODO
         raise NotImplementedError
 
+    def _return_zone_obj_nxapi(self, eachzone):
+        vsanid = eachzone.get(get_key(zonekeys.VSAN_ID, self._SW_VER))
+        vobj = Vsan(switch=self, id=vsanid)
+        zname = eachzone.get(get_key(zonekeys.NAME, self._SW_VER))
+        zobj = zname
+        # zobj = Zone(switch=self, vsan=vobj, name=zname)
+        return (vsanid, zobj)
+
+    def _return_zone_obj_ssh(self, eachzone):
+        vsan = eachzone.get('vsan')
+        zone_name = eachzone.get('zone_name')
+        return (vsan, zone_name)
+
     @property
     def zones(self):
         if self.npv:
-            return None
-        # TODO
-        retlist = {}
+            return {}
         cmd = "show zone"
         out = self.show(cmd)
+        retlist = {}
         if out:
-            allzones = out['TABLE_zone']['ROW_zone']
-            if type(allzones) is dict:
-                allzones = [allzones]
-            log.warning("There are a total of " + str(
-                len(allzones)) + " zones across vsans. Please wait while we get the zone info...")
-            for eachzone in allzones:
-                vsanid = eachzone.get(get_key(zonekeys.VSAN_ID, self._SW_VER))
-                vobj = Vsan(switch=self, id=vsanid)
-                zname = eachzone.get(get_key(zonekeys.NAME, self._SW_VER))
-                zobj = Zone(switch=self, vsan_obj=vobj, name=zname)
-                listofzones = retlist.get(vsanid, None)
-                # print(vsanid)
-                # print(zname)
-                if listofzones is None:
-                    listofzones = [zobj]
-                else:
-                    listofzones.append(zobj)
-                retlist[vsanid] = listofzones
-            return retlist
-        return None
+            if self.is_connection_type_ssh():
+                zone_vsan_dict = {}
+                for eachzone in out:
+                    vsan = eachzone.get('vsan')
+                    zone_name = eachzone.get('zone_name')
+                    zone_vsan_dict[zone_name] = int(vsan)
+
+                # with concurrent.futures.ThreadPoolExecutor() as executor:
+                #     results = executor.map(self._return_zone_obj_ssh,out)
+                #     zone_vsan_dict = {}
+                #     for r in results:
+                #         vsan, zname = r
+                #         zone_vsan_dict[zname] = int(vsan)
+                print("There are a total of " + str(
+                    len(zone_vsan_dict.items())) + " zones across vsan(s). Please wait while we get the zone info...")
+                for zone, vsanid in zone_vsan_dict.items():
+                    # vobj = Vsan(switch=self, id=vsanid)
+                    zobj = zone
+                    # zobj = Zone(switch=self, vsan=vobj, name=zname)
+                    listofzones = retlist.get(vsanid, None)
+                    if listofzones is None:
+                        listofzones = [zobj]
+                    else:
+                        listofzones.append(zobj)
+                    retlist[vsanid] = listofzones
+            else:
+                allzones = out['TABLE_zone']['ROW_zone']
+                if type(allzones) is dict:
+                    allzones = [allzones]
+                print("There are a total of " + str(
+                    len(allzones)) + " zones across vsan(s). Please wait while we get the zone info...")
+                for eachzone in allzones:
+                    vsanid = eachzone.get(get_key(zonekeys.VSAN_ID, self._SW_VER))
+                    # vobj = Vsan(switch=self, id=vsanid)
+                    zname = eachzone.get(get_key(zonekeys.NAME, self._SW_VER))
+                    zobj = zname
+                    # zobj = Zone(switch=self, vsan=vobj, name=zname)
+                    listofzones = retlist.get(vsanid, None)
+                    if listofzones is None:
+                        listofzones = [zobj]
+                    else:
+                        listofzones.append(zobj)
+                    retlist[vsanid] = listofzones
+                # with concurrent.futures.ThreadPoolExecutor() as executor:
+                #     results = executor.map(self._return_zone_obj_nxapi,allzones)
+                #     for r in results:
+                #         vsanid,zobj = r
+                #         listofzones = retlist.get(vsanid, None)
+                #         if listofzones is None:
+                #             listofzones = [zobj]
+                #         else:
+                #             listofzones.append(zobj)
+                #         retlist[vsanid] = listofzones
+        return retlist
 
     @property
     def modules(self):

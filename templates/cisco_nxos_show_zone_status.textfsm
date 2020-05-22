@@ -1,6 +1,6 @@
 Value VSAN (\d+)
 Value DEFAULT_ZONE (deny|permit)
-Value DISTRIBUTE (\S+)
+Value DISTRIBUTE (.*)
 Value INTEROP (\S+)
 Value MODE (basic|enhanced)
 Value MERGE_CONTROL (allow|restrict)
@@ -29,27 +29,26 @@ Value PERCENT_EFFECTIVEDBSIZE (\d+)
 Value SFCSIZE (\d+)
 Value MAX_SFCSIZE (\d+)
 Value PERCENT_SFCSIZE (\d+)
-Value STATUS (.*\n.*)
+Value STATUS (.*)
+Value STATUS_AT (at.*)
 
 Start
   ^VSAN:\s+${VSAN}\s+default-zone:\s+${DEFAULT_ZONE}\s+distribute:\s+${DISTRIBUTE}\s+Interop:\s+${INTEROP}
   ^\s+mode:\s+${MODE}\s+merge-control:\s+${MERGE_CONTROL}
   ^\s+session:\s+${SESSION}
   ^\s+single-session:\s+${SINGLE_SESSION}
-  ^\s+hard-zoning:\s+{HARD_ZONING}\s+broadcast:\s+{BROADCAST}
-  ^\s+smart-zoning:\s+{SMART_ZONING}
-  ^\s+rscn-format:\s+{RSCN_FORMAT}
-  ^\s+activation\s+overwrite\s+control:\s+{ACTIVATION_OVERWRITE_CONTROL}
-  ^Full\s+Zoning\s+Database\s+: -> FullDB
-  ^Active\s+Zoning\s+Database\s+: -> FullDB
-
-
-
-FullDB
-    ^\s+DB size:\s+${FULLDB_DBSIZE}\s+bytes
-    ^\s+Zonesets:\s+{FULLDB_ZONESET_COUNT}\s+Zones:\s+{FULLDB_ZONE_COUNT}\s+Aliases:\s+{FULLDB_ALIASES}$$ -> Start
-    ^\s+Zonesets:\s+{FULLDB_ZONESET_COUNT}\s+Zones:\s+{FULLDB_ZONE_COUNT}\s+Aliases:\s+{FULLDB_ALIASES}\s+Attribute-groups:\s+{FULLDB_ATTRIBUTE_GROUPS}$$ -> Start
-ActiveDB
-    ^\s+DB size:\s+${ACTIVEDB_DBSIZE}\s+bytes
-    Name: zsSB193 Zonesets: 1 Zones: 1
-    Database Not Available
+  ^\s+hard-zoning:\s+${HARD_ZONING}\s+broadcast:\s+${BROADCAST}
+  ^\s+smart-zoning:\s+${SMART_ZONING}
+  ^\s+rscn-format:\s+${RSCN_FORMAT}
+  ^\s+activation\s+overwrite\s+control:\s+${ACTIVATION_OVERWRITE_CONTROL}
+  ^\s+qos:\s+${DEFAULT_ZONE_QOS}\s+broadcast:\s+${DEFAULT_ZONE_BROADCAST}\s+ronly:\s+${DEFAULT_ZONE_RONLY}
+  ^\s+DB size:\s+${FULLDB_DBSIZE}\s+bytes
+  ^\s+Zonesets:\s+${FULLDB_ZONESET_COUNT}\s+Zones:\s+${FULLDB_ZONE_COUNT}\s+Aliases:\s+${FULLDB_ALIASES}\s+Attribute-groups:\s+${FULLDB_ATTRIBUTE_GROUPS}$$
+  ^\s+Zonesets:\s+${FULLDB_ZONESET_COUNT}\s+Zones:\s+${FULLDB_ZONE_COUNT}\s+Aliases:\s+${FULLDB_ALIASES}$$
+  ^\s+DB [sS]ize:\s+${ACTIVEDB_DBSIZE}\s+bytes
+  ^\s+Name:\s+${ACTIVEDB_ZONESET_NAME}\s+Zonesets:\s+${ACTIVEDB_ZONESET_COUNT}\s+Zones:\s+${ACTIVEDB_ZONE_COUNT}$$ -> Start
+  ^Current Total Zone DB Usage:\s+${EFFECTIVEDB_DBSIZE}.*\s+${MAXDB_DBSIZE}.*bytes.*${PERCENT_EFFECTIVEDBSIZE}.*used.*$$
+  ^SFC size:\s+${SFCSIZE}.*\s+${MAX_SFCSIZE}\s+bytes\s+.*${PERCENT_SFCSIZE}.*used.*
+  ^Status:\s+${STATUS}
+  ^\s+${STATUS_AT}
+  ^\s*$$ -> Record Start
