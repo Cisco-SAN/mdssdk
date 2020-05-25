@@ -86,7 +86,7 @@ class TestVsanAddInterfaces(unittest.TestCase):
     def tearDown(self) -> None:
         if self.v.id is not None:
             self.v.delete()
-        if self.pc.name is not None:
+        if self.pc.channel_mode is not None:
             self.pc.delete()
         self.vsandb[1].add_interfaces([self.fc])
         self.assertEqual(self.vsandb.keys(), sw.vsans.keys())

@@ -156,7 +156,7 @@ class Fc(Interface):
         log.debug(cmd)
         if self.__swobj.is_connection_type_ssh():
             return self.__swobj.show(cmd)
-        out = self.__swobj.config(cmd)['body']['TABLE_interface_trans']['ROW_interface_trans']['TABLE_calib'][
+        out = self.__swobj.show(cmd)['TABLE_interface_trans']['ROW_interface_trans']['TABLE_calib'][
             'ROW_calib']
         if type(out) is list:
             for d in out:

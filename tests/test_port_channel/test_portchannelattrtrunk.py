@@ -2,37 +2,47 @@ import unittest
 
 from mdssdk.portchannel import PortChannel
 from mdssdk.connection_manager.errors import CLIError
+from tests.test_port_channel.portchannel_vars import *
+
+log = logging.getLogger(__name__)
 
 class TestPortChannelAttrTrunk(unittest.TestCase):
 
-    def test_trunk_read(self):
-        pc = PortChannel(self.switch, self.pc_id[0])
-        pc.create()
-        self.assertIn(pc.trunk,self.trunk_values)
-        pc.delete()
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.interfaces = sw.interfaces
+        while True:
+            self.pc_id = random.randint(1, 256)
+            if "port-channel"+str(self.pc_id) not in self.interfaces.keys():
+                break
+        self.pc = PortChannel(self.switch, self.pc_id)
+        self.trunk_values = trunk_values
 
-    def test_trunk_read_nonexisting(self):
-        pc = PortChannel(self.switch, self.pc_id[1])
-        if(pc.channel_mode is not None):
-            pc.delete()
-        self.assertIsNone(pc.trunk)
+    def test_trunk_read(self):
+        self.pc.create()
+        self.assertIn(self.pc.trunk,self.trunk_values)
+        self.pc.delete()
+
+    def test_trunk_read_nonexisting(self):  
+        self.assertIsNone(self.pc.trunk)
 
     def test_trunk_write(self):
-        pc = PortChannel(self.switch, self.pc_id[2])
-        pc.create()
-        oldtrunk = pc.trunk
+        self.pc.create()
+        oldtrunk = self.pc.trunk
         for trunk in self.trunk_values:
-            pc.trunk = trunk
-            self.assertEqual(trunk,pc.trunk)
-        pc.trunk = oldtrunk
-        pc.delete()
+            self.pc.trunk = trunk
+            self.assertEqual(trunk, self.pc.trunk)
+        self.pc.trunk = oldtrunk
+        self.pc.delete()
 
     def test_trunk_write_invalid(self):
-        i = self.pc_id[3]
-        pc = PortChannel(self.switch, i)
         trunk = "asdf"
         with self.assertRaises(CLIError) as e:
-            pc.trunk = trunk
-        self.assertEqual("The command \" interface port-channel"+str(i)+" ; switchport trunk mode  "+str(trunk)+" \" gave the error \" % Invalid command \".",str(e.exception))
-        pc.delete()
+            self.pc.trunk = trunk
+        self.assertEqual("The command \" interface port-channel"+str(self.pc_id)+" ; switchport trunk mode  "+str(trunk)+" \" gave the error \" % Invalid command \".",str(e.exception))
 
+    def tearDown(self) -> None:
+        self.pc.delete()
+        self.assertEqual(self.interfaces.keys(), self.switch.interfaces.keys())
