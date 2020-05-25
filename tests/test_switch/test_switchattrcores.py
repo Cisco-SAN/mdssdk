@@ -4,20 +4,21 @@ from tests.test_switch.switch_vars import *
 
 log = logging.getLogger(__name__)
 
-class TestSwitchAttrNpv(unittest.TestCase):
-    
+class TestSwitchAttrCores(unittest.TestCase):
+   
     def setUp(self) -> None:
         self.switch = sw
         log.info(sw.version)
         log.info(sw.ipaddr)
+    
+    def test_cores_read(self):
+        print("Cores " + str(self.switch.cores))
+        self.skipTest("need to fix")
 
-    def test_npv_read(self):
-        self.assertIn(self.switch.npv, [True, False])
-
-    def test_npv_write_error(self):
+    def test_cores_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.switch.npv = True
+            self.switch.cores = "asdf"
         self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:
-    	pass
+        pass

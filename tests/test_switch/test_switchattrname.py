@@ -2,27 +2,34 @@ import re
 import unittest
 
 from mdssdk.connection_manager.errors import CLIError
+from tests.test_switch.switch_vars import *
 
+log = logging.getLogger(__name__)
 
 class TestSwitchAttrName(unittest.TestCase):
-    # name - rw
+    
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.oldname = self.switch.name
+        self.oldname_without_domain = re.sub('\.cisco\.com', '', self.oldname)
+
     def test_name_read(self):
         print("Switch Name : " + self.switch.name)
+        self.skipTest("need to fix ut")
 
     def test_name_write_max32(self):
-        oldname = self.switch.name
-        oldname_without_domain = re.sub('\.cisco\.com', '', oldname)
-        print("Switch OLD Name : " + oldname)
-        name = self.name_max32
+        name = "switch12345678912345678912345678"
         self.switch.name = name
         swname = re.sub('\.cisco\.com', '', self.switch.name)
         # Move to old name
-        self.switch.name = oldname_without_domain
+        self.switch.name = self.oldname_without_domain
         # Later check
         self.assertEqual(name, swname)
 
     def test_name_write_beyondmax(self):
-        name = self.name_beyondmax
+        name = "switch123456789123456789123456789"
         with self.assertRaises(CLIError) as e:
             self.switch.name = name
         self.assertEqual(
@@ -30,7 +37,11 @@ class TestSwitchAttrName(unittest.TestCase):
             str(e.exception))
 
     def test_name_write_invalid(self):
-        name = self.invalid_name  # starts with digit
+        name = "1switch"
         with self.assertRaises(CLIError) as e:
             self.switch.name = name
-            self.assertIn("Invalid switch name. Must start with a letter, end with alphanumeric", str(e.exception))
+        self.assertIn("Invalid switch name. Must start with a letter, end with alphanumeric", str(e.exception))
+
+    def tearDown(self) -> None:
+        self.switch.name = self.oldname_without_domain
+        self.assertEqual(self.oldname, self.switch.name)
