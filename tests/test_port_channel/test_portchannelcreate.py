@@ -1,30 +1,34 @@
 import unittest
 
 from mdssdk.portchannel import PortChannel,InvalidPortChannelRange
+from tests.test_port_channel.portchannel_vars import *
+
+log = logging.getLogger(__name__)
 
 class TestPortChannelCreate(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.interfaces = sw.interfaces
+        while True:
+            self.pc_id = random.randint(1, 256)
+            if "port-channel"+str(self.pc_id) not in self.interfaces.keys():
+                break
+        self.pc = PortChannel(self.switch, self.pc_id)
+
     def test_create(self):
-        pc = PortChannel(self.switch, self.pc_id)
-        pc.create()
-        self.assertEqual(self.pc_id,pc.id)
-        pc.delete()
-
-    def test_create_max(self):
-        for i in self.valid_pc_id:
-            pc = PortChannel(self.switch, i)
-            pc.create()
-            self.assertEqual(i,pc.id)
-        for i in self.valid_pc_id:
-            pc = PortChannel(self.switch, i)
-            pc.delete()
-
+        self.pc.create()
+        self.assertIsNotNone(self.pc.channel_mode)
+        self.pc.delete()
 
     def test_create_invalid(self):
-        for i in self.invalid_pc_id:
+        for i in [0,257]:
             with self.assertRaises(InvalidPortChannelRange) as e:
                 pc = PortChannel(self.switch, i)
             self.assertEqual("InvalidPortChannelRange: Port channel id " + str(i) + " is invalid, id should range from 1 to 256",str(e.exception))
 
-
-
+    def tearDown(self) -> None:
+        self.pc.delete()
+        self.assertEqual(self.interfaces.keys(), self.switch.interfaces.keys())

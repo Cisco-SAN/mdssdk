@@ -2,37 +2,47 @@ import unittest
 
 from mdssdk.portchannel import PortChannel
 from mdssdk.connection_manager.errors import CLIError
+from tests.test_port_channel.portchannel_vars import *
+
+log = logging.getLogger(__name__)
 
 class TestPortChannelAttrStatus(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.interfaces = sw.interfaces
+        while True:
+            self.pc_id = random.randint(1, 256)
+            if "port-channel"+str(self.pc_id) not in self.interfaces.keys():
+                break
+        self.pc = PortChannel(self.switch, self.pc_id)
+
     def test_status_read(self):
-        pc = PortChannel(self.switch, self.pc_id[0])
-        pc.create()
-        self.assertIsNotNone(pc.status)
-        pc.delete()
+        self.pc.create()
+        self.assertEqual('noOperMembers', self.pc.status)
+        self.pc.delete()
 
     def test_status_read_nonexisting(self):
-        pc = PortChannel(self.switch, self.pc_id[1])
-        if(pc.channel_mode is not None):
-            pc.delete()
-        self.assertIsNone(pc.status)
+        self.assertIsNone(self.pc.status)
 
     def test_status_write(self):
-        pc = PortChannel(self.switch, self.pc_id[2])
+        self.pc.create()
         status = "shutdown"
-        pc.status = status
-        self.assertEqual("down", pc.status)
+        self.pc.status = status
+        self.assertEqual("down", self.pc.status)
         status1 = "no shutdown"
-        pc.status = status1
-        self.assertEqual("noOperMembers", pc.status)
-        pc.delete()
+        self.pc.status = status1
+        self.assertEqual("noOperMembers", self.pc.status)
+        self.pc.delete()
 
     def test_status_write_invalid(self):
-        i = self.pc_id[3]
-        pc = PortChannel(self.switch, i)
         status = "asdf"
         with self.assertRaises(CLIError) as e:
-            pc.status = status
-        self.assertEqual("The command \" terminal dont-ask ; interface port-channel"+str(i)+" ; "+str(status)+" ; no terminal dont-ask \" gave the error \" % Invalid command \".",str(e.exception))
-        pc.delete()
+            self.pc.status = status
+        self.assertEqual("The command \" terminal dont-ask ; interface port-channel"+str(self.pc_id)+" ; "+str(status)+" ; no terminal dont-ask \" gave the error \" % Invalid command \".",str(e.exception))
 
+    def tearDown(self) -> None:
+        self.pc.delete()
+        self.assertEqual(self.interfaces.keys(), self.switch.interfaces.keys())

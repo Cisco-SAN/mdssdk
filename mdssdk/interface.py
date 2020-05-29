@@ -299,8 +299,8 @@ class Interface(object):
         if self.__swobj.is_connection_type_ssh():
             out = self.__swobj.show(cmd)
             return out
-        out = self.__swobj.config(cmd)
-        return out['body']['TABLE_counters']['ROW_counters']
+        out = self.__swobj.show(cmd)
+        return out['TABLE_counters']['ROW_counters']
 
     def _execute_counters_brief_cmd(self):
         cmd = "show interface " + self._name + " counters brief"
@@ -309,8 +309,8 @@ class Interface(object):
         if self.__swobj.is_connection_type_ssh():
             out = self.__swobj.show(cmd)
             return out
-        out = self.__swobj.config(cmd)
-        return out['body']["TABLE_counters_brief"]["ROW_counters_brief"]
+        out = self.__swobj.show(cmd)
+        return out["TABLE_counters_brief"]["ROW_counters_brief"]
 
     def _execute_clear_counters_cmd(self):
         cmd = "clear counters interface " + self._name

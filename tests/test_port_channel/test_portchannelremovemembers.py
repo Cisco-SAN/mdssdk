@@ -3,56 +3,76 @@ import unittest
 from mdssdk.portchannel import PortChannel,PortChannelNotPresent
 from mdssdk.fc import Fc
 from mdssdk.connection_manager.errors import CLIError
+from tests.test_port_channel.portchannel_vars import *
+
+log = logging.getLogger(__name__)
 
 class TestPortChannelRemoveMembers(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.interfaces = sw.interfaces
+        while True:
+            self.pc_id = random.randint(1, 256)
+            if "port-channel"+str(self.pc_id) not in self.interfaces.keys():
+                break
+        self.pc = PortChannel(self.switch, self.pc_id)
+        while True:
+            k,v = random.choice(list(self.interfaces.items()))
+            if (type(v) is Fc):
+                self.fc = v
+                log.info(k)
+                break
+
     def test_remove_members_paramtype(self):
-        pc = PortChannel(self.switch, self.pc_id[0])
-        pc.create()
-        fc1 = Fc(self.switch, self.fc_name[0])
-        pc.add_members([fc1])
+        self.pc.create()
+        self.pc.add_members([self.fc])
         with self.assertRaises(TypeError) as e:
-            pc.remove_members(fc1)
+            self.pc.remove_members(self.fc)
         self.assertEqual("'Fc' object is not iterable",str(e.exception))
-        pc.delete()
+        self.pc.delete()
 
     def test_remove_members_one(self):
-        pc = PortChannel(self.switch, self.pc_id[1])
-        pc.create()
-        fc1 = Fc(self.switch, self.fc_name[1])
-        fc2 = Fc(self.switch, self.fc_name[2])
-        pc.add_members([fc1, fc2])
-        pc.remove_members([fc1])
-        self.assertNotIn(fc1.name, pc.members)
-        pc.delete()
+        self.pc.create()
+        while True:
+            k,v = random.choice(list(self.interfaces.items()))
+            if (type(v) is Fc and k!=self.fc.name):
+                fc2 = v
+                log.info(k)
+                break 
+        self.pc.add_members([self.fc, fc2])
+        self.pc.remove_members([self.fc])
+        self.assertNotIn(self.fc.name, self.pc.members)
+        self.assertIn(fc2.name, self.pc.members)
+        self.pc.delete()
 
     def test_remove_members_multiple(self):
-        pc = PortChannel(self.switch, self.pc_id[2])
-        pc.create()
-        fc1 = Fc(self.switch, self.fc_name[3])
-        fc2 = Fc(self.switch, self.fc_name[4])
-        pc.add_members([fc1, fc2])
-        pc.remove_members([fc1, fc2])
-        self.assertIsNone(pc.members)
-        pc.delete()
+        self.pc.create()
+        while True:
+            k,v = random.choice(list(self.interfaces.items()))
+            if (type(v) is Fc and k!=self.fc.name):
+                fc2 = v
+                log.info(k)
+                break 
+        self.pc.add_members([self.fc, fc2])
+        self.pc.remove_members([self.fc, fc2])
+        self.assertIsNone(self.pc.members)
+        self.pc.delete()
 
     def test_remove_members_nonexistingpc(self):
-        i = self.pc_id[3]
-        pc = PortChannel(self.switch, i)
-        fc1 = Fc(self.switch, self.fc_name[5])
         with self.assertRaises(PortChannelNotPresent) as e:
-            pc.add_members([fc1])
-        self.assertEqual("PortChannelNotPresent: Port channel " + str(i) + " is not present on the switch, please create the PC first", str(e.exception))
+            self.pc.add_members([self.fc])
+        self.assertEqual("PortChannelNotPresent: Port channel " + str(self.pc_id) + " is not present on the switch, please create the PC first", str(e.exception))
 
     def test_remove_members_nonexisting(self):
-        i = self.pc_id[4]
-        pc = PortChannel(self.switch, i)
-        pc.create()
-        fcname = self.fc_name[6]
-        fc1 = Fc(self.switch, fcname )
+        self.pc.create()
         with self.assertRaises(CLIError) as e:
-            pc.remove_members([fc1])
-        self.assertEqual("The command \" interface "+str(fcname)+" ; no channel-group "+str(i)+" \" gave the error \" "+str(fcname)+": not part of port-channel \".", str(e.exception))
-        pc.delete()
+            self.pc.remove_members([self.fc])
+        self.assertEqual("The command \" interface "+str(self.fc.name)+" ; no channel-group "+str(self.pc_id)+" \" gave the error \" "+str(self.fc.name)+": not part of port-channel \".", str(e.exception))
+        self.pc.delete()
 
-
+    def tearDown(self) -> None:
+        self.pc.delete()
+        self.assertEqual(self.interfaces.keys(), self.switch.interfaces.keys())

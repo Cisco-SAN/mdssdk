@@ -3,61 +3,76 @@ import unittest
 from mdssdk.portchannel import PortChannel,PortChannelNotPresent
 from mdssdk.fc import Fc
 from mdssdk.connection_manager.errors import CLIError
+from tests.test_port_channel.portchannel_vars import *
+
+log = logging.getLogger(__name__)
 
 class TestPortChannelAddMembers(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.info(sw.version)
+        log.info(sw.ipaddr)
+        self.interfaces = sw.interfaces
+        while True:
+            self.pc_id = random.randint(1, 256)
+            if "port-channel"+str(self.pc_id) not in self.interfaces.keys():
+                break
+        self.pc = PortChannel(self.switch, self.pc_id) 
+        while True:
+            k,v = random.choice(list(self.interfaces.items()))
+            if (type(v) is Fc):
+                self.fc = v
+                log.info(k)
+                break 
+
     def test_add_members_paramtype(self):
-        pc = PortChannel(self.switch, self.pc_id[0])
-        pc.create()
-        fc1 = Fc(self.switch, self.fc_name[0])
+        self.pc.create()
         with self.assertRaises(TypeError) as e:
-            pc.add_members(fc1)
+            self.pc.add_members(self.fc)
         self.assertEqual("'Fc' object is not iterable",str(e.exception))
-        pc.delete()
+        self.pc.delete()
 
     def test_add_members_one(self):
-        pc = PortChannel(self.switch, self.pc_id[1])
-        pc.create()
-        fc1 = Fc(self.switch, self.fc_name[1])
-        pc.add_members([fc1])
-        self.assertIn(fc1.name, pc.members)
-        pc.delete()
+        self.pc.create()
+        self.pc.add_members([self.fc])
+        self.assertIn(self.fc.name, self.pc.members)
+        self.pc.delete()
 
     def test_add_members_multiple(self):
-        pc = PortChannel(self.switch, self.pc_id[2])
-        pc.create()
-        fc1 = Fc(self.switch, self.fc_name[2])
-        fc2 = Fc(self.switch, self.fc_name[3])
-        pc.add_members([fc1, fc2])
-        self.assertIn(fc1.name, pc.members)
-        self.assertIn(fc2.name, pc.members)
-        pc.delete()
+        self.pc.create()
+        while True:
+            k,v = random.choice(list(self.interfaces.items()))
+            if (type(v) is Fc and k!=self.fc.name):
+                fc2 = v
+                log.info(k)
+                break 
+        self.pc.add_members([self.fc, fc2])
+        self.assertIn(self.fc.name, self.pc.members)
+        self.assertIn(fc2.name, self.pc.members)
+        self.pc.delete()
 
     def test_add_members_nonexisting(self):
-        i = self.pc_id[3]
-        pc = PortChannel(self.switch, i)
-        fc1 = Fc(self.switch, self.fc_name[4])
         with self.assertRaises(PortChannelNotPresent) as e:
-            pc.add_members([fc1])
-        self.assertEqual("PortChannelNotPresent: Port channel " + str(i) + " is not present on the switch, please create the PC first", str(e.exception))
+            self.pc.add_members([self.fc])
+        self.assertEqual("PortChannelNotPresent: Port channel " + str(self.pc_id) + " is not present on the switch, please create the PC first", str(e.exception))
 
     def test_add_members_invalidfc(self):
-        i = self.pc_id[4]
-        pc = PortChannel(self.switch, i)
-        pc.create()
-        invalidfc = self.invalid_fc
+        invalidfc = "fc48/48" ### check
         fc1 = Fc(self.switch, invalidfc)
+        self.pc.create()
         with self.assertRaises(CLIError) as e:
-            pc.add_members([fc1])
-        self.assertEqual("The command \" interface "+str(invalidfc)+" ; channel-group "+str(i)+" force \" gave the error \" Invalid interface format \".", str(e.exception))
-        pc.delete()
+            self.pc.add_members([fc1])
+        self.assertEqual("The command \" interface "+str(invalidfc)+" ; channel-group "+str(self.pc_id)+" force \" gave the error \" Invalid interface format \".", str(e.exception))
+        self.pc.delete()
 
     def test_add_members_invalid(self):
-        pc = PortChannel(self.switch, self.pc_id[5])
-        pc.create()
+        self.pc.create()
         with self.assertRaises(AttributeError) as e:
-            pc.add_members([self.fc_name[5]])
+            self.pc.add_members(["fc1/1"])
         self.assertEqual("'str' object has no attribute 'name'", str(e.exception))
-        pc.delete()
+        self.pc.delete()
 
-
+    def tearDown(self) -> None:
+        self.pc.delete()
+        self.assertEqual(self.interfaces.keys(), self.switch.interfaces.keys())
