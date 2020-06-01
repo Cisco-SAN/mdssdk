@@ -1,7 +1,7 @@
 import unittest
 
-from mdssdk.portchannel import PortChannel
 from mdssdk.fc import Fc
+from mdssdk.portchannel import PortChannel
 from tests.test_port_channel.portchannel_vars import *
 
 log = logging.getLogger(__name__)
@@ -10,12 +10,12 @@ class TestPortChannelAttrMembers(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.interfaces = sw.interfaces
         while True:
             self.pc_id = random.randint(1, 256)
-            if "port-channel"+str(self.pc_id) not in self.interfaces.keys():
+            if "port-channel" + str(self.pc_id) not in self.interfaces.keys():
                 break
         self.pc = PortChannel(self.switch, self.pc_id)
 
@@ -28,7 +28,7 @@ class TestPortChannelAttrMembers(unittest.TestCase):
             k,v = random.choice(list(self.interfaces.items()))
             if (type(v) is Fc):
                 fc = v
-                log.info(k)
+                log.debug(k)
                 break 
         self.pc.add_members([fc])
         self.assertIn(fc.name, self.pc.members)

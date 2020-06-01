@@ -10,18 +10,18 @@ class TestPortChannelAttrCounters(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.interfaces = sw.interfaces
         while True:
             self.pc_id = random.randint(1, 256)
-            if "port-channel"+str(self.pc_id) not in self.interfaces.keys():
+            if "port-channel" + str(self.pc_id) not in self.interfaces.keys():
                 break
         self.pc = PortChannel(self.switch, self.pc_id)
 
     def test_counters_read_nonexisting(self):
         with self.assertRaises(CLIError) as e:
-            print(self.pc.counters.__getattribute__('brief'))
+            log.debug(self.pc.counters.__getattribute__('brief'))
         self.assertIn("Invalid range", str(e.exception))
         self.pc.delete()
 
@@ -29,9 +29,9 @@ class TestPortChannelAttrCounters(unittest.TestCase):
         self.pc.create()
         dir_counters = [x for x in dir(self.pc.counters) if not x.startswith('_')]
         for t in dir_counters:
-            print(str(t)+" "+str(self.pc.counters.__getattribute__(t)))
+            log.debug(str(t) + " " + str(self.pc.counters.__getattribute__(t)))
         self.pc.delete()
-        self.skipTest("need to fix assertion")
+        self.skipTest("Needs to be fixed")
 
     def test_counters_write_error(self):
         with self.assertRaises(AttributeError) as e:
@@ -39,7 +39,7 @@ class TestPortChannelAttrCounters(unittest.TestCase):
         self.assertEqual("can't set attribute",str(e.exception))
 
     def test_counters_clear(self):
-        self.skipTest("need to fix")
+        self.skipTest("Needs to be fixed")
         self.pc.counters.clear()
 
     def tearDown(self) -> None:

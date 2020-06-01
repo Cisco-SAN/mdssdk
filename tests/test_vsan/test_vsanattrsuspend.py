@@ -9,8 +9,8 @@ class TestVsanAttrSuspend(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.vsandb = sw.vsans
         while True:
             self.id = get_random_id()
@@ -28,7 +28,7 @@ class TestVsanAttrSuspend(unittest.TestCase):
 
     def test_suspend_read_error(self):
         with self.assertRaises(AttributeError) as e:
-            print(self.v.suspend)
+            log.debug(self.v.suspend)
         self.assertEqual("unreadable attribute", str(e.exception))
 
     def test_suspend_write_nonexistingvsan(self):

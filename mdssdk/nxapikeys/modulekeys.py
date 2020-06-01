@@ -18,3 +18,4 @@ MOD_MODEL = {
 MOD_STATUS = {
     DEFAULT: 'status'
 }
+

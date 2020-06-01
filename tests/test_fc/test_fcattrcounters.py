@@ -9,22 +9,22 @@ class TestFcAttrCounters(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         interfaces = sw.interfaces
         while True:
-            k,v = random.choice(list(interfaces.items()))
+            k, v = random.choice(list(interfaces.items()))
             if (type(v) is Fc):
                 self.fc = v
-                log.info(k)
+                log.debug(k)
                 break 
 
     def test_counters_read(self):
         dir_counters = [x for x in dir(self.fc.counters) if not x.startswith('_')]
-        print("Counters "+str(self.fc.name))
+        log.debug("Counters " + str(self.fc.name))
         for t in dir_counters:
-            print(str(t) + " : " + str(self.fc.counters.__getattribute__(t)))
-        self.skipTest("need to fix assertion")
+            log.debug(str(t) + " : " + str(self.fc.counters.__getattribute__(t)))
+        self.skipTest("Needs to be fixed")
 
     def test_counters_write_error(self):
         with self.assertRaises(AttributeError) as e:

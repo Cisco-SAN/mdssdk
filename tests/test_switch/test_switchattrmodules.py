@@ -4,22 +4,23 @@ from tests.test_switch.switch_vars import *
 
 log = logging.getLogger(__name__)
 
+
 class TestSwitchAttrModules(unittest.TestCase):
-    
+
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
 
     def test_modules_read(self):
         if (self.switch.modules is not None):
-            print("Modules : ")
+            log.debug("Modules : ")
             temp = [x for x in dir(self.switch.modules[0]) if not x.startswith('_')]
             for t in temp:
-                print(str(t) + " : " + str(self.switch.modules[0].__getattribute__(t)))
+                log.debug(str(t) + " : " + str(self.switch.modules[0].__getattribute__(t)))
         else:
-            print("Modules : None")
-        self.skipTest("need to fix")
+            log.debug("Modules : None")
+        self.skipTest("Needs to be fixed")
 
     def test_modules_write_error(self):
         if (self.switch.modules is not None):

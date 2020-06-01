@@ -9,21 +9,21 @@ class TestFcAttrTransceiver(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         interfaces = sw.interfaces
         while True:
-            k,v = random.choice(list(interfaces.items()))
+            k, v = random.choice(list(interfaces.items()))
             if (type(v) is Fc):
                 self.fc = v
-                log.info(k)
+                log.debug(k)
                 break 
 
     def test_transceiver_read(self):
         dir_trans = [x for x in dir(self.fc.transceiver) if not x.startswith('_')]
-        print(str(self.fc.name) + " transceiver : ")
+        log.debug(str(self.fc.name) + " transceiver : ")
         for t in dir_trans:
-            print(str(t) + " : " + str(self.fc.transceiver.__getattribute__(t)))
+            log.debug(str(t) + " : " + str(self.fc.transceiver.__getattribute__(t)))
         self.skipTest("needs to be fixed")
              
     def test_transceiver_write_error(self):

@@ -1,7 +1,7 @@
 import unittest
 
-from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
 
 
 class TestZoneAttrFulldbZonesetCount(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestZoneAttrFulldbZonesetCount(unittest.TestCase):
         v.create()
         z = Zone(self.switch, v, self.zone_name[0])
         z.create()
-        print("Full DB Zoneset Count : " + str(z.fulldb_zoneset_count))
+        log.debug("Full DB Zoneset Count : " + str(z.fulldb_zoneset_count))
         self.assertIsNotNone(z.fulldb_zoneset_count)
         v.delete()
 
@@ -19,7 +19,7 @@ class TestZoneAttrFulldbZonesetCount(unittest.TestCase):
         v = Vsan(self.switch,self.vsan_id[1])
         v.create()
         z = Zone(self.switch, v, self.zone_name[1])
-        print("Full DB Zoneset Count(nonexisting) : "+str(z.fulldb_zoneset_count))
+        log.debug("Full DB Zoneset Count(nonexisting) : " + str(z.fulldb_zoneset_count))
         self.assertIsNotNone(z.fulldb_zoneset_count)
         v.delete()
 

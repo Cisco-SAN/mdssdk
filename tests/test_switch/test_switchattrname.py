@@ -6,18 +6,20 @@ from tests.test_switch.switch_vars import *
 
 log = logging.getLogger(__name__)
 
+
 class TestSwitchAttrName(unittest.TestCase):
-    
+
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.oldname = self.switch.name
         self.oldname_without_domain = re.sub('\.cisco\.com', '', self.oldname)
 
     def test_name_read(self):
-        print("Switch Name : " + self.switch.name)
-        self.skipTest("need to fix ut")
+        swname = self.switch.name
+        log.debug("Switch Name : " + swname)
+        self.assertRegex(swname, "^\S+$", msg="Switch name not correct")
 
     def test_name_write_max32(self):
         name = "switch12345678912345678912345678"

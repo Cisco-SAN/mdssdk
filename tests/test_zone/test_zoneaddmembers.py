@@ -16,8 +16,8 @@ class TestZoneAddMembers(unittest.TestCase):
         members = self.members_dict
         self.switch.config('fcalias name somefcalias vsan ' + str(i))
         z.add_members(members)
-        print("Zone Members : " + str(members))
-        print("Zone Members : " + str(z.members))
+        log.debug("Zone Members : " + str(members))
+        log.debug("Zone Members : " + str(z.members))
         self.assertEqual(len(members), len(z.members))
         z.delete()
         v.delete()
@@ -30,7 +30,7 @@ class TestZoneAddMembers(unittest.TestCase):
         members = self.members_list
         z.add_members(members)
         self.assertEqual(len(members), len(z.members))
-        print("Zone Members : " + str(z.members))
+        log.debug("Zone Members : " + str(z.members))
         z.delete()
         v.delete()
 

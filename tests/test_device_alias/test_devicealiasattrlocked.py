@@ -10,8 +10,8 @@ log = logging.getLogger(__name__)
 class TestDeviceAliasAttrLocked(unittest.TestCase):
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.d = DeviceAlias(self.switch)
         self.old = self.d.distribute
         currdb = self.d.database
@@ -24,7 +24,7 @@ class TestDeviceAliasAttrLocked(unittest.TestCase):
                 self.pwwn = get_random_pwwn()
                 if self.name not in currdb.keys() and self.pwwn not in currdb.values():
                     break
-        log.info({self.name: self.pwwn})
+        log.debug({self.name: self.pwwn})
 
     def test_locked_values(self):
         self.assertIn(self.d.locked, [True, False])

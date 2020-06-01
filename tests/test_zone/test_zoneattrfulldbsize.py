@@ -1,7 +1,7 @@
 import unittest
 
-from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
 
 
 class TestZoneAttrFulldbSize(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestZoneAttrFulldbSize(unittest.TestCase):
         v.create()
         z = Zone(self.switch, v, self.zone_name[0])
         z.create()
-        print("Full DB Size : " + str(z.fulldb_size))
+        log.debug("Full DB Size : " + str(z.fulldb_size))
         self.assertIsNotNone(z.fulldb_size)
         v.delete()
 
@@ -19,7 +19,7 @@ class TestZoneAttrFulldbSize(unittest.TestCase):
         v = Vsan(self.switch,self.vsan_id[1])
         v.create()
         z = Zone(self.switch, v, self.zone_name[1])
-        print("Full DB Size(nonexisting) : "+str(z.fulldb_size))
+        log.debug("Full DB Size(nonexisting) : " + str(z.fulldb_size))
         self.assertIsNotNone(z.fulldb_size)
         v.delete()
 

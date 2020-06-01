@@ -111,8 +111,7 @@ class Zone(object):
             >>>
 
         """
-        vsan_obj = Vsan(switch=self.__swobj, id=self._vsan)
-        return vsan_obj
+        return self._vsan
 
     @property
     def members(self):

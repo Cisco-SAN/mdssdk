@@ -11,8 +11,8 @@ class TestDeviceAliasRename(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.d = DeviceAlias(self.switch)
         self.olddb = self.d.database
         if self.olddb is None:
@@ -24,7 +24,7 @@ class TestDeviceAliasRename(unittest.TestCase):
                 self.pwwn = get_random_pwwn()
                 if self.name not in self.olddb.keys() and self.pwwn not in self.olddb.values():
                     break
-        log.info({self.name: self.pwwn})
+        log.debug({self.name: self.pwwn})
 
     def test_rename(self):
         self.d.create({self.name: self.pwwn})

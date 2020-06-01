@@ -1,7 +1,7 @@
 import unittest
 
-from mdssdk.vsan import Vsan
 from mdssdk.connection_manager.errors import CLIError
+from mdssdk.vsan import Vsan
 from tests.test_vsan.vsan_vars import *
 
 log = logging.getLogger(__name__)
@@ -10,14 +10,14 @@ class TestVsanCreate(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.vsandb = sw.vsans
         while True:
             self.id = get_random_id()
             if self.id not in self.vsandb.keys():
                 break
-        self.v = Vsan(switch=self.switch, id=self.id) 
+        self.v = Vsan(switch=self.switch, id=self.id)
         self.boundary_id = boundary_id
         self.reserved_id = reserved_id
 

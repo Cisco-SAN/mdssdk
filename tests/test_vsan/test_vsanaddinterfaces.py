@@ -1,9 +1,9 @@
 import unittest
 
-from mdssdk.vsan import Vsan, VsanNotPresent, InvalidInterface
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
 from mdssdk.portchannel import PortChannel
+from mdssdk.vsan import Vsan, VsanNotPresent
 from tests.test_vsan.vsan_vars import *
 
 log = logging.getLogger(__name__)
@@ -12,15 +12,15 @@ class TestVsanAddInterfaces(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.vsandb = sw.vsans
         while True:
             self.id = get_random_id()
             if self.id not in self.vsandb.keys():
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
-        self.fc = self.vsandb[1].interfaces[1]   ## fc interface from vsan 1
+        self.fc = self.vsandb[1].interfaces[1]  ## fc interface from vsan 1
         self.interfaces = self.switch.interfaces
         while True:
             self.pc_id = get_random_id(1, 256)

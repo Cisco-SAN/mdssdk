@@ -1,5 +1,6 @@
 import unittest
 
+from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc, InvalidAnalyticsType
 from tests.test_fc.fc_vars import *
 
@@ -9,27 +10,30 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.values = analytics_values
         interfaces = sw.interfaces
         while True:
-            k,v = random.choice(list(interfaces.items()))
+            k, v = random.choice(list(interfaces.items()))
             if (type(v) is Fc):
                 self.fc = v
-                log.info(k)
-                break 
+                log.debug(k)
+                break
         self.old = self.fc.analytics_type
 
     def test_analytics_type_read(self):
         self.assertIn(self.fc.analytics_type, self.values)
 
     def test_analytics_type_write(self):
-        for val in self.values:
-            self.fc.analytics_type = val
-            self.assertEqual(val, self.fc.analytics_type)
-        self.fc.analytics_type = self.old
-        self.assertEqual(self.old, self.fc.analytics_type)
+        try:
+            for val in self.values:
+                self.fc.analytics_type = val
+                self.assertEqual(val, self.fc.analytics_type)
+            self.fc.analytics_type = self.old
+            self.assertEqual(self.old, self.fc.analytics_type)
+        except CLIError as c:
+            pass
 
     def test_analytics_type_write_invalid(self):
         analytics_type = "asdf"
@@ -40,5 +44,8 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
             str(e.exception))
 
     def tearDown(self) -> None:
-        self.fc.analytics_type = self.old
-        self.assertEqual(self.old, self.fc.analytics_type)
+        try:
+            self.fc.analytics_type = self.old
+            self.assertEqual(self.old, self.fc.analytics_type)
+        except CLIError as c:
+            pass

@@ -1,10 +1,24 @@
 import logging
 import unittest
 
-logging.basicConfig(filename='test_portchannel.log', filemode='w', level=logging.DEBUG,
-                    format="[%(asctime)s] [%(module)-14.14s] [%(levelname)-5.5s] %(message)s")
+# Change root logger level from WARNING (default) to NOTSET in order for all messages to be delegated.
+logging.getLogger().setLevel(logging.NOTSET)
+logFormatter = logging.Formatter("[%(asctime)s] [%(module)-14.14s] [%(levelname)-5.5s] %(message)s")
+# Add stdout handler, with level INFO
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+console.setFormatter(logFormatter)
+logging.getLogger().addHandler(console)
 
-logging.info("Running tests...")
+# Add file rotating handler, with level DEBUG
+fileHandler = logging.FileHandler("test.log")
+fileHandler.setLevel(logging.DEBUG)
+fileHandler.setFormatter(logFormatter)
+logging.getLogger().addHandler(fileHandler)
 
-suite = unittest.TestLoader().discover('tests.test_portchannel', 'test_portchannel*.py')
+log = logging.getLogger(__name__)
+
+log.info("Running tests...")
+
+suite = unittest.TestLoader().discover('tests.test_port_channel', 'test_portchannel*.py')
 unittest.TextTestRunner(verbosity=2, failfast=True).run(suite)

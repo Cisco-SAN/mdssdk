@@ -4,12 +4,13 @@ from tests.test_switch.switch_vars import *
 
 log = logging.getLogger(__name__)
 
+
 class TestSwitchAttrIpAddr(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.ip_address = ip_address
 
     def test_ipaddr_read(self):

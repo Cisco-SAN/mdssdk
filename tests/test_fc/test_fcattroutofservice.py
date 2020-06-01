@@ -9,21 +9,21 @@ class TestFcAttrOutOfService(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         interfaces = sw.interfaces
         while True:
-            k,v = random.choice(list(interfaces.items()))
+            k, v = random.choice(list(interfaces.items()))
             if (type(v) is Fc):
                 self.fc = v
-                log.info(k)
-                break 
+                log.debug(k)
+                break
         self.status_values = status_values
         self.old = self.fc.status
 
     def test_out_of_service_read_error(self):
         with self.assertRaises(AttributeError) as e:
-            print(self.fc.out_of_service)
+            log.debug(self.fc.out_of_service)
         self.assertEqual("unreadable attribute", str(e.exception))
 
     def test_out_of_service_write(self):

@@ -10,8 +10,8 @@ class TestDeviceAliasClearDatabase(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.d = DeviceAlias(self.switch)
         self.olddb = self.d.database
         if self.olddb is None:

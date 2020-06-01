@@ -4,16 +4,17 @@ from tests.test_switch.switch_vars import *
 
 log = logging.getLogger(__name__)
 
+
 class TestSwitchAttrVsans(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
 
     def test_vsans_read(self):
-        print("Vsans : " + str(self.switch.vsans))
-        self.skipTest("need to fix")
+        log.debug("Vsans : " + str(self.switch.vsans))
+        self.skipTest("Needs to be fixed")
 
     def test_vsans_write_error(self):
         with self.assertRaises(AttributeError) as e:

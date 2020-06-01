@@ -1,7 +1,7 @@
 import unittest
 
-from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
 
 
 class TestZoneAttrEffectivedbSize(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestZoneAttrEffectivedbSize(unittest.TestCase):
         v.create()
         z = Zone(self.switch, v, self.zone_name[0])
         z.create()
-        print("Effective DB Size : " + str(z.effectivedb_size))
+        log.debug("Effective DB Size : " + str(z.effectivedb_size))
         self.assertIsNotNone(z.effectivedb_size)
         v.delete()
 
@@ -19,7 +19,7 @@ class TestZoneAttrEffectivedbSize(unittest.TestCase):
         v = Vsan(self.switch,self.vsan_id[1])
         v.create()
         z = Zone(self.switch, v, self.zone_name[1])
-        print("Effective DB Size(nonexisting) : "+str(z.effectivedb_size))
+        log.debug("Effective DB Size(nonexisting) : " + str(z.effectivedb_size))
         self.assertIsNotNone(z.effectivedb_size)
         v.delete()
 

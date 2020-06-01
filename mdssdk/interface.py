@@ -3,8 +3,9 @@ import re
 
 from .constants import PAT_PC, PAT_FC
 from .nxapikeys import interfacekeys
+from .parsers.interface import ShowInterfaceBrief, ShowInterfaceDescription, ShowInterfaceCountersBrief, \
+    ShowInterfaceCountersDetailed
 from .utility.utils import get_key
-from .parsers.interface import ShowInterfaceBrief, ShowInterfaceDescription, ShowInterfaceCountersBrief, ShowInterfaceCountersDetailed
 
 log = logging.getLogger(__name__)
 
@@ -79,7 +80,6 @@ class Interface(object):
         cmd = "show interface  " + self._name + " description"
         if self.__swobj.is_connection_type_ssh():
             outlines = self.__swobj.show(cmd)
-            print(outlines)
             shint = ShowInterfaceDescription(outlines)
             return shint.description
         out = self.__swobj.show(cmd)

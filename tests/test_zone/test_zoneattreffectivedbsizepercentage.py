@@ -1,7 +1,7 @@
 import unittest
 
-from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
 
 
 class TestZoneAttrEffectivedbSizePercentage(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestZoneAttrEffectivedbSizePercentage(unittest.TestCase):
         v.create()
         z = Zone(self.switch, v, self.zone_name[0])
         z.create()
-        print("Effective DB Size Percentage : " + str(z.effectivedb_size_percentage))
+        log.debug("Effective DB Size Percentage : " + str(z.effectivedb_size_percentage))
         self.assertIsNotNone(z.effectivedb_size_percentage)
         v.delete()
 
@@ -19,7 +19,7 @@ class TestZoneAttrEffectivedbSizePercentage(unittest.TestCase):
         v = Vsan(self.switch,self.vsan_id[1])
         v.create()
         z = Zone(self.switch, v, self.zone_name[1])
-        print("Effective DB Size Percentage(nonexisting) : "+str(z.effectivedb_size_percentage))
+        log.debug("Effective DB Size Percentage(nonexisting) : " + str(z.effectivedb_size_percentage))
         self.assertIsNotNone(z.effectivedb_size_percentage)
         v.delete()
 

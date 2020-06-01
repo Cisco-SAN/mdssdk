@@ -10,12 +10,12 @@ class TestPortChannelAttrDescription(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.interfaces = sw.interfaces
         while True:
             self.pc_id = random.randint(1, 256)
-            if "port-channel"+str(self.pc_id) not in self.interfaces.keys():
+            if "port-channel" + str(self.pc_id) not in self.interfaces.keys():
                 break
         self.pc = PortChannel(self.switch, self.pc_id)
 
@@ -26,7 +26,7 @@ class TestPortChannelAttrDescription(unittest.TestCase):
 
     def test_description_read_nonexisting(self):
         with self.assertRaises(CLIError) as e:
-            print(self.pc.description)
+            log.debug(self.pc.description)
         self.assertIn("Invalid range", str(e.exception))
 
     def test_description_write_max254(self):

@@ -1,29 +1,30 @@
 import unittest
 
-from mdssdk.portchannel import PortChannel,PortChannelNotPresent
-from mdssdk.fc import Fc
 from mdssdk.connection_manager.errors import CLIError
+from mdssdk.fc import Fc
+from mdssdk.portchannel import PortChannel, PortChannelNotPresent
 from tests.test_port_channel.portchannel_vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestPortChannelAddMembers(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.interfaces = sw.interfaces
         while True:
             self.pc_id = random.randint(1, 256)
-            if "port-channel"+str(self.pc_id) not in self.interfaces.keys():
+            if "port-channel" + str(self.pc_id) not in self.interfaces.keys():
                 break
-        self.pc = PortChannel(self.switch, self.pc_id) 
+        self.pc = PortChannel(self.switch, self.pc_id)
         while True:
-            k,v = random.choice(list(self.interfaces.items()))
+            k, v = random.choice(list(self.interfaces.items()))
             if (type(v) is Fc):
                 self.fc = v
-                log.info(k)
+                log.debug(k)
                 break 
 
     def test_add_members_paramtype(self):
@@ -45,7 +46,7 @@ class TestPortChannelAddMembers(unittest.TestCase):
             k,v = random.choice(list(self.interfaces.items()))
             if (type(v) is Fc and k!=self.fc.name):
                 fc2 = v
-                log.info(k)
+                log.debug(k)
                 break 
         self.pc.add_members([self.fc, fc2])
         self.assertIn(self.fc.name, self.pc.members)

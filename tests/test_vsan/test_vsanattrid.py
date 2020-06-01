@@ -1,7 +1,6 @@
 import unittest
 
 from mdssdk.vsan import Vsan
-from mdssdk.connection_manager.errors import CLIError
 from tests.test_vsan.vsan_vars import *
 
 log = logging.getLogger(__name__)
@@ -10,8 +9,8 @@ class TestVsanAttrId(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         self.vsandb = sw.vsans
         while True:
             self.id = get_random_id()
@@ -37,5 +36,5 @@ class TestVsanAttrId(unittest.TestCase):
 
     def tearDown(self) -> None:
         if self.v.id is not None:
-            v.delete()
+            self.v.delete()
         self.assertEqual(self.vsandb.keys(), sw.vsans.keys())

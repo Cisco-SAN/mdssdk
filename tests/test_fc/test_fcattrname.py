@@ -9,16 +9,16 @@ class TestFcAttrName(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
-        log.info(sw.version)
-        log.info(sw.ipaddr)
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
         interfaces = sw.interfaces
         while True:
-            k,v = random.choice(list(interfaces.items()))
+            k, v = random.choice(list(interfaces.items()))
             if (type(v) is Fc):
                 self.fc = v
                 self.name = k
                 break
-        log.info(self.name)
+        log.debug(self.name)
 
     def test_name_read(self):
         self.assertEqual(self.name, self.fc.name)

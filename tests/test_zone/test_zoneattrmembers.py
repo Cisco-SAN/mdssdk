@@ -1,10 +1,7 @@
 import unittest
 
-from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
-from mdssdk.fc import Fc
-from mdssdk.devicealias import DeviceAlias
-from mdssdk.portchannel import PortChannel
+from mdssdk.zone import Zone
 
 
 class TestZoneAttrMembers(unittest.TestCase):
@@ -19,7 +16,7 @@ class TestZoneAttrMembers(unittest.TestCase):
         self.switch.config('fcalias name somefcalias vsan ' + str(i))
         z.add_members(members)
         self.assertEqual(len(members), len(z.members))
-        print("Zone members added : " + str(z.members))
+        log.debug("Zone members added : " + str(z.members))
         z.delete()
         v.delete()
 
