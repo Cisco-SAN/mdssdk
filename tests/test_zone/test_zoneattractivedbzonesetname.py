@@ -3,37 +3,44 @@ import unittest
 from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
 from mdssdk.zoneset import ZoneSet
+from tests.test_zone.zone_vars import *
+
+log = logging.getLogger(__name__)
 
 class TestZoneAttrActivedbZonesetName(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id)
+        self.v.create()
+        self.z = Zone(self.switch, self.id, "test_zone")
+
     def test_activedb_zoneset_name_read(self):
-        v = Vsan(self.switch, self.vsan_id[0])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[0])
-        z.create()
-        zoneset = ZoneSet(self.switch, v, "test_zoneset")
+        self.z.create()
+        zoneset = ZoneSet(self.switch, self.id, "test_zoneset")
         zoneset.create()   
-        z.add_members([{'fcid': '0x123456'}])
-        zoneset.add_members([z])
+        self.z.add_members([{'fcid': '0x123456'}])
+        zoneset.add_members([self.z])
         zoneset.activate(True)
         if(zoneset.is_active()):
-            self.assertIsNotNone(z.activedb_zoneset_name)
+            self.assertEqual('test_zoneset',self.z.activedb_zoneset_name)
         else:
-            self.assertIsNone(z.activedb_zoneset_name)
-        v.delete()
+            self.assertIsNone(self.z.activedb_zoneset_name)
 
     def test_activedb_zoneset_name_read_nonexisting(self):
-        v = Vsan(self.switch,self.vsan_id[1])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[1])
-        self.assertIsNone(z.activedb_zoneset_name)
-        v.delete()
+        self.assertIsNone(self.z.activedb_zoneset_name)
 
     def test_activedb_zoneset_name_write_error(self):
-        v = Vsan(self.switch,self.vsan_id[2])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[2])
         with self.assertRaises(AttributeError) as e:
-            z.activedb_zoneset_name = "asdf"
+            self.z.activedb_zoneset_name = "asdf"
         self.assertEqual('can\'t set attribute',str(e.exception))
-        v.delete()
+
+    def tearDown(self) -> None:
+        self.v.delete()

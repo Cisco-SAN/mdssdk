@@ -3,44 +3,43 @@ import unittest
 from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
 from mdssdk.connection_manager.errors import CLIError
+from tests.test_zone.zone_vars import *
 
+log = logging.getLogger(__name__)
 
 class TestZoneAttrSmartZone(unittest.TestCase):
 
-    def test_smart_zone_read(self):
-        v = Vsan(self.switch, self.vsan_id[0])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[0])
-        z.create()
-        self.assertIn(z.smart_zone, ['enabled', 'disabled'])
-        v.delete()
+    def setUp(self) -> None:
+        self.switch = sw
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id)
+        self.v.create()
+        self.z = Zone(self.switch, self.id, "test_zone")
+        self.old = self.z.smart_zone
 
-    def test_smart_zone_read_nonexisting(self):
-        v = Vsan(self.switch, self.vsan_id[1])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[1])
-        self.assertIn(z.smart_zone, ['enabled', 'disabled'])
-        v.delete()
+    def test_smart_zone_read(self):
+        self.assertIn(self.z.smart_zone, [True, False])
 
     def test_smart_zone_write(self):
-        v = Vsan(self.switch, self.vsan_id[2])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[2])
-        z.create()
-        old = z.smart_zone
-        z.smart_zone = True
-        self.assertEqual('enabled', z.smart_zone)
-        z.smart_zone = False
-        self.assertEqual('disabled', z.smart_zone)
-        z.smart_zone = old
-        v.delete()
+        self.z.create()
+        old = self.z.smart_zone
+        self.z.smart_zone = True
+        self.assertTrue(self.z.smart_zone)
+        self.z.smart_zone = False
+        self.assertFalse(self.z.smart_zone)
+        self.z.smart_zone = old
 
-    '''def test_smart_zone_write_invalid(self):
-        v = Vsan(self.switch,self.vsan_id[3])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[3])
-        z.create()
-        with self.assertRaises(TypeError) as e:
-            z.smart_zone = 'asdf'
-        self.assertEqual("Only bool value(true/false) supported.", str(e.exception))
-        v.delete()'''
+    def test_smart_zone_write_invalid(self):
+        with self.assertRaises(ValueError) as e:
+            self.z.smart_zone = 'asdf'
+        self.assertEqual("Smart zone value must be of typr bool, True/False", str(e.exception))
+
+    def tearDown(self) -> None:
+        self.z.smart_zone = self.old
+        self.v.delete()

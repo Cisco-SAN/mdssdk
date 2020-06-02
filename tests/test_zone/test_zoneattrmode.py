@@ -3,46 +3,43 @@ import unittest
 from mdssdk.zone import Zone, InvalidZoneMode
 from mdssdk.vsan import Vsan
 from mdssdk.constants import BASIC, ENHANCED
+from tests.test_zone.zone_vars import *
 
+log = logging.getLogger(__name__)
 
 class TestZoneAttrMode(unittest.TestCase):
 
-    def test_mode_read(self):
-        v = Vsan(self.switch, self.vsan_id[0])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[0])
-        z.create()
-        self.assertIn(z.mode, [BASIC, ENHANCED])
-        v.delete()
+    def setUp(self) -> None:
+        self.switch = sw
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id)
+        self.v.create()
+        self.z = Zone(self.switch, self.id, "test_zone")
+        self.old = self.z.mode
 
-    def test_mode_read_nonexisting(self):
-        v = Vsan(self.switch, self.vsan_id[1])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[1])
-        self.assertIn(z.mode, [BASIC, ENHANCED])
-        v.delete()
+    def test_mode_read(self):
+        self.assertIn(self.z.mode, [BASIC, ENHANCED])
 
     def test_mode_write(self):
-        v = Vsan(self.switch, self.vsan_id[2])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[2])
-        z.create()
-        old = z.mode
-        z.mode = BASIC
-        self.assertEqual(BASIC, z.mode)
-        z.mode = ENHANCED
-        self.assertEqual(ENHANCED, z.mode)
-        z.mode = old
-        v.delete()
+        self.z.create()
+        self.z.mode = BASIC
+        self.assertEqual(BASIC, self.z.mode)
+        self.z.mode = ENHANCED
+        self.assertEqual(ENHANCED, self.z.mode)
 
     def test_mode_write_invalid(self):
-        v = Vsan(self.switch, self.vsan_id[3])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[3])
-        z.create()
         mode = 'asdf'
         with self.assertRaises(InvalidZoneMode) as e:
-            z.mode = mode
+            self.z.mode = mode
         self.assertEqual('InvalidZoneMode: Invalid zone mode ' + str(mode) + ' . Valid values are: basic,enhanced',
                          str(e.exception))
-        v.delete()
+
+    def tearDown(self) -> None:
+        self.z.mode = self.old
+        self.v.delete()

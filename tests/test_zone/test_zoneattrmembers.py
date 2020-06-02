@@ -2,37 +2,75 @@ import unittest
 
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
+from tests.test_zone.zone_vars import *
+from mdssdk.fc import Fc
+from mdssdk.portchannel import PortChannel
+from mdssdk.devicealias import DeviceAlias
 
+log = logging.getLogger(__name__)
 
 class TestZoneAttrMembers(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id)
+        self.v.create()
+        self.z = Zone(self.switch, self.id, "test_zone")
+
     def test_members_read(self):
-        i = self.vsan_id[0]
-        v = Vsan(self.switch, i)
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[0])
-        z.create()
-        members = self.members_dict
-        self.switch.config('fcalias name somefcalias vsan ' + str(i))
-        z.add_members(members)
-        self.assertEqual(len(members), len(z.members))
-        log.debug("Zone members added : " + str(z.members))
-        z.delete()
-        v.delete()
+        fc_name = ""
+        for k,v in list(self.switch.interfaces.items()):
+            if type(v) is Fc:
+                fc_name = k
+                break
+        while True:
+            pc_id = get_random_id(1, 256)
+            if "port-channel"+str(pc_id) not in self.switch.interfaces.keys():
+                break
+        pc = PortChannel(self.switch, pc_id)
+        d = DeviceAlias(self.switch)
+        olddb = d.database
+        if olddb is None:
+            da_name = get_random_string()
+            da_pwwn = get_random_pwwn()
+        else:
+            while True:
+                da_name = get_random_string()
+                da_pwwn = get_random_pwwn()
+                if da_name not in olddb.keys() and da_pwwn not in olddb.values():
+                    break
+        d.create({da_name: da_pwwn})
+        members = [{'pwwn': '50:08:01:60:08:9f:4d:00'},
+                    {'interface': fc_name},
+                    {'device-alias': da_name},
+                    {'ip-address': '1.1.1.1'},
+                    {'symbolic-nodename': 'symbnodename'},
+                    {'fwwn': '11:12:13:14:15:16:17:18'},
+                    {'fcid': '0x123456'},
+                    {'interface': pc.name},
+                    {'fcalias': 'somefcalias'}]
+        self.switch.config('fcalias name somefcalias vsan ' + str(self.id))
+        self.z.add_members(members)
+        mem = self.z.members
+        d.delete(da_name)
+        log.debug("Given Zone Members : " + str(members))
+        log.debug("Zone Members : " + str(mem))
+        self.assertEqual(len(members), len(mem))
 
     def test_members_read_nonexisting(self):
-        v = Vsan(self.switch, self.vsan_id[1])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[1])
-        self.assertIsNone(z.members)
-        v.delete()
+        self.assertIsNone(self.z.members)
 
     def test_members_write_error(self):
-        v = Vsan(self.switch, self.vsan_id[2])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[2])
-        z.create()
         with self.assertRaises(AttributeError) as e:
-            z.members = []
+            self.z.members = []
         self.assertEqual('can\'t set attribute', str(e.exception))
-        v.delete()
+
+    def tearDown(self) -> None:
+        self.v.delete()

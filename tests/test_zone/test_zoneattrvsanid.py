@@ -1,13 +1,12 @@
 import unittest
 
-from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
+from mdssdk.vsan import Vsan
 from tests.test_zone.zone_vars import *
 
 log = logging.getLogger(__name__)
 
-
-class TestZoneAttrEffectivedbSize(unittest.TestCase):
+class TestZoneAttrVsanId(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
@@ -22,19 +21,13 @@ class TestZoneAttrEffectivedbSize(unittest.TestCase):
         self.v.create()
         self.z = Zone(self.switch, self.id, "test_zone")
 
-    def test_effectivedb_size_read(self):
-        self.z.create()
-        log.debug("Effective DB Size : " + str(self.z.effectivedb_size))
-        self.assertIsNotNone(self.z.effectivedb_size)
+    def test_vsan_id_read(self):
+        self.assertEqual(self.id, self.z.vsan_id)
 
-    def test_effectivedb_size_read_nonexisting(self):
-        log.debug("Effective DB Size(nonexisting) : " + str(self.z.effectivedb_size))
-        self.assertIsNotNone(self.z.effectivedb_size)
-
-    def test_effectivedb_size_write_error(self):
+    def test_vsan_id_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.z.effectivedb_size = "asdf"
-        self.assertEqual('can\'t set attribute',str(e.exception))
+            self.z.vsan_id = 5
+        self.assertEqual('can\'t set attribute', str(e.exception))
 
     def tearDown(self) -> None:
         self.v.delete()
