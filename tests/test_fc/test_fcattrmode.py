@@ -23,7 +23,7 @@ class TestFcAttrMode(unittest.TestCase):
         self.mode_values = mode_values
 
     def test_mode_read(self):
-        self.assertIn(self.fc.mode, self.mode_values + ['--'])
+        self.assertIn(self.fc.mode, self.mode_values + ['TE', 'TF', '--', ' --'])
 
     def test_mode_write(self):
         self.skipTest("needs to be fixed")
@@ -39,8 +39,13 @@ class TestFcAttrMode(unittest.TestCase):
             mode) + " \" gave the error \" % Invalid command \".", str(e.exception))
 
     def tearDown(self) -> None:
-        if ("--" in self.old):
-            self.fc.mode = 'auto'
-        else:
-            self.fc.mode = self.old
-        self.assertEqual(self.old, self.fc.mode)
+        if(self.fc.mode != self.old):
+            if ("--" in self.old):
+                self.fc.mode = 'auto'
+            elif self.fc.mode == 'TE':
+                self.fc.mode = 'E'
+            elif self.fc.mode == 'TF':
+                self.fc.mode = 'F'   
+            else:
+                self.fc.mode = self.old
+            self.assertEqual(self.old, self.fc.mode)

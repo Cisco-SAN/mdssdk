@@ -3,108 +3,120 @@ import unittest
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
+from tests.test_zone.zone_vars import *
+from mdssdk.fc import Fc
+from mdssdk.portchannel import PortChannel
+from mdssdk.devicealias import DeviceAlias
 
+log = logging.getLogger(__name__)
 
 class TestZoneAddMembers(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id)
+        self.v.create()
+        self.z = Zone(self.switch, self.id, "test_zone")
+        self.z.create()
+
     def test_add_members_dict(self):
-        i = self.vsan_id[0]
-        v = Vsan(self.switch, i)
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[0])
-        z.create()
-        members = self.members_dict
-        self.switch.config('fcalias name somefcalias vsan ' + str(i))
-        z.add_members(members)
-        log.debug("Zone Members : " + str(members))
-        log.debug("Zone Members : " + str(z.members))
-        self.assertEqual(len(members), len(z.members))
-        z.delete()
-        v.delete()
+        fc_name = ""
+        for k,v in list(self.switch.interfaces.items()):
+            if type(v) is Fc:
+                fc_name = k
+                break
+        while True:
+            pc_id = get_random_id(1, 256)
+            if "port-channel"+str(pc_id) not in self.switch.interfaces.keys():
+                break
+        pc = PortChannel(self.switch, pc_id)
+        d = DeviceAlias(sw)
+        olddb = d.database
+        if olddb is None:
+            da_name = get_random_string()
+            da_pwwn = get_random_pwwn()
+        else:
+            while True:
+                da_name = get_random_string()
+                da_pwwn = get_random_pwwn()
+                if da_name not in olddb.keys() and da_pwwn not in olddb.values():
+                    break
+        d.create({da_name: da_pwwn})
+        members = [{'pwwn': '50:08:01:60:08:9f:4d:00'},
+                    {'interface': fc_name},
+                    {'device-alias': da_name},
+                    {'ip-address': '1.1.1.1'},
+                    {'symbolic-nodename': 'symbnodename'},
+                    {'fwwn': '11:12:13:14:15:16:17:18'},
+                    {'fcid': '0x123456'},
+                    {'interface': pc.name},
+                    {'fcalias': 'somefcalias'}]
+        self.switch.config('fcalias name somefcalias vsan ' + str(self.id))
+        self.z.add_members(members)
+        mem = self.z.members
+        d.delete(da_name)
+        log.debug("Zone Members To Add : " + str(members))
+        log.debug("Zone Members Added : " + str(mem))
+        self.assertEqual(len(members), len(mem))
 
     def test_add_members(self):
-        v = Vsan(self.switch, self.vsan_id[1])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[1])
-        z.create()
-        members = self.members_list
-        z.add_members(members)
-        self.assertEqual(len(members), len(z.members))
-        log.debug("Zone Members : " + str(z.members))
-        z.delete()
-        v.delete()
+        members = []
+        for v in list(self.switch.interfaces.values()):
+            if type(v) is Fc:
+                members.append(v)
+                break
+        while True:
+            pc_id = get_random_id(1, 256)
+            if "port-channel"+str(pc_id) not in self.switch.interfaces.keys():
+                break
+        members.append(PortChannel(self.switch, pc_id))
+        members.append("10:99:88:90:76:88:99:ef")
+        self.z.add_members(members)
+        log.debug("Zone Members To Add : " + str(members))
+        log.debug("Zone Members Added : " + str(self.z.members))
+        self.assertEqual(len(members), len(self.z.members))
 
     def test_add_members_error_pwwn(self):
-        i = self.vsan_id[2]
-        v = Vsan(self.switch, i)
-        v.create()
-        name = self.zone_name[2]
-        z = Zone(self.switch, v, name)
-        z.create()
         members = [{'pwwn': '50:08:01:60:08:9f:4d:00:01'}]
         with self.assertRaises(CLIError) as e:
-            z.add_members(members)
-        self.assertEqual('The command " zone name ' + str(name) + ' vsan ' + str(
-            i) + ' ; member pwwn 50:08:01:60:08:9f:4d:00:01 " gave the error " % Invalid command ".', str(e.exception))
-        z.delete()
-        v.delete()
+            self.z.add_members(members)
+        self.assertEqual('The command " zone name test_zone vsan ' + str(
+            self.id) + ' ; member pwwn 50:08:01:60:08:9f:4d:00:01 " gave the error " % Invalid command ".', str(e.exception))
 
     def test_add_members_error_ip(self):
-        i = self.vsan_id[3]
-        v = Vsan(self.switch, i)
-        v.create()
-        name = self.zone_name[3]
-        z = Zone(self.switch, v, name)
-        z.create()
         members = [{'ip-address': '1.1.1.1.1'}]
         with self.assertRaises(CLIError) as e:
-            z.add_members(members)
-        self.assertEqual('The command " zone name ' + str(name) + ' vsan ' + str(
-            i) + ' ; member ip-address 1.1.1.1.1 " gave the error " % Invalid ip address ".', str(e.exception))
-        z.delete()
-        v.delete()
+            self.z.add_members(members)
+        self.assertEqual('The command " zone name test_zone vsan ' + str(
+            self.id) + ' ; member ip-address 1.1.1.1.1 " gave the error " % Invalid ip address ".', str(e.exception))
 
     def test_add_members_error_fcid(self):
-        i = self.vsan_id[4]
-        v = Vsan(self.switch, i)
-        v.create()
-        name = self.zone_name[4]
-        z = Zone(self.switch, v, name)
-        z.create()
         members = [{'fcid': '0x123'}]
         with self.assertRaises(CLIError) as e:
-            z.add_members(members)
-        self.assertEqual('The command " zone name ' + str(name) + ' vsan ' + str(
-            i) + ' ; member fcid 0x123 " gave the error " Invalid FCID ".', str(e.exception))
-        z.delete()
-        v.delete()
+            self.z.add_members(members)
+        self.assertEqual('The command " zone name test_zone vsan ' + str(
+            self.id) + ' ; member fcid 0x123 " gave the error " Invalid FCID ".', str(e.exception))
 
     def test_add_members_error_fwwn(self):
-        i = self.vsan_id[5]
-        v = Vsan(self.switch, i)
-        v.create()
-        name = self.zone_name[5]
-        z = Zone(self.switch, v, name)
-        z.create()
         members = [{'fwwn': '11:12:13:14:15:16:17:18:19'}]
         with self.assertRaises(CLIError) as e:
-            z.add_members(members)
-        self.assertEqual('The command " zone name ' + str(name) + ' vsan ' + str(
-            i) + ' ; member fwwn 11:12:13:14:15:16:17:18:19 " gave the error " % Invalid command ".', str(e.exception))
-        z.delete()
-        v.delete()
+            self.z.add_members(members)
+        self.assertEqual('The command " zone name test_zone vsan ' + str(
+            self.id) + ' ; member fwwn 11:12:13:14:15:16:17:18:19 " gave the error " % Invalid command ".', str(e.exception))
 
     def test_add_members_error_fcalias(self):
-        i = self.vsan_id[6]
-        v = Vsan(self.switch, i)
-        v.create()
-        name = self.zone_name[6]
-        z = Zone(self.switch, v, name)
-        z.create()
         members = [{'fcalias': 'somefcalias'}]
         with self.assertRaises(CLIError) as e:
-            z.add_members(members)
-        self.assertEqual('The command " zone name ' + str(name) + ' vsan ' + str(
-            i) + ' ; member fcalias somefcalias " gave the error " Alias not present ".', str(e.exception))
-        z.delete()
-        v.delete()
+            self.z.add_members(members)
+        self.assertEqual('The command " zone name test_zone vsan ' + str(
+            self.id) + ' ; member fcalias somefcalias " gave the error " Alias not present ".', str(e.exception))
+
+    def tearDown(self) -> None:
+        self.v.delete()

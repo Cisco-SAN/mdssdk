@@ -12,18 +12,9 @@ class TestSwitchFeature(unittest.TestCase):
         self.switch = sw
         log.debug(sw.version)
         log.debug(sw.ipaddr)
-        feature_list = sw.show("show feature", use_ssh=True)
-        for eachrow in feature_list:
-            if eachrow['state'] == 'disabled':
-                self.name = eachrow['feature']
-                self.old = False
-                if self.name not in ['ssh', 'telnet', 'nxapi']:
-                    try:
-                        self.switch.feature(self.name, self.old)
-                        break
-                    except UnsupportedFeature as e:
-                        continue
+        self.name = 'analytics'
         log.debug("Feature " + self.name)
+        self.old = self.switch.feature(self.name)
 
     def test_feature(self):
         self.skipTest("Needs to be fixed")

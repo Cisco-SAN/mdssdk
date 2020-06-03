@@ -1,49 +1,46 @@
 import unittest
 
-from mdssdk.zone import Zone
+from mdssdk.zone import Zone, InvalidDefaultZone
 from mdssdk.vsan import Vsan
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.constants import PERMIT, DENY
+from tests.test_zone.zone_vars import *
+
+log = logging.getLogger(__name__)
 
 
 class TestZoneAttrDefaultZone(unittest.TestCase):
 
-    def test_default_zone_read(self):
-        v = Vsan(self.switch, self.vsan_id[0])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[0])
-        z.create()
-        self.assertIn(z.default_zone, [PERMIT, DENY])
-        v.delete()
+    def setUp(self) -> None:
+        self.switch = sw
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id)
+        self.v.create()
+        self.z = Zone(self.switch, self.id, "test_zone")
+        self.old = self.z.default_zone
 
-    def test_default_zone_read_nonexisting(self):
-        v = Vsan(self.switch, self.vsan_id[1])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[1])
-        self.assertIn(z.default_zone, [PERMIT, DENY])
-        v.delete()
+    def test_default_zone_read(self):
+        self.assertIn(self.z.default_zone, [PERMIT, DENY])
 
     def test_default_zone_write(self):
-        v = Vsan(self.switch, self.vsan_id[2])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[2])
-        z.create()
-        old = z.default_zone
-        z.default_zone = DENY
-        self.assertEqual(DENY, z.default_zone)
-        z.default_zone = PERMIT
-        self.assertEqual(PERMIT, z.default_zone)
-        z.default_zone = old
-        v.delete()
+        self.z.default_zone = DENY
+        self.assertEqual(DENY, self.z.default_zone)
+        self.z.default_zone = PERMIT
+        self.assertEqual(PERMIT, self.z.default_zone)
 
     def test_default_zone_write_invalid(self):
-        v = Vsan(self.switch, self.vsan_id[3])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[3])
-        z.create()
+        self.z.create()
         default_zone = 'asdf'
-        with self.assertRaises(CLIError) as e:
-            z.default_zone = default_zone
-        self.assertEqual('The command " No cmd sent " gave the error " Invalid default-zone value ' + str(
-            default_zone) + ' . Valid values are: permit,deny ".', str(e.exception))
-        v.delete()
+        with self.assertRaises(InvalidDefaultZone) as e:
+            self.z.default_zone = default_zone
+        self.assertIn("Invalid default-zone value " + default_zone + " . Valid values are: " + PERMIT + "," + DENY, str(e.exception))
+
+    def tearDown(self) -> None:
+        self.z.default_zone = self.old
+        self.v.delete()
