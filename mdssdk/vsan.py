@@ -252,19 +252,21 @@ class Vsan(object):
         if self.id is None:
             raise VsanNotPresent("Vsan " + str(self._id) + " is not present on the switch.")
         else:
-            cmdlist = []
+            cmd = ""
             for eachint in interfaces:
                 fcmatch = re.match(PAT_FC, eachint.name)
                 pcmatch = re.match(PAT_PC, eachint.name)
                 if fcmatch or pcmatch:
-                    cmd = "vsan database ; vsan " + str(self._id) + " interface " + eachint.name
-                    cmdlist.append(cmd)
+                    cmd = cmd + "terminal dont-ask ; vsan database ; vsan " + str(
+                        self._id) + " interface " + eachint.name + " ; no terminal dont-ask ; "
+                    # cmdlist.append(cmd)
                 else:
                     raise InvalidInterface("Interface " + str(eachint.name) +
                                            " is not supported, and hence cannot be added to the vsan, "
                                            "supported interface types are 'fc' amd 'port-channel'")
             try:
-                self.__swobj._config_list(cmdlist)
+                # self.__swobj._config_list(cmdlist)
+                self.__swobj.config(cmd)
             except CLIError as c:
                 if "membership being configured is already configured for the interface" in c.message:
                     return

@@ -67,20 +67,19 @@ class TestVsanAddInterfaces(unittest.TestCase):
     def test_addinterfaces_repeated(self):
         self.v.create()
         self.pc.create()
-        self.v.add_interfaces([self.fc, self.fc, self.pc]) ## pc will not be added
+        self.v.add_interfaces([self.fc, self.fc, self.pc])  ## self.fc even though repeated will not be added
         self.assertEqual(self.fc.name, self.v.interfaces[0].name)
-        self.assertEqual(1, len(self.v.interfaces))
+        self.assertEqual(2, len(self.v.interfaces))
         self.pc.delete()
         self.v.delete()
 
     def test_addinterfaces_portchannelnotpresent(self):
         self.v.create()
-        with self.assertRaises(CLIError) as e: 
+        with self.assertRaises(CLIError) as e:
             self.v.add_interfaces([self.pc])
-        self.assertEqual(
-            'The command " vsan database ; vsan ' + str(self.id) + ' interface port-channel' + str(
-                self.pc.id) + ' " gave the error " Invalid range ".',
-            str(e.exception))
+        self.assertRegex(str(e.exception),
+                         '.*The command.*vsan database ; vsan ' + str(self.id) + ' interface port-channel' + str(
+                             self.pc.id) + '.*gave the error.*Invalid range .*')
         self.v.delete()
 
     def tearDown(self) -> None:

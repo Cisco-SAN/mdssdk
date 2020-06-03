@@ -31,19 +31,19 @@ class Zone(object):
 
     :param switch: switch object on which zone operations needs to be executed
     :type switch: Switch
-    :param vsan: vsan id on which zone operations needs to be executed
-    :type vsan: int
     :param name: zone name with which zone operations needs to be executed
     :type name: str
+    :param vsan: vsan id on which zone operations needs to be executed
+    :type vsan: int
     :raises CLIError: if vsan is not present on the switch
     :example:
         >>>
         >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password)
-        >>> zoneObj = Zone(switch_obj,1,"zone_fab_a")
+        >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
         >>>
     """
 
-    def __init__(self, switch, vsan, name):
+    def __init__(self, switch, name, vsan):
         self.__swobj = switch
         self._SW_VER = switch._SW_VER
         self._vsan = vsan
@@ -62,7 +62,7 @@ class Zone(object):
         :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
-            >>> zoneObj = Zone(switch_obj,1,"zone_fab_a")
+            >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
             >>> zoneObj.create()
             >>> print(zoneObj.name)
             zone_fab_a
@@ -85,7 +85,7 @@ class Zone(object):
         :rtype: Vsan
         :example:
             >>>
-            >>> zoneObj = Zone(switch_obj,1,"zone_fab_a")
+            >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
             >>> print(zoneObj.vsan)
             <mdslib.vsan.Vsan object at 0x10d105550>
             >>> print(zoneObj.vsan.id)
@@ -105,7 +105,7 @@ class Zone(object):
         :rtype: int
         :example:
             >>>
-            >>> zoneObj = Zone(switch_obj,1,"zone_fab_a")
+            >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
             >>> print(zoneObj.vsan_id)
             1
             >>>
@@ -645,7 +645,7 @@ class Zone(object):
         :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
-            >>> zoneObj = Zone(switch_obj,vsan_obj,"zone_fab_a")
+            >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
             >>> zoneObj.create()
             >>>
          """
@@ -660,7 +660,7 @@ class Zone(object):
         :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
-            >>> zoneObj = Zone(switch_obj,vsan_obj,"zone_fab_a")
+            >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
             >>> zoneObj.delete()
             >>>
          """
@@ -681,7 +681,7 @@ class Zone(object):
         :raises InvalidZoneMemberType: if zone member type is invalid
         :example:
             >>>
-            >>> zoneObj = Zone(switch_obj,vsan_obj,"zone_fab_a")
+            >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
             >>> zoneObj.create()
             >>> int12 = Fc(sw, "fc1/2")
             >>> int13 = Fc(sw, "fc1/3")
@@ -716,7 +716,7 @@ class Zone(object):
         :raises InvalidZoneMemberType: if zone member type is invalid
         :example:
             >>>
-            >>> zoneObj = Zone(switch_obj,vsan_obj,"zone_fab_a")
+            >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
             >>> zoneObj.create()
             >>> int12 = Fc(sw, "fc1/2")
             >>> int13 = Fc(sw, "fc1/3")

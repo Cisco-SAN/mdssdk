@@ -21,15 +21,15 @@ class ZoneSet(object):
 
     :param switch: switch object on which zoneset operations needs to be executed
     :type switch: Switch
-    :param vsan: vsan id on which zone operations needs to be executed
-    :type vsan: int
     :param name: zoneset name with which zoneset operations needs to be executed
     :type name: str
+    :param vsan: vsan id on which zone operations needs to be executed
+    :type vsan: int
     :raises CLIError: if vsan is not present on the switch
     :example:
         >>>
         >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password)
-        >>> zonesetObj = ZoneSet(switch_obj,1,"zoneset_fab_A")
+        >>> zonesetObj = ZoneSet(switch_obj,"zoneset_fab_A",1)
         >>>
     """
 
@@ -40,7 +40,7 @@ class ZoneSet(object):
         self._name = name
         # Create a dummy zone obj to send zoneset cmds, DO NOT use 'create' method with it!!
         log.debug("Init a dummy zone object for the zoneset with name " + self._name)
-        self.__zoneObj = Zone(self.__swobj, self._vsan, name=None)
+        self.__zoneObj = Zone(self.__swobj, name=None, vsan=self._vsan)
 
     @property
     def name(self):
@@ -52,7 +52,7 @@ class ZoneSet(object):
         :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
-            >>> zonesetObj = ZoneSet(switch_obj,vsan_obj,"zoneset_fab_A")
+            >>> zonesetObj = ZoneSet(switch_obj,"zoneset_fab_A",1)
             >>> zonesetObj.create()
             >>> print(zonesetObj.name)
             zoneset_fab_A
@@ -80,7 +80,7 @@ class ZoneSet(object):
         :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
-            >>> zonesetObj = ZoneSet(switch_obj,1,"zoneset_fab_A")
+            >>> zonesetObj = ZoneSet(switch_obj,"zoneset_fab_A",1)
             >>> vobj = zonesetObj.vsan
             >>> print(vobj)
             <mdslib.vsan.Vsan object at 0x10d105550>
@@ -99,7 +99,7 @@ class ZoneSet(object):
         :rtype: int
         :example:
             >>>
-            >>> zonesetObj = ZoneSet(switch_obj,1,"zoneset_fab_A")
+            >>> zonesetObj = ZoneSet(switch_obj,"zoneset_fab_A",1)
             >>> print(zonesetObj.vsan_id)
             1
             >>>
@@ -133,7 +133,7 @@ class ZoneSet(object):
                 if out is not None:
                     for eachzdb in out:
                         zname = eachzdb['name']
-                        retlist[zname] = Zone(self.__swobj, self._vsanobj, eachzdb)
+                        retlist[zname] = Zone(self.__swobj, eachzdb, self._vsan)
                     return retlist
                 return None
             else:
@@ -144,11 +144,11 @@ class ZoneSet(object):
                         zdb = zonedata.get('ROW_zone', None)
                         if type(zdb) is dict:
                             zname = zdb[get_key(zonekeys.NAME, self._SW_VER)]
-                            retlist[zname] = Zone(self.__swobj, self._vsanobj, zname)
+                            retlist[zname] = Zone(self.__swobj, zname, self._vsan)
                         else:
                             for eachzdb in zdb:
                                 zname = eachzdb[get_key(zonekeys.NAME, self._SW_VER)]
-                                retlist[zname] = Zone(self.__swobj, self._vsanobj, eachzdb)
+                                retlist[zname] = Zone(self.__swobj, eachzdb, self._vsan)
                         return retlist
         return None
 
@@ -159,7 +159,7 @@ class ZoneSet(object):
         :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
-            >>> zonesetObj = ZoneSet(switch_obj,vsan_obj,"zoneset_fab_A")
+            >>> zonesetObj = ZoneSet(switch_obj,"zoneset_fab_A",1)
             >>> zonesetObj.create()
             >>>
          """
@@ -173,7 +173,7 @@ class ZoneSet(object):
         :raises CLIError: if vsan is not present on the switch
         :example:
             >>>
-            >>> zonesetObj = ZoneSet(switch_obj,vsan_obj,"zoneset_fab_A")
+            >>> zonesetObj = ZoneSet(switch_obj,"zoneset_fab_A",1)
             >>> zonesetObj.delete()
             >>>
          """
@@ -191,11 +191,11 @@ class ZoneSet(object):
 
         :example:
             >>>
-            >>> z1 = Zone(sw, v, "zonetemp")
-            >>> z2 = Zone(sw, v, "zonetemp_int")
+            >>> z1 = Zone(sw,"zonetemp",1)
+            >>> z2 = Zone(sw,"zonetemp_int",1)
             >>> z1.create()
             >>> z2.create()
-            >>> zs = ZoneSet(switch=sw, vsan_obj=v, name="scriptZoneset")
+            >>> zs = ZoneSet(switch=sw, name="scriptZoneset",vsan=1)
             >>> zs.create()
             >>> zs.add_members([z1,z2])
             >>>
