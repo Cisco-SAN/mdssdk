@@ -2,32 +2,32 @@ import unittest
 
 from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
+from tests.test_zone.zone_vars import *
 
+log = logging.getLogger(__name__)
 
 class TestZoneAttrVsan(unittest.TestCase):
 
-    def test_vsan_read(self):
-        i = self.vsan_id[0]
-        v = Vsan(self.switch, i)
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[0])
-        z.create()
-        self.assertEqual(i, z.vsan.id)
-        v.delete()
+    def setUp(self) -> None:
+        self.switch = sw
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id)
+        self.v.create()
+        self.z = Zone(self.switch, self.id, "test_zone")
 
-    def test_vsan_read_nonexisting(self):
-        v = Vsan(self.switch, self.vsan_id[1])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[1])
-        self.assertIsNone(z.vsan)
-        v.delete()
+    def test_vsan_read(self):
+        self.assertEqual(self.id, self.z.vsan.id)
 
     def test_vsan_write_error(self):
-        v = Vsan(self.switch, self.vsan_id[2])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[2])
-        z.create()
         with self.assertRaises(AttributeError) as e:
-            z.vsan = 5
+            self.z.vsan = 5
         self.assertEqual('can\'t set attribute', str(e.exception))
-        v.delete()
+
+    def tearDown(self) -> None:
+        self.v.delete()

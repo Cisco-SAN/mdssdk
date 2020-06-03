@@ -820,9 +820,9 @@ class Zone(object):
         except CLIError as c:
             if "Duplicate member" in c.message:
                 return False, None
-            if not self.__swobj.is_connection_type_ssh():
-                log.error(c)
-                raise CLIError(cmd, c.message)
+            # if not self.__swobj.is_connection_type_ssh():
+            #     log.error(c)
+            #     raise CLIError(cmd, c.message)
             self._check_msg(c.message, cmd) 
       
         if out is not None and not self.__swobj.is_connection_type_ssh():

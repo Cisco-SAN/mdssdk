@@ -28,7 +28,11 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
     def test_analytics_type_write(self):
         try:
             for val in self.values:
-                self.fc.analytics_type = val
+                try:
+                    self.fc.analytics_type = val
+                except CLIError as e:
+                    if "Unsupported Port mode of interface" in str(e.exception):
+                        self.skipTest("Skipping test, port mode is unsupported")
                 self.assertEqual(val, self.fc.analytics_type)
             self.fc.analytics_type = self.old
             self.assertEqual(self.old, self.fc.analytics_type)

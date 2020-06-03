@@ -2,30 +2,36 @@ import unittest
 
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
+from tests.test_zone.zone_vars import *
 
+log = logging.getLogger(__name__)
 
 class TestZoneAttrMaxdbSize(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id)
+        self.v.create()
+        self.z = Zone(self.switch, self.id, "test_zone")
+
     def test_maxdb_size_read(self):
-        v = Vsan(self.switch, self.vsan_id[0])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[0])
-        z.create()
-        log.debug("Max DB Size : " + str(z.maxdb_size))
-        v.delete()
+        self.z.create()
+        log.debug("Max DB Size : " + str(self.z.maxdb_size))
 
     def test_maxdb_size_read_nonexisting(self):
-        v = Vsan(self.switch,self.vsan_id[1])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[1])
-        log.debug("Max DB Size(nonexisting) : " + str(z.maxdb_size))
-        v.delete()
+        log.debug("Max DB Size(nonexisting) : " + str(self.z.maxdb_size))
 
     def test_maxdb_size_write_error(self):
-        v = Vsan(self.switch,self.vsan_id[2])
-        v.create()
-        z = Zone(self.switch, v, self.zone_name[2])
         with self.assertRaises(AttributeError) as e:
-            z.maxdb_size = "asdf"
+            self.z.maxdb_size = "asdf"
         self.assertEqual('can\'t set attribute',str(e.exception))
-        v.delete()
+
+    def tearDown(self) -> None:
+        self.v.delete()

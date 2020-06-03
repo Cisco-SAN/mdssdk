@@ -40,8 +40,15 @@ class TestFcAttrSpeed(unittest.TestCase):
             speed) + " \" gave the error \" % Invalid command \".", str(e.exception))
 
     def tearDown(self) -> None:
-        if ("--" in self.old):
-            self.fc.speed = 'auto'
-        else:
-            self.fc.speed = ((int)(self.old))*1000 # read in Gbps, write in Mbps
-        self.assertEqual(self.old, self.fc.speed)
+        if(self.fc.speed != self.old):
+            try:
+                if ("--" in self.old):
+                    self.fc.speed = 'auto'
+                else:
+                    self.fc.speed = ((int)(self.old))*1000 # read in Gbps, write in Mbps
+                self.assertEqual(self.old, self.fc.speed)
+            except CLIError as e:
+                if "port already in a port-channel, no config allowed" in str(e.msg):
+                    pass
+                else:
+                    log.debug("CLIError : "+str(e.msg))

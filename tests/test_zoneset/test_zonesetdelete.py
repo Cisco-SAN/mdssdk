@@ -3,27 +3,36 @@ import unittest
 from mdssdk.zoneset import ZoneSet
 from mdssdk.vsan import Vsan
 from mdssdk.connection_manager.errors import CLIError
+from tests.test_zoneset.zoneset_vars import *
 
+log = logging.getLogger(__name__)
 
 class TestZoneSetDelete(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.switch = sw
+        log.debug(sw.version)
+        log.debug(sw.ipaddr)
+        self.vsandb = sw.vsans
+        while True:
+            self.id = get_random_id()
+            if self.id not in self.vsandb.keys():
+                break
+        self.v = Vsan(switch=self.switch, id=self.id)
+        self.v.create()
+        self.zoneset = ZoneSet(self.switch, self.id, "test_zoneset")
+
     def test_delete(self):
-        v = Vsan(self.switch, self.vsan_id[0])
-        v.create()
-        z = ZoneSet(self.switch, v, self.zoneset_name[0])
-        z.create()
-        z.delete()
-        self.assertIsNone(z.name)
-        v.delete()
+        self.zoneset.create()
+        self.assertEqual('test_zoneset',self.zoneset.name)
+        self.zoneset.delete()
+        self.assertIsNone(self.zoneset.name)
 
     def test_delete_nonexisting(self):
-        i = self.vsan_id[1]
-        v = Vsan(self.switch, i)
-        v.create()
-        zonesetname = self.zoneset_name[1]
-        z = ZoneSet(self.switch, v, zonesetname)
         with self.assertRaises(CLIError) as e:
-            z.delete()
-        self.assertEqual('The command " no zoneset name ' + str(zonesetname) + ' vsan ' + str(
-            i) + ' " gave the error " Zoneset not present ".', str(e.exception))
-        v.delete()
+            self.zoneset.delete()
+        self.assertEqual('The command " no zoneset name test_zoneset vsan ' + str(
+            self.id) + ' " gave the error " Zoneset not present ".', str(e.exception))
+
+    def tearDown(self) -> None:
+        self.v.delete()
