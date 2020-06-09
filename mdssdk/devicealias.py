@@ -1,17 +1,13 @@
 import logging
 import time
 
-from .connection_manager.errors import CLIError, CustomException
+from .connection_manager.errors import CLIError, InvalidMode
 from .constants import ENHANCED, BASIC
 from .nxapikeys import devicealiaskeys
 from .parsers.device_alias import ShowDeviceAliasDatabase, ShowDeviceAliasStatus
 from .utility.utils import get_key
 
 log = logging.getLogger(__name__)
-
-
-class InvalidMode(CustomException):
-    pass
 
 
 class DeviceAlias(object):

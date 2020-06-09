@@ -379,8 +379,8 @@ class Interface(object):
             """
             out = self.__intobj._execute_counters_detailed_cmd()
             if self.__swobj.is_connection_type_ssh():
-	            shintcd = ShowInterfaceCountersDetailed(out)
-	            return shintcd.total_stats
+                shintcd = ShowInterfaceCountersDetailed(out)
+                return shintcd.total_stats
             total = out.get('TABLE_total', None)
             if total is not None:
                 return total.get('ROW_total', None)
@@ -406,8 +406,8 @@ class Interface(object):
             """
             out = self.__intobj._execute_counters_detailed_cmd()
             if self.__swobj.is_connection_type_ssh():
-	            shintcd = ShowInterfaceCountersDetailed(out)
-	            return shintcd.link_stats
+                shintcd = ShowInterfaceCountersDetailed(out)
+                return shintcd.link_stats
             total = out.get('TABLE_link', None)
             if total is not None:
                 return total.get('ROW_link', None)
@@ -429,8 +429,8 @@ class Interface(object):
             """
             out = self.__intobj._execute_counters_detailed_cmd()
             if self.__swobj.is_connection_type_ssh():
-	            shintcd = ShowInterfaceCountersDetailed(out)
-	            return shintcd.loop_stats
+                shintcd = ShowInterfaceCountersDetailed(out)
+                return shintcd.loop_stats
             total = out.get('TABLE_loop', None)
             if total is not None:
                 return total.get('ROW_loop', None)
@@ -454,8 +454,8 @@ class Interface(object):
             """
             out = self.__intobj._execute_counters_detailed_cmd()
             if self.__swobj.is_connection_type_ssh():
-	            shintcd = ShowInterfaceCountersDetailed(out)
-	            return shintcd.congestion_stats
+                shintcd = ShowInterfaceCountersDetailed(out)
+                return shintcd.congestion_stats
             total = out.get('TABLE_congestion', None)
             if total is not None:
                 return total.get('ROW_congestion', None)
@@ -478,8 +478,8 @@ class Interface(object):
             """
             out = self.__intobj._execute_counters_detailed_cmd()
             if self.__swobj.is_connection_type_ssh():
-	            shintcd = ShowInterfaceCountersDetailed(out)
-	            return shintcd.other_stats
+                shintcd = ShowInterfaceCountersDetailed(out)
+                return shintcd.other_stats
             total = out.get('TABLE_others', None)
             if total is not None:
                 return total.get('ROW_others', None)

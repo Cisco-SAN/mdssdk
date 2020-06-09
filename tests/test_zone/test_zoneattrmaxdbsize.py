@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
-from tests.test_zone.zone_vars import *
+from tests.test_zone.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestZoneAttrMaxdbSize(unittest.TestCase):
 
@@ -19,7 +20,7 @@ class TestZoneAttrMaxdbSize(unittest.TestCase):
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
-        self.z = Zone(self.switch, self.id, "test_zone")
+        self.z = Zone(self.switch, "test_zone", self.id)
 
     def test_maxdb_size_read(self):
         self.z.create()
@@ -31,7 +32,7 @@ class TestZoneAttrMaxdbSize(unittest.TestCase):
     def test_maxdb_size_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.z.maxdb_size = "asdf"
-        self.assertEqual('can\'t set attribute',str(e.exception))
+        self.assertEqual('can\'t set attribute', str(e.exception))
 
     def tearDown(self) -> None:
         self.v.delete()

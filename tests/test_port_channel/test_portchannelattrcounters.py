@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.portchannel import PortChannel
-from tests.test_port_channel.portchannel_vars import *
+from tests.test_port_channel.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestPortChannelAttrCounters(unittest.TestCase):
 
@@ -36,7 +37,7 @@ class TestPortChannelAttrCounters(unittest.TestCase):
     def test_counters_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.pc.counters = "mds"
-        self.assertEqual("can't set attribute",str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def test_counters_clear(self):
         self.skipTest("Needs to be fixed")

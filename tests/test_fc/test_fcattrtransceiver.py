@@ -1,9 +1,10 @@
 import unittest
 
 from mdssdk.fc import Fc
-from tests.test_fc.fc_vars import *
+from tests.test_fc.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestFcAttrTransceiver(unittest.TestCase):
 
@@ -17,7 +18,7 @@ class TestFcAttrTransceiver(unittest.TestCase):
             if (type(v) is Fc):
                 self.fc = v
                 log.debug(k)
-                break 
+                break
 
     def test_transceiver_read(self):
         dir_trans = [x for x in dir(self.fc.transceiver) if not x.startswith('_')]
@@ -25,7 +26,7 @@ class TestFcAttrTransceiver(unittest.TestCase):
         for t in dir_trans:
             log.debug(str(t) + " : " + str(self.fc.transceiver.__getattribute__(t)))
         self.skipTest("needs to be fixed")
-             
+
     def test_transceiver_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.fc.transceiver = []

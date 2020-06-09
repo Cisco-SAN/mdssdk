@@ -3,15 +3,16 @@ import re
 
 log = logging.getLogger(__name__)
 
+
 class ShowVsan(object):
-    def __init__(self, outlines, vsan_id = None):
+    def __init__(self, outlines, vsan_id=None):
         self._all_vsans = []
         self._group_dict = {}
         self.vsan_id = vsan_id
         self.process_all(outlines)
 
     def process_all(self, outlines):
-        outlines = "".join([eachline.strip("\n") for eachline in outlines])        
+        outlines = "".join([eachline.strip("\n") for eachline in outlines])
         PAT_VSAN_INFO = "vsan\s(?P<vsan>\d*)(\sinformation\s+name:(?P<name>\S*)\s+state:(?P<state>\S*)\s+interoperability mode:(?P<interop_mode>\S*)\s+loadbalancing:(?P<load_balancing>\S*)\s+operational state:(?P<operational_state>\S*))?"
         regex = re.compile(PAT_VSAN_INFO)
         match = regex.finditer(outlines)
@@ -20,9 +21,9 @@ class ShowVsan(object):
             self._group_dict = next((v for v in self._all_vsans if v["vsan"] == str(self.vsan_id)), {})
             log.debug(self._all_vsans)
             log.debug(self._group_dict)
- 
+
     @property
-    def id(self):        
+    def id(self):
         vsan_id = self._group_dict.get('vsan', None)
         if vsan_id is not None:
             return int(vsan_id)

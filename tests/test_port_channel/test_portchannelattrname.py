@@ -1,9 +1,10 @@
 import unittest
 
 from mdssdk.portchannel import PortChannel
-from tests.test_port_channel.portchannel_vars import *
+from tests.test_port_channel.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestPortChannelAttrName(unittest.TestCase):
 
@@ -20,13 +21,13 @@ class TestPortChannelAttrName(unittest.TestCase):
 
     def test_name_read(self):
         self.pc.create()
-        self.assertEqual('port-channel'+str(self.pc_id),self.pc.name)
+        self.assertEqual('port-channel' + str(self.pc_id), self.pc.name)
         self.pc.delete()
 
     def test_name_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.pc.name = "asdf"
-        self.assertEqual("can't set attribute",str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:
         self.pc.delete()

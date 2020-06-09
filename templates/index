@@ -20,7 +20,7 @@ cisco_nxos_show_feature.textfsm, .*, cisco_nxos, sh[[ow]] fe[[ature]]
 cisco_nxos_show_module.textfsm, .*, cisco_nxos, sh[[ow]] mod[[ule]] *
 cisco_nxos_show_version.textfsm, .*, cisco_nxos, sh[[ow]] ve[[rsion]]
 cisco_nxos_show_cores.textfsm, .*, cisco_nxos, sh[[ow]] cor[[es]]
-cisco_nxos_show_zone.textfsm, .*, cisco_nxos, sh[[ow]] zo[[ne]] *
+cisco_nxos_show_zone.textfsm, .*, cisco_nxos, sh[[ow]] zo[[ne]] n[[ame]] *
 
 
 

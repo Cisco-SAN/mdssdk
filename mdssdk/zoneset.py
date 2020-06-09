@@ -1,7 +1,7 @@
 import logging
 import time
 
-from .connection_manager.errors import CLIError, CustomException
+from .connection_manager.errors import CLIError, ZoneNotPresent
 from .nxapikeys import zonekeys
 from .parsers.zoneset import ShowZoneset, ShowZonesetActive
 from .utility.utils import get_key
@@ -9,10 +9,6 @@ from .vsan import Vsan
 from .zone import Zone
 
 log = logging.getLogger(__name__)
-
-
-class ZoneNotPresent(CustomException):
-    pass
 
 
 class ZoneSet(object):
@@ -33,10 +29,10 @@ class ZoneSet(object):
         >>>
     """
 
-    def __init__(self, switch, vsan_id, name):
+    def __init__(self, switch, name, vsan):
         self.__swobj = switch
         self._SW_VER = switch._SW_VER
-        self._vsan = vsan_id
+        self._vsan = vsan
         self._name = name
         # Create a dummy zone obj to send zoneset cmds, DO NOT use 'create' method with it!!
         log.debug("Init a dummy zone object for the zoneset with name " + self._name)
@@ -91,23 +87,6 @@ class ZoneSet(object):
         return vsan_obj
 
     @property
-    def vsan_id(self):
-        """
-        Get vsan id for the zone
-
-        :return: vsan: vsan id of the zone
-        :rtype: int
-        :example:
-            >>>
-            >>> zonesetObj = ZoneSet(switch_obj,"zoneset_fab_A",1)
-            >>> print(zonesetObj.vsan_id)
-            1
-            >>>
-
-        """
-        return self._vsan
-
-    @property
     def members(self):
         """
         Get members of the zoneset
@@ -125,6 +104,7 @@ class ZoneSet(object):
         retlist = {}
         out = self.__show_zoneset_name()
         if out:
+            active = self.is_active()
             if self.__swobj.is_connection_type_ssh():
                 cmd = "show zoneset name " + self._name + " vsan " + str(self._vsan)
                 outlines = self.__swobj.show(cmd)
@@ -133,7 +113,9 @@ class ZoneSet(object):
                 if out is not None:
                     for eachzdb in out:
                         zname = eachzdb['name']
-                        retlist[zname] = Zone(self.__swobj, eachzdb, self._vsan)
+                        zobj = Zone(self.__swobj, zname, self._vsan)
+                        zobj._set_part_of_active(active)
+                        retlist[zname] = zobj
                     return retlist
                 return None
             else:
@@ -144,11 +126,15 @@ class ZoneSet(object):
                         zdb = zonedata.get('ROW_zone', None)
                         if type(zdb) is dict:
                             zname = zdb[get_key(zonekeys.NAME, self._SW_VER)]
-                            retlist[zname] = Zone(self.__swobj, zname, self._vsan)
+                            zobj = Zone(self.__swobj, zname, self._vsan)
+                            zobj._set_part_of_active(active)
+                            retlist[zname] = zobj
                         else:
                             for eachzdb in zdb:
                                 zname = eachzdb[get_key(zonekeys.NAME, self._SW_VER)]
-                                retlist[zname] = Zone(self.__swobj, eachzdb, self._vsan)
+                                zobj = Zone(self.__swobj, zname, self._vsan)
+                                zobj._set_part_of_active(active)
+                                retlist[zname] = zobj
                         return retlist
         return None
 
@@ -269,7 +255,7 @@ class ZoneSet(object):
             shzoneset = ShowZonesetActive(outlines)
             if shzoneset.active == self._name:
                 return True
-            return False   
+            return False
         out = self.__swobj.show(cmd)
         log.debug(out)
         if out:
@@ -287,7 +273,7 @@ class ZoneSet(object):
             if name_of_zone is None:
                 self.__zoneObj._clear_lock_if_enhanced()
                 raise ZoneNotPresent(
-                    "The given zoneset member '" + eachmem._name + "' is not present in the switch. Please create the zone first.")
+                    "The given zoneset member '" + eachmem._name + "' is not present in the switch.")
             else:
                 if remove:
                     cmd = "no member " + name_of_zone
@@ -302,5 +288,18 @@ class ZoneSet(object):
         cmd = "show zoneset name " + self._name + " vsan  " + str(self._vsan)
         out = self.__swobj.show(cmd)
         log.debug(out)
-        # print(out)
-        return out
+        if out:
+            if self.__swobj.is_connection_type_ssh():
+                if type(out[0]) is str:
+                    if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
+                        raise CLIError(cmd, out[0])
+                    if "Zoneset not present" == out[0].strip():
+                        return None
+                        # raise CLIError(cmd, out[0])
+            # print(out)
+            return out
+        else:
+            return None
+
+# TODO active members from 8.4.2 to 8.4.2a
+# TODO in zone module to add active members

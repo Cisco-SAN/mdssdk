@@ -1,10 +1,11 @@
 import unittest
 
-from mdssdk.zoneset import ZoneSet
 from mdssdk.vsan import Vsan
-from tests.test_zoneset.zoneset_vars import *
+from mdssdk.zoneset import ZoneSet
+from tests.test_zoneset.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestZoneSetAttrVsan(unittest.TestCase):
 
@@ -19,7 +20,7 @@ class TestZoneSetAttrVsan(unittest.TestCase):
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
-        self.zoneset = ZoneSet(self.switch, self.id, "test_zoneset")
+        self.zoneset = ZoneSet(self.switch, "test_zoneset", self.id)
 
     def test_vsan_read(self):
         self.assertEqual(self.id, self.zoneset.vsan.id)

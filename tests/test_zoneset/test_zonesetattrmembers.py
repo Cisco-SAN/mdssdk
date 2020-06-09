@@ -1,12 +1,12 @@
 import unittest
 
-from mdssdk.zoneset import ZoneSet
-from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
-from mdssdk.connection_manager.errors import CLIError
-from tests.test_zoneset.zoneset_vars import *
+from mdssdk.zone import Zone
+from mdssdk.zoneset import ZoneSet
+from tests.test_zoneset.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestZoneSetAttrMembers(unittest.TestCase):
 
@@ -21,14 +21,14 @@ class TestZoneSetAttrMembers(unittest.TestCase):
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
-        self.zoneset = ZoneSet(self.switch, self.id, "test_zoneset")
+        self.zoneset = ZoneSet(self.switch, "test_zoneset", self.id)
         self.zoneset.create()
 
     def test_members_read(self):
         self.skipTest("needs to be fixed")
-        zone1 = Zone(self.switch, self.id, "test_zone1")
+        zone1 = Zone(self.switch, "test_zone1", self.id)
         zone1.create()
-        zone2 = Zone(self.switch, self.id, "test_zone2")
+        zone2 = Zone(self.switch, "test_zone2", self.id)
         zone2.create()
         members = [zone1, zone2]
         self.zoneset.add_members(members)

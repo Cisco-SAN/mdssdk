@@ -1,7 +1,7 @@
 import logging
 import re
 
-from .connection_manager.errors import CustomException
+from .connection_manager.errors import InvalidProfile
 
 log = logging.getLogger(__name__)
 
@@ -26,11 +26,6 @@ TOTAL_PAT = "^\| Total  \| n\/a  n\/a  n\/a   \|\s+(?P<scsi_itls>\d+)\s+(?P<nvme
 TOTAL_PAT_COMP = re.compile(TOTAL_PAT)
 TIME_PAT = "As of (?P<collected_at>.*)"
 TIME_PAT_COMP = re.compile(TIME_PAT)
-
-
-# Analytics related exceptions
-class InvalidProfile(CustomException):
-    pass
 
 
 class Analytics():

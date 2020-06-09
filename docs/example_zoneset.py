@@ -1,37 +1,38 @@
-from mdssdk.switch import Switch
-from mdssdk.zone import Zone
-from mdssdk.zoneset import ZoneSet
-from mdssdk.vsan import Vsan
+from mdssdk.devicealias import DeviceAlias
 from mdssdk.fc import Fc
 from mdssdk.portchannel import PortChannel
-from mdssdk.devicealias import DeviceAlias
+from mdssdk.switch import Switch
+from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
+from mdssdk.zoneset import ZoneSet
 
 # Switch credentials
 user = 'yourswitchusername'
 pw = 'yourswitchpassword'
-ip_address = 'yourswitchip' # 10.197.155.110
+ip_address = 'yourswitchip'  # 10.197.155.110
 p = 8443
 
 # Creating switch object
-sw = Switch(ip_address=ip_address,username=user,password=pw,connection_type='https',port=p,timeout=30,verify_ssl=False)
+sw = Switch(ip_address=ip_address, username=user, password=pw, connection_type='https', port=p, timeout=30,
+            verify_ssl=False)
 
 # Instantiating Vsan object with id 2
-v = Vsan(sw,2)
+v = Vsan(sw, 2)
 
 # Creating vsan
 v.create()
 
 # Creating Fc object for interface fc1/3
-int13 = Fc(sw,"fc1/3")
+int13 = Fc(sw, "fc1/3")
 
 # Instantiating PortChannel object 1
-pc1 = PortChannel(sw,1)
+pc1 = PortChannel(sw, 1)
 
 # Creating port channel
 pc1.create()
 
 # Adding interfaces to vsan 2
-v.add_interfaces([int13,pc1])
+v.add_interfaces([int13, pc1])
 
 # Instantiating DeviceAlias object
 d = DeviceAlias(sw)
@@ -47,7 +48,7 @@ z = Zone(sw, v, "zone1")
 z.create()
 
 # Configuring fcalias
-sw.config('fcalias name somefcalias vsan '+str(v.id))
+sw.config('fcalias name somefcalias vsan ' + str(v.id))
 
 memlist = [{'pwwn': '50:08:01:60:08:9f:4d:00'},
            {'pwwn': '50:08:01:60:08:9f:4d:01'},

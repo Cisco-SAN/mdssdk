@@ -6,6 +6,7 @@ log = logging.getLogger(__name__)
 PAT_NAME = "zoneset name\s+(?P<name>\S+)\s+vsan\s+(?P<vsan>\d+)"
 PAT_MEMBERS = "zone name\s+(?P<name>\S+)\s+vsan\s+(?P<vsan>\d+)"
 
+
 class ShowZoneset(object):
     def __init__(self, outlines):
         self._name = {}
@@ -14,7 +15,7 @@ class ShowZoneset(object):
         log.debug(self._name)
         log.debug(self._members)
 
-    def process_all(self, outlines):      
+    def process_all(self, outlines):
         match = re.search(PAT_NAME, outlines[0])
         if match:
             self._name = match.groupdict()
@@ -33,5 +34,4 @@ class ShowZoneset(object):
     def members(self):
         if not self._members:
             return None
-        return self._members       
-
+        return self._members

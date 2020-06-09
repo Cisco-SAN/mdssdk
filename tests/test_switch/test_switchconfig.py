@@ -1,7 +1,7 @@
 import unittest
 
 from mdssdk.connection_manager.errors import CLIError
-from tests.test_switch.switch_vars import *
+from tests.test_switch.vars import *
 
 log = logging.getLogger(__name__)
 

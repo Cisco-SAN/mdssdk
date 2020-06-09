@@ -1,9 +1,9 @@
 import base64
 import json
 import logging
+from builtins import range
 
 import requests
-from builtins import range
 from requests.auth import HTTPBasicAuth
 from urllib3.exceptions import InsecureRequestWarning
 

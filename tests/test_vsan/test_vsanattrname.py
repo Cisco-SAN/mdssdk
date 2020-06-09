@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.vsan import Vsan
-from tests.test_vsan.vsan_vars import *
+from tests.test_vsan.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestVsanAttrName(unittest.TestCase):
 
@@ -17,10 +18,10 @@ class TestVsanAttrName(unittest.TestCase):
             self.id = get_random_id()
             if self.id not in self.vsandb.keys():
                 break
-        self.v = Vsan(switch=self.switch, id=self.id) 
+        self.v = Vsan(switch=self.switch, id=self.id)
 
     def test_name_read(self):
-        name ="test___vsan___name"
+        name = "test___vsan___name"
         self.v.create(name)
         self.assertEqual(name, self.v.name)
         self.v.delete()
@@ -63,7 +64,7 @@ class TestVsanAttrName(unittest.TestCase):
         self.v.delete()
 
     def test_name_write_nonexistingvsan(self):
-        self.v.name = "vsantest"   ## writing name creates vsan on switch if it doesn't exist
+        self.v.name = "vsantest"  ## writing name creates vsan on switch if it doesn't exist
         self.assertEqual(self.id, self.v.id)
         self.v.delete()
 

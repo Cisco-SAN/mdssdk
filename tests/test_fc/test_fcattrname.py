@@ -1,9 +1,10 @@
 import unittest
 
 from mdssdk.fc import Fc
-from tests.test_fc.fc_vars import *
+from tests.test_fc.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestFcAttrName(unittest.TestCase):
 

@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.portchannel import PortChannel
-from tests.test_port_channel.portchannel_vars import *
+from tests.test_port_channel.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestPortChannelAttrTrunk(unittest.TestCase):
 
@@ -22,10 +23,10 @@ class TestPortChannelAttrTrunk(unittest.TestCase):
 
     def test_trunk_read(self):
         self.pc.create()
-        self.assertIn(self.pc.trunk,self.trunk_values)
+        self.assertIn(self.pc.trunk, self.trunk_values)
         self.pc.delete()
 
-    def test_trunk_read_nonexisting(self):  
+    def test_trunk_read_nonexisting(self):
         self.assertIsNone(self.pc.trunk)
 
     def test_trunk_write(self):
@@ -41,7 +42,8 @@ class TestPortChannelAttrTrunk(unittest.TestCase):
         trunk = "asdf"
         with self.assertRaises(CLIError) as e:
             self.pc.trunk = trunk
-        self.assertEqual("The command \" interface port-channel"+str(self.pc_id)+" ; switchport trunk mode  "+str(trunk)+" \" gave the error \" % Invalid command \".",str(e.exception))
+        self.assertEqual("The command \" interface port-channel" + str(self.pc_id) + " ; switchport trunk mode  " + str(
+            trunk) + " \" gave the error \" % Invalid command \".", str(e.exception))
 
     def tearDown(self) -> None:
         self.pc.delete()

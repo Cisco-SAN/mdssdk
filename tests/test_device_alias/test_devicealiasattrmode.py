@@ -1,9 +1,9 @@
 import unittest
 
-from mdssdk.connection_manager.errors import CLIError
+from mdssdk.connection_manager.errors import CLIError, InvalidMode
 from mdssdk.constants import BASIC, ENHANCED
-from mdssdk.devicealias import DeviceAlias, InvalidMode
-from tests.test_device_alias.da_vars import *
+from mdssdk.devicealias import DeviceAlias
+from tests.test_device_alias.vars import *
 
 log = logging.getLogger(__name__)
 

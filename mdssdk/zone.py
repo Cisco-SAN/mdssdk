@@ -2,7 +2,7 @@ import logging
 import re
 import time
 
-from .connection_manager.errors import CLIError, CustomException
+from .connection_manager.errors import CLIError, InvalidZoneMode, InvalidDefaultZone, InvalidZoneMemberType
 from .constants import ENHANCED, BASIC, PERMIT, DENY, PAT_WWN
 from .fc import Fc
 from .nxapikeys import zonekeys
@@ -11,18 +11,6 @@ from .utility.utils import get_key
 from .vsan import Vsan
 
 log = logging.getLogger(__name__)
-
-
-# zone related exceptions
-class InvalidZoneMode(CustomException):
-    pass
-
-
-class InvalidDefaultZone(CustomException):
-    pass
-
-class InvalidZoneMemberType(CustomException):
-    pass
 
 
 class Zone(object):
@@ -51,6 +39,10 @@ class Zone(object):
         self.__zones = None
         self.__rpc = None
         self.__method = u'cli_conf'
+        self._part_of_active_zs = False
+
+    def _set_part_of_active(self, val):
+        self._part_of_active_zs = val
 
     @property
     def name(self):
@@ -97,23 +89,6 @@ class Zone(object):
         return vsan_obj
 
     @property
-    def vsan_id(self):
-        """
-        Get vsan id for the zone
-
-        :return: vsan: vsan id of the zone
-        :rtype: int
-        :example:
-            >>>
-            >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
-            >>> print(zoneObj.vsan_id)
-            1
-            >>>
-
-        """
-        return self._vsan
-
-    @property
     def members(self):
         """
         Get members of the zone
@@ -132,62 +107,75 @@ class Zone(object):
         out = self.__show_zone_name()
         if out:
             if self.__swobj.is_connection_type_ssh():
-                return out
+                return self.__format_members_ssh(out)
+                # return out
             try:
                 retout = out['TABLE_zone_member']['ROW_zone_member']
             except KeyError:
                 return None
             if type(retout) is dict:
                 # means there is only one member for the zone, so convert to list and return
-                return self.__format_members([retout])
-            return self.__format_members(retout)
+                # return self.__format_members([retout])
+                return [retout]
+            return retout
+            # return self.__format_members(retout)
         return None
 
-    def __format_members_ssh(self, retout):
-        retvalues = []
-        for eachentry in retout:
-            type = eachentry['member_type']
-            temp = type.replace('-', '_')
-            val = eachentry[temp]
-            retvalues.append({})
+    def __format_members_ssh(self, out):
+        log.debug(out)
+        retout = []
+        for eachmem in out:
+            mem_dict = {}
+            for k, v in eachmem.items():
+                if k == 'type' and v == '':
+                    break
+                elif k == 'vsan' or k == 'zone_name' or v == '':
+                    continue
+                else:
+                    mem_dict[k] = v
+            if mem_dict:
+                retout.append(mem_dict)
+        if retout:
+            return retout
+        return None
 
-    def __format_members(self, retout):
-
-        #
-        # This function converts the input retout from this
-        #
-        # [{'type': 'pwwn', 'wwn': '50:08:01:60:08:9f:4d:00', 'dev_alias': 'JDSU-180-Lrow-1'},
-        #  {'type': 'pwwn', 'wwn': '50:08:01:60:08:9f:4d:01', 'dev_alias': 'JDSU-180-Lrow-2'},
-        #  {'type': 'interface', 'intf_fc': 'fc1/4', 'wwn': '20:00:00:de:fb:b1:96:10'},
-        #  {'type': 'device-alias', 'dev_alias': 'hello'}, {'type': 'ip-address', 'ipaddr': '1.1.1.1'},
-        #  {'type': 'symbolic-nodename', 'symnodename': 'symbnodename'},
-        #  {'type': 'fwwn', 'wwn': '11:12:13:14:15:16:17:18'}, {'type': 'fcid', 'fcid': '0x123456'},
-        #  {'type': 'interface', 'intf_port_ch': 1, 'wwn': '20:00:00:de:fb:b1:96:10'},
-        #  {'type': 'symbolic-nodename', 'symnodename': 'testsymnode'},
-        #  {'type': 'fcalias', 'fcalias_name': 'somefcalias', 'fcalias_vsan_id': 1}]
-        #
-        # to this one
-        #
-        # [{'pwwn': '50:08:01:60:08:9f:4d:00'},
-        #  {'pwwn': '50:08:01:60:08:9f:4d:01'},
-        #  {'interface': 'fc1/4'},
-        #  {'device-alias': 'hello'}, {'ip-address': '1.1.1.1'},
-        #  {'symbolic-nodename': 'symbnodename'},
-        #  {'fwwn': '11:12:13:14:15:16:17:18'}, {'fcid': '0x123456'},
-        #  {'interface': 1},
-        #  {'symbolic-nodename': 'testsymnode'},
-        #  {'fcalias': 'somefcalias'}]
-        log.debug(retout)
-        retvalues = []
-        valid_zone_members = get_key(zonekeys.VALID_MEMBERS, self._SW_VER)
-        for eachmem in retout:
-            type = eachmem[get_key(zonekeys.ZONE_MEMBER_TYPE, self._SW_VER)]
-            nxapikey = valid_zone_members.get(type)
-            for eachkey in eachmem.keys():
-                if eachkey.startswith(nxapikey):
-                    value = eachmem[eachkey]
-                    retvalues.append({type: value})
-        return retvalues
+    # def __format_members(self, retout):
+    #     print(retout)
+    #     #
+    #     # This function converts the input retout from this
+    #     #
+    #     # [{'type': 'pwwn', 'wwn': '50:08:01:60:08:9f:4d:00', 'dev_alias': 'JDSU-180-Lrow-1'},
+    #     #  {'type': 'pwwn', 'wwn': '50:08:01:60:08:9f:4d:01', 'dev_alias': 'JDSU-180-Lrow-2'},
+    #     #  {'type': 'interface', 'intf_fc': 'fc1/4', 'wwn': '20:00:00:de:fb:b1:96:10'},
+    #     #  {'type': 'device-alias', 'dev_alias': 'hello'}, {'type': 'ip-address', 'ipaddr': '1.1.1.1'},
+    #     #  {'type': 'symbolic-nodename', 'symnodename': 'symbnodename'},
+    #     #  {'type': 'fwwn', 'wwn': '11:12:13:14:15:16:17:18'}, {'type': 'fcid', 'fcid': '0x123456'},
+    #     #  {'type': 'interface', 'intf_port_ch': 1, 'wwn': '20:00:00:de:fb:b1:96:10'},
+    #     #  {'type': 'symbolic-nodename', 'symnodename': 'testsymnode'},
+    #     #  {'type': 'fcalias', 'fcalias_name': 'somefcalias', 'fcalias_vsan_id': 1}]
+    #     #
+    #     # to this one
+    #     #
+    #     # [{'pwwn': '50:08:01:60:08:9f:4d:00'},
+    #     #  {'pwwn': '50:08:01:60:08:9f:4d:01'},
+    #     #  {'interface': 'fc1/4'},
+    #     #  {'device-alias': 'hello'}, {'ip-address': '1.1.1.1'},
+    #     #  {'symbolic-nodename': 'symbnodename'},
+    #     #  {'fwwn': '11:12:13:14:15:16:17:18'}, {'fcid': '0x123456'},
+    #     #  {'interface': 1},
+    #     #  {'symbolic-nodename': 'testsymnode'},
+    #     #  {'fcalias': 'somefcalias'}]
+    #     log.debug(retout)
+    #     retvalues = []
+    #     valid_zone_members = get_key(zonekeys.VALID_MEMBERS, self._SW_VER)
+    #     for eachmem in retout:
+    #         type = eachmem[get_key(zonekeys.ZONE_MEMBER_TYPE, self._SW_VER)]
+    #         nxapikey = valid_zone_members.get(type)
+    #         for eachkey in eachmem.keys():
+    #             if eachkey.startswith(nxapikey):
+    #                 value = eachmem[eachkey]
+    #                 retvalues.append({type: value})
+    #     return retvalues
 
     @property
     def locked(self):
@@ -775,7 +763,7 @@ class Zone(object):
     def __get_cmd_list(self, mem, removeflag):
         key = list(mem.keys())[0]
         val = list(mem.values())[0]
-        valid_zone_members = get_key(zonekeys.VALID_MEMBERS, self._SW_VER) 
+        valid_zone_members = get_key(zonekeys.VALID_MEMBERS, self._SW_VER)
         if key in list(valid_zone_members.keys()):
             cmd = "member " + key + " " + val
             if removeflag:
@@ -791,23 +779,33 @@ class Zone(object):
         cmd = "show zone name " + self._name + " vsan  " + str(self._vsan)
         out = self.__swobj.show(cmd)
         log.debug(out)
-        if self.__swobj.is_connection_type_ssh():
-            if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
-                raise CLIError(cmd, out[0])
-
-        # print(out)
-        return out
+        if out:
+            if self.__swobj.is_connection_type_ssh():
+                if type(out[0]) is str:
+                    if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
+                        raise CLIError(cmd, out[0])
+                    if "Zone not present" == out[0].strip():
+                        return None
+                        # raise CLIError(cmd, out[0])
+            # print(out)
+            return out
+        else:
+            return None
 
     def __show_zone_status(self):
         log.debug("Executing the cmd show zone status vsan <> ")
         cmd = "show zone status vsan  " + str(self._vsan)
         out = self.__swobj.show(cmd)
         log.debug(out)
-        if self.__swobj.is_connection_type_ssh():
-            if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
-                raise CLIError(cmd, out[0])
-            return out
-        return out['TABLE_zone_status']['ROW_zone_status']
+        if out:
+            if self.__swobj.is_connection_type_ssh():
+                if type(out[0]) is str:
+                    if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
+                        raise CLIError(cmd, out[0])
+                return out
+            return out['TABLE_zone_status']['ROW_zone_status']
+        else:
+            raise CLIError(cmd, "VSAN " + str(self._vsan) + " is not configured")
 
     def _send_zone_cmd(self, cmd):
         out = None
@@ -823,15 +821,15 @@ class Zone(object):
             # if not self.__swobj.is_connection_type_ssh():
             #     log.error(c)
             #     raise CLIError(cmd, c.message)
-            self._check_msg(c.message, cmd) 
-      
+            self._check_msg(c.message, cmd)
+
         if out is not None and not self.__swobj.is_connection_type_ssh():
             msg = out['msg'].strip()
             log.debug("------" + msg)
             if msg:
                 self._check_msg(msg, cmd)
         self.__commit_config_if_locked()
-    
+
     def _check_msg(self, msg, cmd):
         if "Current zoning mode same as specified zoning mode" in msg:
             log.debug(msg)

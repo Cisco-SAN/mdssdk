@@ -49,7 +49,7 @@ class SwitchUtils:
                     pcobj = PortChannel(switch=self, id=pcid)
                     retlist[pcname] = pcobj
             return retlist
-            
+
         # Get FC related data
         fcout = out.get('TABLE_interface_brief_fc', None)
         if fcout is not None:
@@ -102,7 +102,7 @@ class SwitchUtils:
                 id = int(eachele.get('vsan'))
                 vobj = Vsan(switch=self, id=id)
                 retlist[id] = vobj
-            return retlist  
+            return retlist
         out = self.show(cmd)['TABLE_vsan']['ROW_vsan']
         for eachele in out:
             id = eachele.get(get_key(vsankeys.VSAN_ID, self._SW_VER))

@@ -1,9 +1,10 @@
 import unittest
 
 from mdssdk.vsan import Vsan
-from tests.test_vsan.vsan_vars import *
+from tests.test_vsan.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestVsanAttrSuspend(unittest.TestCase):
 
@@ -16,7 +17,7 @@ class TestVsanAttrSuspend(unittest.TestCase):
             self.id = get_random_id()
             if self.id not in self.vsandb.keys():
                 break
-        self.v = Vsan(switch=self.switch, id=self.id) 
+        self.v = Vsan(switch=self.switch, id=self.id)
 
     def test_suspend_write(self):
         self.v.create()
@@ -32,7 +33,7 @@ class TestVsanAttrSuspend(unittest.TestCase):
         self.assertEqual("unreadable attribute", str(e.exception))
 
     def test_suspend_write_nonexistingvsan(self):
-        self.v.suspend = True # writing suspend value creates vsan
+        self.v.suspend = True  # writing suspend value creates vsan
         self.assertEqual("suspended", self.v.state)
         self.v.delete()
 

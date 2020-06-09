@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
-from tests.test_fc.fc_vars import *
+from tests.test_fc.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestFcAttrSpeed(unittest.TestCase):
 
@@ -27,11 +28,11 @@ class TestFcAttrSpeed(unittest.TestCase):
         self.assertIn(self.fc.speed, self.speed_values_read)
 
     def test_speed_write(self):
-        self.skipTest("needs to be fixed")
+        # self.skipTest("needs to be fixed")
         for speed in self.speed_values_write:
             self.fc.speed = speed
             self.assertEqual(speed, self.fc.speed)
-        
+
     def test_speed_write_invalid(self):
         speed = "asdf"
         with self.assertRaises(CLIError) as e:
@@ -40,15 +41,15 @@ class TestFcAttrSpeed(unittest.TestCase):
             speed) + " \" gave the error \" % Invalid command \".", str(e.exception))
 
     def tearDown(self) -> None:
-        if(self.fc.speed != self.old):
+        if (self.fc.speed != self.old):
             try:
                 if ("--" in self.old):
                     self.fc.speed = 'auto'
                 else:
-                    self.fc.speed = ((int)(self.old))*1000 # read in Gbps, write in Mbps
+                    self.fc.speed = ((int)(self.old)) * 1000  # read in Gbps, write in Mbps
                 self.assertEqual(self.old, self.fc.speed)
             except CLIError as e:
                 if "port already in a port-channel, no config allowed" in str(e.msg):
                     pass
                 else:
-                    log.debug("CLIError : "+str(e.msg))
+                    log.debug("CLIError : " + str(e.msg))

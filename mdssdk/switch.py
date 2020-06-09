@@ -7,7 +7,8 @@ import time
 from .analytics import Analytics
 from .connection_manager.connect_netmiko import SSHSession
 from .connection_manager.connect_nxapi import ConnectNxapi
-from .connection_manager.errors import CLIError, CustomException
+from .connection_manager.errors import CLIError, UnsupportedVersion, VersionNotFound, UnsupportedFeature, \
+    UnsupportedConfig
 from .constants import DEFAULT
 from .nxapikeys import versionkeys, featurekeys
 from .parsers.switch import ShowTopology
@@ -15,22 +16,6 @@ from .utility.switch_utility import SwitchUtils
 from .utility.utils import get_key
 
 log = logging.getLogger(__name__)
-
-
-class UnsupportedVersion(CustomException):
-    pass
-
-
-class VersionNotFound(CustomException):
-    pass
-
-
-class UnsupportedFeature(CustomException):
-    pass
-
-
-class UnsupportedConfig(CustomException):
-    pass
 
 
 def log_exception(logger):
@@ -742,7 +727,7 @@ class Switch(SwitchUtils):
             log.debug("Result got via ssh was :")
             log.debug(retdict)
             return retdict
-            
+
         return_list = self._cli_command(commands, rpc=rpc, method=method)
 
         log.debug("Config commands sent are :")

@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.vsan import Vsan
-from tests.test_vsan.vsan_vars import *
+from tests.test_vsan.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestVsanCreate(unittest.TestCase):
 

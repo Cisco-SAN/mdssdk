@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.portchannel import PortChannel
-from tests.test_port_channel.portchannel_vars import *
+from tests.test_port_channel.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestPortChannelAttrStatus(unittest.TestCase):
 
@@ -41,7 +42,8 @@ class TestPortChannelAttrStatus(unittest.TestCase):
         status = "asdf"
         with self.assertRaises(CLIError) as e:
             self.pc.status = status
-        self.assertEqual("The command \" terminal dont-ask ; interface port-channel"+str(self.pc_id)+" ; "+str(status)+" ; no terminal dont-ask \" gave the error \" % Invalid command \".",str(e.exception))
+        self.assertEqual("The command \" terminal dont-ask ; interface port-channel" + str(self.pc_id) + " ; " + str(
+            status) + " ; no terminal dont-ask \" gave the error \" % Invalid command \".", str(e.exception))
 
     def tearDown(self) -> None:
         self.pc.delete()

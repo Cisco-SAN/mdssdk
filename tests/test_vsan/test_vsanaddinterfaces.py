@@ -4,9 +4,10 @@ from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
 from mdssdk.portchannel import PortChannel
 from mdssdk.vsan import Vsan, VsanNotPresent
-from tests.test_vsan.vsan_vars import *
+from tests.test_vsan.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestVsanAddInterfaces(unittest.TestCase):
 
@@ -24,9 +25,9 @@ class TestVsanAddInterfaces(unittest.TestCase):
         self.interfaces = self.switch.interfaces
         while True:
             self.pc_id = get_random_id(1, 256)
-            if "port-channel"+str(self.pc_id) not in self.interfaces.keys():
+            if "port-channel" + str(self.pc_id) not in self.interfaces.keys():
                 break
-        self.pc = PortChannel(self.switch, self.pc_id) 
+        self.pc = PortChannel(self.switch, self.pc_id)
         self.invalid_fc = Fc(self.switch, "fc48/48")  ## matches fc pattern but is not present on switch
 
     def test_addinterfaces_type_error(self):

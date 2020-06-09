@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.portchannel import PortChannel
-from tests.test_port_channel.portchannel_vars import *
+from tests.test_port_channel.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestPortChannelAttrMode(unittest.TestCase):
 
@@ -22,7 +23,7 @@ class TestPortChannelAttrMode(unittest.TestCase):
 
     def test_mode_read(self):
         self.pc.create()
-        self.assertIn(self.pc.mode, self.mode_values+["--"])
+        self.assertIn(self.pc.mode, self.mode_values + ["--"])
         self.pc.delete()
 
     def test_mode_read_nonexisting(self):
@@ -35,7 +36,7 @@ class TestPortChannelAttrMode(unittest.TestCase):
         for mode in self.mode_values:
             self.pc.mode = mode
             self.assertEqual(mode, self.pc.mode)
-        if('--' in oldmode):
+        if ('--' in oldmode):
             oldmode = 'auto'
         self.pc.mode = oldmode
         self.pc.delete()
@@ -44,7 +45,8 @@ class TestPortChannelAttrMode(unittest.TestCase):
         mode = "asdf"
         with self.assertRaises(CLIError) as e:
             self.pc.mode = mode
-        self.assertEqual("The command \" interface port-channel"+str(self.pc_id)+" ; switchport mode  "+str(mode)+" \" gave the error \" % Invalid command \".",str(e.exception))
+        self.assertEqual("The command \" interface port-channel" + str(self.pc_id) + " ; switchport mode  " + str(
+            mode) + " \" gave the error \" % Invalid command \".", str(e.exception))
 
     def tearDown(self) -> None:
         self.pc.delete()

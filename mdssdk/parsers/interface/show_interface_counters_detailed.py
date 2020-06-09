@@ -81,28 +81,29 @@ FIB drops for ports\s+(?P<pg_fib_start>\d+)-(?P<pg_fib_end>\d+):\s+(?P<pg_fib_dr
 XBAR errors for ports\s+(?P<pg_xbar_start>\d+)-(?P<pg_xbar_end>\d+):\s+(?P<pg_xbar_drops>\d+)\s+ \
 Other drop count:\s+(?P<pg_other_drops>\d+)"
 
+
 class ShowInterfaceCountersDetailed(object):
     def __init__(self, outlines):
         self._group_dict = {}
         self.process_all(outlines)
 
     def process_all(self, outlines):
-        outlines = "".join([eachline.strip("\n") for eachline in outlines])        
+        outlines = "".join([eachline.strip("\n") for eachline in outlines])
         match = re.search(PAT_TS, outlines)
         if match:
-            self._group_dict['total_stats'] = { k:int(v) for k,v in match.groupdict().items()}
+            self._group_dict['total_stats'] = {k: int(v) for k, v in match.groupdict().items()}
         match = re.search(PAT_LS, outlines)
         if match:
-            self._group_dict['link_stats'] = { k:int(v) for k,v in match.groupdict().items()}
+            self._group_dict['link_stats'] = {k: int(v) for k, v in match.groupdict().items()}
         match = re.search(PAT_LOS, outlines)
         if match:
-            self._group_dict['loop_stats'] = { k:int(v) for k,v in match.groupdict().items()}
+            self._group_dict['loop_stats'] = {k: int(v) for k, v in match.groupdict().items()}
         match = re.search(PAT_CS, outlines)
         if match:
-            self._group_dict['congestion_stats'] = { k:int(v) for k,v in match.groupdict().items() if v is not None}
+            self._group_dict['congestion_stats'] = {k: int(v) for k, v in match.groupdict().items() if v is not None}
         match = re.search(PAT_OS, outlines)
         if match:
-            self._group_dict['other_stats'] = { k:int(v) for k,v in match.groupdict().items()}
+            self._group_dict['other_stats'] = {k: int(v) for k, v in match.groupdict().items()}
         log.debug(self._group_dict)
 
     @property

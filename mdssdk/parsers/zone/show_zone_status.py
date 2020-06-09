@@ -10,8 +10,9 @@ PAT_SMART = "smart-zoning:\s+(?P<smart_zone>\S+)"
 PAT_FULL_DB = "Full Zoning Database :\s+DB size:\s+(?P<fulldb_size>\d+)\s+bytes\s+Zonesets:\s+(?P<fulldb_zoneset_count>\d+)\s+Zones:\s+(?P<fulldb_zone_count>\d+)"
 PAT_EFF_DB = "Current Total Zone DB Usage:\s+(?P<effectivedb_size>\d+)\s+\/\s+(?P<maxdb_size>\d+)\s+bytes\s+\((?P<effectivedb_size_percentage>\d+)"
 PAT_ACTIVE_DB = "Active Zoning Database :\s+DB Size:\s+(?P<activedb_size>\d+)\s+bytes\s+Name:\s+(?P<activedb_zoneset_name>\S+)\s+Zonesets:\s+(?P<activedb_zoneset_count>\d+)\s+Zones:\s+(?P<activedb_zone_count>\d+)"
-PAT_STATUS =  "Status:\s+(?P<status>.*)"
+PAT_STATUS = "Status:\s+(?P<status>.*)"
 ALL_PAT = [PAT_LOCK, PAT_MODE, PAT_DEFAULT, PAT_SMART, PAT_FULL_DB, PAT_EFF_DB, PAT_ACTIVE_DB, PAT_STATUS]
+
 
 class ShowZoneStatus(object):
     def __init__(self, outlines):
@@ -19,8 +20,8 @@ class ShowZoneStatus(object):
         self.process_all(outlines)
         log.debug(self._group_dict)
 
-    def process_all(self, outlines):     
-        outlines = "".join([eachline for eachline in outlines])  
+    def process_all(self, outlines):
+        outlines = "".join([eachline for eachline in outlines])
         for pat in ALL_PAT:
             match = re.search(pat, outlines)
             if match:
@@ -77,13 +78,12 @@ class ShowZoneStatus(object):
 
     @property
     def effectivedb_size(self):
-        return self._group_dict.get('effectivedb_size', None)    
-    
+        return self._group_dict.get('effectivedb_size', None)
+
     @property
     def effectivedb_size_percentage(self):
-        return self._group_dict.get('effectivedb_size_percentage', None)    
+        return self._group_dict.get('effectivedb_size_percentage', None)
 
     @property
     def status(self):
         return self._group_dict.get('status', None)
-

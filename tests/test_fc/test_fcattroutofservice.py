@@ -1,9 +1,12 @@
+import random
+import time
 import unittest
 
 from mdssdk.fc import Fc
-from tests.test_fc.fc_vars import *
+from tests.test_fc.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestFcAttrOutOfService(unittest.TestCase):
 
@@ -27,8 +30,8 @@ class TestFcAttrOutOfService(unittest.TestCase):
         self.assertEqual("unreadable attribute", str(e.exception))
 
     def test_out_of_service_write(self):
-        self.skipTest("needs to be fixed")
-        if(self.fc.status == 'outOfServc'):
+        # self.skipTest("needs to be fixed")
+        if (self.fc.status == 'outOfServc'):
             self.fc.out_of_service = False
             self.assertIn(self.fc.status, self.status_values)
             self.fc.out_of_service = True
@@ -37,6 +40,8 @@ class TestFcAttrOutOfService(unittest.TestCase):
             self.fc.out_of_service = True
             self.assertEqual('outOfServc', self.fc.status)
             self.fc.out_of_service = False
+            self.fc.status = "no shutdown"
+            time.sleep(2)
             self.assertEqual(self.old, self.fc.status)
 
     def test_out_of_service_write_invalid(self):

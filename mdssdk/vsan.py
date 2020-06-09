@@ -46,7 +46,7 @@ class Vsan(object):
         """
         if self.__swobj.is_connection_type_ssh():
             outlines = self.__swobj.show("show vsan")
-            shvsan = ShowVsan(outlines,self._id)
+            shvsan = ShowVsan(outlines, self._id)
             return shvsan.id
         try:
             out = self.__get_facts()
@@ -83,7 +83,7 @@ class Vsan(object):
         """
         if self.__swobj.is_connection_type_ssh():
             outlines = self.__swobj.show("show vsan")
-            shvsan = ShowVsan(outlines,self._id)
+            shvsan = ShowVsan(outlines, self._id)
             return shvsan.name
         try:
             out = self.__get_facts()
@@ -109,7 +109,7 @@ class Vsan(object):
         """
         if self.__swobj.is_connection_type_ssh():
             outlines = self.__swobj.show("show vsan")
-            shvsan = ShowVsan(outlines,self._id)
+            shvsan = ShowVsan(outlines, self._id)
             return shvsan.state
         try:
             out = self.__get_facts()

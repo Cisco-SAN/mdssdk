@@ -1,28 +1,15 @@
 import logging
 import re
 
-from .connection_manager.errors import CustomException, CLIError
+from .connection_manager.errors import PortChannelNotPresent, InvalidPortChannelRange, InvalidChannelMode, CLIError
 from .constants import ON, ACTIVE, PAT_FC, PAT_PC, VALID_PC_RANGE
 from .fc import Fc
 from .interface import Interface
 from .nxapikeys import portchanelkeys
+from .parsers.portchannel import ShowPortChannelDatabase, ShowPortChannelDatabaseDetail
 from .utility.utils import get_key
-from .parsers.portchannel import ShowPortChannelDatabase,ShowPortChannelDatabaseDetail
 
 log = logging.getLogger(__name__)
-
-
-# portchannel related exceptions
-class PortChannelNotPresent(CustomException):
-    pass
-
-
-class InvalidPortChannelRange(CustomException):
-    pass
-
-
-class InvalidChannelMode(CustomException):
-    pass
 
 
 class PortChannel(Interface):
@@ -205,7 +192,7 @@ class PortChannel(Interface):
             try:
                 self.__swobj.config(cmd)
             except CLIError as c:
-                if not "port-channel "+str(self._id)+" deleted and all its members disabled" in c.message:
+                if not "port-channel " + str(self._id) + " deleted and all its members disabled" in c.message:
                     raise CLIError(cmd, c.message)
 
     def add_members(self, interfaces):
@@ -234,7 +221,7 @@ class PortChannel(Interface):
             try:
                 out = self.__swobj.config(cmd)
             except CLIError as c:
-                if str(eachint.name)+" added to port-channel "+str(self._id)+" and disabled" in c.message:
+                if str(eachint.name) + " added to port-channel " + str(self._id) + " and disabled" in c.message:
                     continue
                 raise CLIError(cmd, c.message)
 
@@ -261,7 +248,7 @@ class PortChannel(Interface):
             try:
                 out = self.__swobj.config(cmd)
             except CLIError as c:
-                if str(eachint.name)+" removed from port-channel "+str(self._id)+" and disabled" in c.message:
+                if str(eachint.name) + " removed from port-channel " + str(self._id) + " and disabled" in c.message:
                     continue
                 raise CLIError(cmd, c.message)
 
@@ -277,7 +264,7 @@ class PortChannel(Interface):
         out = self.__swobj.show(cmd)
         log.debug(out)
         if self.__swobj.is_connection_type_ssh():
-            shpc = ShowPortChannelDatabase(out,self._id)
+            shpc = ShowPortChannelDatabase(out, self._id)
             return shpc.present
         if out:
             # There is atleast one PC in the switch

@@ -1,11 +1,12 @@
 import unittest
 
-from mdssdk.zoneset import ZoneSet, ZoneNotPresent
-from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
-from tests.test_zoneset.zoneset_vars import *
+from mdssdk.zone import Zone
+from mdssdk.zoneset import ZoneSet, ZoneNotPresent
+from tests.test_zoneset.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestZoneSetAddMembers(unittest.TestCase):
 
@@ -20,20 +21,21 @@ class TestZoneSetAddMembers(unittest.TestCase):
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
-        self.zoneset = ZoneSet(self.switch, self.id, "test_zoneset")
+        self.zoneset = ZoneSet(self.switch, "test_zoneset", self.id)
         self.zoneset.create()
 
     def test_add_members_nonexisting(self):
-        zone = Zone(self.switch, self.id, "test_zone")
+        zone = Zone(self.switch, "test_zone", self.id)
         with self.assertRaises(ZoneNotPresent) as e:
             self.zoneset.add_members([zone])
-        self.assertEqual("ZoneNotPresent: The given zoneset member 'test_zone' is not present in the switch. Please create the zone first.", str(e.exception))
+        self.assertEqual("ZoneNotPresent: The given zoneset member 'test_zone' is not present in the switch.",
+                         str(e.exception))
 
     def test_add_members(self):
         self.skipTest("needs to be fixed")
-        zone1 = Zone(self.switch, self.id, "test_zone1")
+        zone1 = Zone(self.switch, "test_zone1", self.id)
         zone1.create()
-        zone2 = Zone(self.switch, self.id, "test_zone2")
+        zone2 = Zone(self.switch, "test_zone2", self.id)
         zone2.create()
         members = [zone1, zone2]
         self.zoneset.add_members(members)

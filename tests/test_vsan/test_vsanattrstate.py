@@ -1,9 +1,10 @@
 import unittest
 
 from mdssdk.vsan import Vsan
-from tests.test_vsan.vsan_vars import *
+from tests.test_vsan.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestVsanAttrState(unittest.TestCase):
 
@@ -16,7 +17,7 @@ class TestVsanAttrState(unittest.TestCase):
             self.id = get_random_id()
             if self.id not in self.vsandb.keys():
                 break
-        self.v = Vsan(switch=self.switch, id=self.id) 
+        self.v = Vsan(switch=self.switch, id=self.id)
 
     def test_state_read(self):
         self.v.create()

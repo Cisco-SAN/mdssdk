@@ -1,12 +1,13 @@
 import unittest
 
-from mdssdk.zoneset import ZoneSet
-from mdssdk.zone import Zone
-from mdssdk.vsan import Vsan
 from mdssdk.connection_manager.errors import CLIError
-from tests.test_zoneset.zoneset_vars import *
+from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
+from mdssdk.zoneset import ZoneSet
+from tests.test_zoneset.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestZoneSetRemoveMembers(unittest.TestCase):
 
@@ -21,21 +22,22 @@ class TestZoneSetRemoveMembers(unittest.TestCase):
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
-        self.zone = Zone(self.switch, self.id, "test_zone")
+        self.zone = Zone(self.switch, "test_zone", self.id)
         self.zone.create()
-        self.zoneset = ZoneSet(self.switch, self.id, "test_zoneset")
+        self.zoneset = ZoneSet(self.switch, "test_zoneset", self.id)
         self.zoneset.create()
 
     def test_remove_members_nonexisting(self):
         self.assertIsNone(self.zoneset.members)
         with self.assertRaises(CLIError) as e:
             self.zoneset.remove_members([self.zone])
-        self.assertEqual('The command " zoneset name test_zoneset vsan ' + str(self.id) + ' ; no member test_zone " gave the error " Zone not present ".', str(e.exception))
+        self.assertEqual('The command " zoneset name test_zoneset vsan ' + str(
+            self.id) + ' ; no member test_zone " gave the error " Zone not present ".', str(e.exception))
 
     def test_remove_members(self):
         self.skipTest("needs to be fixed")
         zone1 = self.zone
-        zone2 = Zone(self.switch, self.id, "test_zone2")
+        zone2 = Zone(self.switch, "test_zone2", self.id)
         zone2.create()
         self.zoneset.add_members([zone1, zone2])
         self.assertIsNotNone(self.zoneset.members)

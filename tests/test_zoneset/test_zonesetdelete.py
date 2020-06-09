@@ -1,11 +1,12 @@
 import unittest
 
-from mdssdk.zoneset import ZoneSet
-from mdssdk.vsan import Vsan
 from mdssdk.connection_manager.errors import CLIError
-from tests.test_zoneset.zoneset_vars import *
+from mdssdk.vsan import Vsan
+from mdssdk.zoneset import ZoneSet
+from tests.test_zoneset.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestZoneSetDelete(unittest.TestCase):
 
@@ -20,11 +21,11 @@ class TestZoneSetDelete(unittest.TestCase):
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
-        self.zoneset = ZoneSet(self.switch, self.id, "test_zoneset")
+        self.zoneset = ZoneSet(self.switch, "test_zoneset", self.id)
 
     def test_delete(self):
         self.zoneset.create()
-        self.assertEqual('test_zoneset',self.zoneset.name)
+        self.assertEqual('test_zoneset', self.zoneset.name)
         self.zoneset.delete()
         self.assertIsNone(self.zoneset.name)
 

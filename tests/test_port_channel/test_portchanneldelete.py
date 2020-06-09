@@ -1,9 +1,10 @@
 import unittest
 
 from mdssdk.portchannel import PortChannel
-from tests.test_port_channel.portchannel_vars import *
+from tests.test_port_channel.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestPortChannelDelete(unittest.TestCase):
 
@@ -20,7 +21,7 @@ class TestPortChannelDelete(unittest.TestCase):
 
     def test_delete_nonexisting(self):
         self.assertIsNone(self.pc.channel_mode)
-        self.pc.delete() # no error
+        self.pc.delete()  # no error
         self.assertIsNone(self.pc.channel_mode)
 
     def test_delete(self):

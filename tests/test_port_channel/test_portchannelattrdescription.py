@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.portchannel import PortChannel
-from tests.test_port_channel.portchannel_vars import *
+from tests.test_port_channel.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestPortChannelAttrDescription(unittest.TestCase):
 
@@ -42,7 +43,7 @@ class TestPortChannelAttrDescription(unittest.TestCase):
         desc = "switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678"
         with self.assertRaises(CLIError) as e:
             self.pc.description = desc
-        self.assertIn('String exceeded max length of (254)',str(e.exception))
+        self.assertIn('String exceeded max length of (254)', str(e.exception))
         self.pc.delete()
 
     def tearDown(self) -> None:

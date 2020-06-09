@@ -1,6 +1,6 @@
 import unittest
 
-from tests.test_switch.switch_vars import *
+from tests.test_switch.vars import *
 
 log = logging.getLogger(__name__)
 
@@ -19,8 +19,7 @@ class TestSwitchAttrModules(unittest.TestCase):
             for t in temp:
                 log.debug(str(t) + " : " + str(self.switch.modules[0].__getattribute__(t)))
         else:
-            log.debug("Modules : None")
-        self.skipTest("Needs to be fixed")
+            self.fail("switch.modules failed to get module objects")
 
     def test_modules_write_error(self):
         if (self.switch.modules is not None):

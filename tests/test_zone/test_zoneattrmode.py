@@ -1,11 +1,12 @@
 import unittest
 
-from mdssdk.zone import Zone, InvalidZoneMode
-from mdssdk.vsan import Vsan
 from mdssdk.constants import BASIC, ENHANCED
-from tests.test_zone.zone_vars import *
+from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone, InvalidZoneMode
+from tests.test_zone.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestZoneAttrMode(unittest.TestCase):
 
@@ -20,7 +21,7 @@ class TestZoneAttrMode(unittest.TestCase):
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
-        self.z = Zone(self.switch, self.id, "test_zone")
+        self.z = Zone(self.switch, "test_zone", self.id)
         self.old = self.z.mode
 
     def test_mode_read(self):

@@ -3,7 +3,7 @@ import unittest
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
 from mdssdk.portchannel import PortChannel, PortChannelNotPresent
-from tests.test_port_channel.portchannel_vars import *
+from tests.test_port_channel.vars import *
 
 log = logging.getLogger(__name__)
 
@@ -25,13 +25,13 @@ class TestPortChannelAddMembers(unittest.TestCase):
             if (type(v) is Fc):
                 self.fc = v
                 log.debug(k)
-                break 
+                break
 
     def test_add_members_paramtype(self):
         self.pc.create()
         with self.assertRaises(TypeError) as e:
             self.pc.add_members(self.fc)
-        self.assertEqual("'Fc' object is not iterable",str(e.exception))
+        self.assertEqual("'Fc' object is not iterable", str(e.exception))
         self.pc.delete()
 
     def test_add_members_one(self):
@@ -43,11 +43,11 @@ class TestPortChannelAddMembers(unittest.TestCase):
     def test_add_members_multiple(self):
         self.pc.create()
         while True:
-            k,v = random.choice(list(self.interfaces.items()))
-            if (type(v) is Fc and k!=self.fc.name):
+            k, v = random.choice(list(self.interfaces.items()))
+            if (type(v) is Fc and k != self.fc.name):
                 fc2 = v
                 log.debug(k)
-                break 
+                break
         self.pc.add_members([self.fc, fc2])
         self.assertIn(self.fc.name, self.pc.members)
         self.assertIn(fc2.name, self.pc.members)
@@ -56,15 +56,17 @@ class TestPortChannelAddMembers(unittest.TestCase):
     def test_add_members_nonexisting(self):
         with self.assertRaises(PortChannelNotPresent) as e:
             self.pc.add_members([self.fc])
-        self.assertEqual("PortChannelNotPresent: Port channel " + str(self.pc_id) + " is not present on the switch, please create the PC first", str(e.exception))
+        self.assertEqual("PortChannelNotPresent: Port channel " + str(
+            self.pc_id) + " is not present on the switch, please create the PC first", str(e.exception))
 
     def test_add_members_invalidfc(self):
-        invalidfc = "fc48/48" ### check
+        invalidfc = "fc48/48"  ### check
         fc1 = Fc(self.switch, invalidfc)
         self.pc.create()
         with self.assertRaises(CLIError) as e:
             self.pc.add_members([fc1])
-        self.assertEqual("The command \" interface "+str(invalidfc)+" ; channel-group "+str(self.pc_id)+" force \" gave the error \" Invalid interface format \".", str(e.exception))
+        self.assertEqual("The command \" interface " + str(invalidfc) + " ; channel-group " + str(
+            self.pc_id) + " force \" gave the error \" Invalid interface format \".", str(e.exception))
         self.pc.delete()
 
     def test_add_members_invalid(self):

@@ -1,6 +1,6 @@
 import unittest
 
-from tests.test_switch.switch_vars import *
+from tests.test_switch.vars import *
 
 log = logging.getLogger(__name__)
 
@@ -13,8 +13,9 @@ class TestSwitchAttrType(unittest.TestCase):
         log.debug(sw.ipaddr)
 
     def test_type_read(self):
-        log.debug("Type : " + str(self.switch.type))
-        self.skipTest("Needs to be fixed")
+        type = str(self.switch.type)
+        log.debug("Type : " + type)
+        self.assertIsNotNone(type)
 
     def test_type_write_error(self):
         with self.assertRaises(AttributeError) as e:

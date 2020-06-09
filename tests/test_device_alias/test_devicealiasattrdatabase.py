@@ -2,7 +2,7 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.devicealias import DeviceAlias
-from tests.test_device_alias.da_vars import *
+from tests.test_device_alias.vars import *
 
 log = logging.getLogger(__name__)
 

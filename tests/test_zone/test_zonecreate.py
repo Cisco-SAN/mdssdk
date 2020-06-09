@@ -1,11 +1,12 @@
 import unittest
 
-from mdssdk.zone import Zone
-from mdssdk.vsan import Vsan
 from mdssdk.connection_manager.errors import CLIError
-from tests.test_zone.zone_vars import *
+from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
+from tests.test_zone.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestZoneCreate(unittest.TestCase):
 
@@ -25,19 +26,19 @@ class TestZoneCreate(unittest.TestCase):
         self.skipTest("needs to be fixed")
         self.v.delete()
         self.assertIsNone(self.v.id)
-        z = Zone(self.switch, self.id, "test_zone")
+        z = Zone(self.switch, "test_zone", self.id)
         with self.assertRaises(CLIError) as e:
             z.create()
         self.assertIn("VSAN " + str(self.id) + " is not configured", str(e.exception))
 
     def test_create(self):
-        z = Zone(self.switch, self.id, "test_zone")
+        z = Zone(self.switch, "test_zone", self.id)
         z.create()
         self.assertEqual("test_zone", z.name)
 
     def test_create_name_invalid(self):
         name = "zone1*!"
-        z = Zone(self.switch, self.id, name)
+        z = Zone(self.switch, name, self.id)
         with self.assertRaises(CLIError) as e:
             z.create()
         self.assertEqual("The command \" zone name " + str(name) + " vsan " + str(
@@ -45,15 +46,16 @@ class TestZoneCreate(unittest.TestCase):
 
     def test_create_name_invalidfirstchar(self):
         name = "1zone"
-        z = Zone(self.switch, self.id, name)
+        z = Zone(self.switch, name, self.id)
         with self.assertRaises(CLIError) as e:
             z.create()
         self.assertEqual("The command \" zone name " + str(name) + " vsan " + str(
-            self.id) + " \" gave the error \" Illegal first character (name must start with a letter) \".", str(e.exception))
+            self.id) + " \" gave the error \" Illegal first character (name must start with a letter) \".",
+                         str(e.exception))
 
     def test_create_name_beyondmax(self):
         name = 'zo123456789123456789123456789123456789123456789123456789123456789'
-        z = Zone(self.switch, self.id, name)
+        z = Zone(self.switch, name, self.id)
         with self.assertRaises(CLIError) as e:
             z.create()
         self.assertEqual("The command \" zone name " + str(name) + " vsan " + str(
@@ -61,7 +63,7 @@ class TestZoneCreate(unittest.TestCase):
 
     def test_create_name_max(self):
         name = 'z123456789123456789123456789123456789123456789123456789123456789'
-        z = Zone(self.switch, self.id, name)
+        z = Zone(self.switch, name, self.id)
         z.create()
         self.assertEqual(name, z.name)
 

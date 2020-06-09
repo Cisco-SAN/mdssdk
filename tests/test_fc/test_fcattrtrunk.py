@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
-from tests.test_fc.fc_vars import *
+from tests.test_fc.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestFcAttrTrunk(unittest.TestCase):
 

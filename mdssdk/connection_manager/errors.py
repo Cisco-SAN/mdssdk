@@ -77,9 +77,68 @@ class CustomException(Exception):
     __str__ = __repr__
 
 
+class UnsupportedVersion(CustomException):
+    pass
+
+
+class VersionNotFound(CustomException):
+    pass
+
+
+class UnsupportedFeature(CustomException):
+    pass
+
+
+class UnsupportedConfig(CustomException):
+    pass
+
+
 class VsanNotPresent(CustomException):
     pass
 
 
 class InvalidInterface(CustomException):
+    pass
+
+
+# Analytics related exceptions
+class InvalidProfile(CustomException):
+    pass
+
+
+class InvalidAnalyticsType(CustomException):
+    pass
+
+
+class InvalidMode(CustomException):
+    pass
+
+
+# portchannel related exceptions
+class PortChannelNotPresent(CustomException):
+    pass
+
+
+class InvalidPortChannelRange(CustomException):
+    pass
+
+
+class InvalidChannelMode(CustomException):
+    pass
+
+
+# zone related exceptions
+class InvalidZoneMode(CustomException):
+    pass
+
+
+class InvalidDefaultZone(CustomException):
+    pass
+
+
+class InvalidZoneMemberType(CustomException):
+    pass
+
+
+class ZoneNotPresent(CustomException):
     pass

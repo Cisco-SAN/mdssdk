@@ -1,18 +1,14 @@
 import logging
 import re
 
-from .connection_manager.errors import CustomException, InvalidInterface
+from .connection_manager.errors import InvalidAnalyticsType, InvalidInterface
 from .constants import SHUTDOWN, NO_SHUTDOWN, PAT_FC
 from .interface import Interface
 from .nxapikeys import interfacekeys
-from .utility.utils import get_key
 from .parsers.interface import ShowInterfaceTransceiverDetail
+from .utility.utils import get_key
 
 log = logging.getLogger(__name__)
-
-
-class InvalidAnalyticsType(CustomException):
-    pass
 
 
 class Fc(Interface):

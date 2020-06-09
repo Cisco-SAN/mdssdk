@@ -1,10 +1,9 @@
 import unittest
 
-from mdssdk.zone import Zone, InvalidDefaultZone
-from mdssdk.vsan import Vsan
-from mdssdk.connection_manager.errors import CLIError
 from mdssdk.constants import PERMIT, DENY
-from tests.test_zone.zone_vars import *
+from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone, InvalidDefaultZone
+from tests.test_zone.vars import *
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +21,7 @@ class TestZoneAttrDefaultZone(unittest.TestCase):
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
-        self.z = Zone(self.switch, self.id, "test_zone")
+        self.z = Zone(self.switch, "test_zone", self.id)
         self.old = self.z.default_zone
 
     def test_default_zone_read(self):
@@ -39,7 +38,8 @@ class TestZoneAttrDefaultZone(unittest.TestCase):
         default_zone = 'asdf'
         with self.assertRaises(InvalidDefaultZone) as e:
             self.z.default_zone = default_zone
-        self.assertIn("Invalid default-zone value " + default_zone + " . Valid values are: " + PERMIT + "," + DENY, str(e.exception))
+        self.assertIn("Invalid default-zone value " + default_zone + " . Valid values are: " + PERMIT + "," + DENY,
+                      str(e.exception))
 
     def tearDown(self) -> None:
         self.z.default_zone = self.old

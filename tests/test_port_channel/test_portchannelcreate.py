@@ -1,9 +1,10 @@
 import unittest
 
 from mdssdk.portchannel import PortChannel, InvalidPortChannelRange
-from tests.test_port_channel.portchannel_vars import *
+from tests.test_port_channel.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestPortChannelCreate(unittest.TestCase):
 
@@ -24,10 +25,12 @@ class TestPortChannelCreate(unittest.TestCase):
         self.pc.delete()
 
     def test_create_invalid(self):
-        for i in [0,257]:
+        for i in [0, 257]:
             with self.assertRaises(InvalidPortChannelRange) as e:
                 pc = PortChannel(self.switch, i)
-            self.assertEqual("InvalidPortChannelRange: Port channel id " + str(i) + " is invalid, id should range from 1 to 256",str(e.exception))
+            self.assertEqual(
+                "InvalidPortChannelRange: Port channel id " + str(i) + " is invalid, id should range from 1 to 256",
+                str(e.exception))
 
     def tearDown(self) -> None:
         self.pc.delete()

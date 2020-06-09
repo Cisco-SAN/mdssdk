@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.fc import Fc
 from mdssdk.portchannel import PortChannel
-from tests.test_port_channel.portchannel_vars import *
+from tests.test_port_channel.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestPortChannelAttrMembers(unittest.TestCase):
 
@@ -25,11 +26,11 @@ class TestPortChannelAttrMembers(unittest.TestCase):
     def test_members_read(self):
         self.pc.create()
         while True:
-            k,v = random.choice(list(self.interfaces.items()))
+            k, v = random.choice(list(self.interfaces.items()))
             if (type(v) is Fc):
                 fc = v
                 log.debug(k)
-                break 
+                break
         self.pc.add_members([fc])
         self.assertIn(fc.name, self.pc.members)
         self.pc.delete()
@@ -37,7 +38,7 @@ class TestPortChannelAttrMembers(unittest.TestCase):
     def test_members_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.pc.members = []
-        self.assertEqual("can't set attribute",str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:
         self.pc.delete()

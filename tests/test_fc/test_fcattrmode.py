@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
-from tests.test_fc.fc_vars import *
+from tests.test_fc.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestFcAttrMode(unittest.TestCase):
 
@@ -26,10 +27,8 @@ class TestFcAttrMode(unittest.TestCase):
         self.assertIn(self.fc.mode, self.mode_values + ['TE', 'TF', '--', ' --'])
 
     def test_mode_write(self):
-        self.skipTest("needs to be fixed")
-        for mode in self.mode_values:
-            self.fc.mode = mode
-            self.assertEqual(mode, self.fc.mode)
+        self.fc.mode = "auto"
+        self.assertIn(self.fc.mode, self.mode_values + ['TE', 'TF', '--', ' --'])
 
     def test_mode_write_invalid(self):
         mode = "asdf"
@@ -39,13 +38,13 @@ class TestFcAttrMode(unittest.TestCase):
             mode) + " \" gave the error \" % Invalid command \".", str(e.exception))
 
     def tearDown(self) -> None:
-        if(self.fc.mode != self.old):
+        if (self.fc.mode != self.old):
             if ("--" in self.old):
                 self.fc.mode = 'auto'
             elif self.fc.mode == 'TE':
                 self.fc.mode = 'E'
             elif self.fc.mode == 'TF':
-                self.fc.mode = 'F'   
+                self.fc.mode = 'F'
             else:
                 self.fc.mode = self.old
             self.assertEqual(self.old, self.fc.mode)

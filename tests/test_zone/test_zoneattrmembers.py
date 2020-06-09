@@ -1,13 +1,14 @@
 import unittest
 
-from mdssdk.vsan import Vsan
-from mdssdk.zone import Zone
-from tests.test_zone.zone_vars import *
+from mdssdk.devicealias import DeviceAlias
 from mdssdk.fc import Fc
 from mdssdk.portchannel import PortChannel
-from mdssdk.devicealias import DeviceAlias
+from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
+from tests.test_zone.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestZoneAttrMembers(unittest.TestCase):
 
@@ -22,17 +23,17 @@ class TestZoneAttrMembers(unittest.TestCase):
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
-        self.z = Zone(self.switch, self.id, "test_zone")
+        self.z = Zone(self.switch, "test_zone", self.id)
 
     def test_members_read(self):
         fc_name = ""
-        for k,v in list(self.switch.interfaces.items()):
+        for k, v in list(self.switch.interfaces.items()):
             if type(v) is Fc:
                 fc_name = k
                 break
         while True:
             pc_id = get_random_id(1, 256)
-            if "port-channel"+str(pc_id) not in self.switch.interfaces.keys():
+            if "port-channel" + str(pc_id) not in self.switch.interfaces.keys():
                 break
         pc = PortChannel(self.switch, pc_id)
         d = DeviceAlias(self.switch)
@@ -48,14 +49,14 @@ class TestZoneAttrMembers(unittest.TestCase):
                     break
         d.create({da_name: da_pwwn})
         members = [{'pwwn': '50:08:01:60:08:9f:4d:00'},
-                    {'interface': fc_name},
-                    {'device-alias': da_name},
-                    {'ip-address': '1.1.1.1'},
-                    {'symbolic-nodename': 'symbnodename'},
-                    {'fwwn': '11:12:13:14:15:16:17:18'},
-                    {'fcid': '0x123456'},
-                    {'interface': pc.name},
-                    {'fcalias': 'somefcalias'}]
+                   {'interface': fc_name},
+                   {'device-alias': da_name},
+                   {'ip-address': '1.1.1.1'},
+                   {'symbolic-nodename': 'symbnodename'},
+                   {'fwwn': '11:12:13:14:15:16:17:18'},
+                   {'fcid': '0x123456'},
+                   {'interface': pc.name},
+                   {'fcalias': 'somefcalias'}]
         self.switch.config('fcalias name somefcalias vsan ' + str(self.id))
         self.z.add_members(members)
         mem = self.z.members

@@ -1,11 +1,12 @@
 import unittest
 
-from mdssdk.zone import Zone
-from mdssdk.vsan import Vsan
 from mdssdk.connection_manager.errors import CLIError
-from tests.test_zone.zone_vars import *
+from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
+from tests.test_zone.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestZoneDelete(unittest.TestCase):
 
@@ -20,7 +21,7 @@ class TestZoneDelete(unittest.TestCase):
                 break
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
-        self.z = Zone(self.switch, self.id, "test_zone")
+        self.z = Zone(self.switch, "test_zone", self.id)
 
     def test_delete(self):
         self.z.create()

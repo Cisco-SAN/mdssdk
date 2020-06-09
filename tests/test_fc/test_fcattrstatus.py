@@ -2,9 +2,10 @@ import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
-from tests.test_fc.fc_vars import *
+from tests.test_fc.vars import *
 
 log = logging.getLogger(__name__)
+
 
 class TestFcAttrStatus(unittest.TestCase):
 
@@ -27,12 +28,12 @@ class TestFcAttrStatus(unittest.TestCase):
 
     def test_status_write(self):
         self.skipTest("needs to be fixed")
-        if(self.fc.status == "down"):
+        if (self.fc.status == "down"):
             self.fc.status = "no shutdown"
             self.assertIn(self.fc.status, self.status_values)
             status = "shutdown"
             self.fc.status = status
-            self.assertEqual(self.old, self.fc.status) 
+            self.assertEqual(self.old, self.fc.status)
         else:
             status = "shutdown"
             self.fc.status = status
