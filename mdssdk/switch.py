@@ -376,10 +376,10 @@ class Switch(SwitchUtils):
         ff = self.form_factor
         if ff in ["9706", "9710", "9718"]:
             mods = self.modules
-            for eachmod in mods:
-                if "Supervisor Module-3" in eachmod.module_type:
+            for modnum, eachmod in mods.items():
+                if "Supervisor Module-3" in eachmod.type:
                     return "m9700-sf3ek9"
-                elif "Supervisor Module-4" in eachmod.module_type:
+                elif "Supervisor Module-4" in eachmod.type:
                     return "m9700-sf4ek9"
             return None
         elif "9132T" in ff:

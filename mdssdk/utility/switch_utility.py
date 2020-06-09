@@ -199,13 +199,13 @@ class SwitchUtils:
         Returns a list of modules present on the switch
 
         :return: list of modules present on the switch
-        :rtype: list(Module)
+        :rtype: dict(module-num : Module)
         :example:
             >>> mods = switch_obj.modules
-            >>> for eachmod in mods:
+            >>> for modnum, eachmod in mods.items():
             ...     print("mod status is    : " + eachmod.status)
             ...     print("mod ports is     : " + str(eachmod.ports))
-            ...     print("mod modtype is   : " + eachmod.module_type)
+            ...     print("mod modtype is   : " + eachmod.type)
             ...     print("mod model is     : " + eachmod.model)
             ...     print("mod modnumber is : " + str(eachmod.module_number))
             ...     print("##")
@@ -237,13 +237,13 @@ class SwitchUtils:
             >>>
         """
 
-        mlist = []
+        mret = {}
         out = self.show("show module")
         if self.is_connection_type_ssh():
             for eachrow in out:
                 modnum = eachrow['module']
                 m = Module(self, modnum, eachrow)
-                mlist.append(m)
+                mret[modnum] = m
         else:
             modinfo = out['TABLE_modinfo']['ROW_modinfo']
             # For 1RU switch modinfo is a dict
@@ -253,8 +253,8 @@ class SwitchUtils:
             for eachmodinfo in modinfo:
                 modnumkey = get_key(modulekeys.MOD_NUM, self._SW_VER)
                 m = Module(self, eachmodinfo[modnumkey], eachmodinfo)
-                mlist.append(m)
-        return mlist
+                mret[m.module_number] = m
+        return mret
 
     @property
     def flogidb(self):

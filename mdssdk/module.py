@@ -85,7 +85,7 @@ class Module(object):
         return int(self.__mod_ports)
 
     @property
-    def module_type(self):
+    def type(self):
         """
         Get type of the module
 
@@ -95,7 +95,7 @@ class Module(object):
             >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password )
             >>> mod_handler = switch_obj.modules
             >>> first_mod_handler = mod_handler[0]
-            >>> print(first_mod_handler.module_type)
+            >>> print(first_mod_handler.type)
             2/4/8/10/16 Gbps Advanced FC Module
             >>>
         """

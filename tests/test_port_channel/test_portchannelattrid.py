@@ -1,4 +1,5 @@
 import unittest
+import random
 
 from mdssdk.portchannel import PortChannel
 from tests.test_port_channel.vars import *
