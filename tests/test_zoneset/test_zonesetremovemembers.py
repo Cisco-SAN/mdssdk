@@ -35,7 +35,6 @@ class TestZoneSetRemoveMembers(unittest.TestCase):
             self.id) + ' ; no member test_zone " gave the error " Zone not present ".', str(e.exception))
 
     def test_remove_members(self):
-        self.skipTest("needs to be fixed")
         zone1 = self.zone
         zone2 = Zone(self.switch, "test_zone2", self.id)
         zone2.create()

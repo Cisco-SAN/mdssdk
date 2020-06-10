@@ -71,7 +71,7 @@ class Module(object):
             >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password )
             >>> mod_handler = switch_obj.modules
             >>> first_mod_handler = mod_handler[0]
-            >>> print(first_mod_handler.module_number)
+            >>> print(first_mod_handler.ports)
             48
             >>>
         """

@@ -37,7 +37,11 @@ class TestPortChannelAddMembers(unittest.TestCase):
 
     def test_add_members_one(self):
         self.pc.create()
-        self.pc.add_members([self.fc])
+        try:
+            self.pc.add_members([self.fc])
+        except CLIError as c:
+            if "port not compatible" in c.message:
+                self.skipTest("Skipping test as as port not compatible. Please rerun the test cases")
         self.assertIn(self.fc.name, self.pc.members)
         self.pc.delete()
 
@@ -49,7 +53,11 @@ class TestPortChannelAddMembers(unittest.TestCase):
                 fc2 = v
                 log.debug(k)
                 break
-        self.pc.add_members([self.fc, fc2])
+        try:
+            self.pc.add_members([self.fc, fc2])
+        except CLIError as c:
+            if "port not compatible" in c.message:
+                self.skipTest("Skipping test as as port not compatible. Please rerun the test cases")
         self.assertIn(self.fc.name, self.pc.members)
         self.assertIn(fc2.name, self.pc.members)
         self.pc.delete()
