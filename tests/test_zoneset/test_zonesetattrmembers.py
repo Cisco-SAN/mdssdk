@@ -25,7 +25,6 @@ class TestZoneSetAttrMembers(unittest.TestCase):
         self.zoneset.create()
 
     def test_members_read(self):
-        self.skipTest("needs to be fixed")
         zone1 = Zone(self.switch, "test_zone1", self.id)
         zone1.create()
         zone2 = Zone(self.switch, "test_zone2", self.id)

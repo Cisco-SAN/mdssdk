@@ -23,7 +23,6 @@ class TestZoneCreate(unittest.TestCase):
         self.v.create()
 
     def test_create_nonexistingvsan(self):
-        self.skipTest("needs to be fixed")
         self.v.delete()
         self.assertIsNone(self.v.id)
         z = Zone(self.switch, "test_zone", self.id)
