@@ -12,7 +12,10 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
 
     def setUp(self) -> None:
         self.switch = sw
+        self.switch.feature("analytics", True)
         self.anaenabled = self.switch.feature("analytics")
+        if not self.anaenabled:
+            self.skipTest("Ana feature not enabled or supported")
         log.debug(sw.version)
         log.debug(sw.ipaddr)
         self.values = analytics_values
@@ -21,6 +24,10 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
             k, v = random.choice(list(interfaces.items()))
             if (type(v) is Fc):
                 self.fc = v
+                mod, port = get_mod_port(self.fc.name)
+                modobj = self.switch.modules[mod]
+                if modobj.model not in ANA_SUPP_MOD:
+                    continue
                 log.debug(k)
                 break
         self.old = self.fc.analytics_type
@@ -40,7 +47,7 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
                 except CLIError as e:
                     if "Unsupported Port mode of interface" in str(e.message):
                         self.skipTest("Skipping test, port mode is unsupported")
-                self.assertEqual(val, self.fc.analytics_type)
+                self.assertEqual(val, self.fc.analytics_type, "port is: " + self.fc.name)
             self.fc.analytics_type = self.old
             self.assertEqual(self.old, self.fc.analytics_type)
         except CLIError as c:

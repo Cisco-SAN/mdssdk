@@ -107,7 +107,7 @@ class SwitchUtils:
         for eachele in out:
             id = eachele.get(get_key(vsankeys.VSAN_ID, self._SW_VER))
             vobj = Vsan(switch=self, id=id)
-            retlist[id] = vobj
+            retlist[int(id)] = vobj
         return retlist
 
     @property

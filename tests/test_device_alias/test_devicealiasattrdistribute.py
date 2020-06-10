@@ -1,6 +1,7 @@
 import unittest
 
 from mdssdk.devicealias import DeviceAlias
+from mdssdk.connection_manager.errors import CLIError
 from tests.test_device_alias.vars import *
 
 log = logging.getLogger(__name__)
@@ -19,15 +20,32 @@ class TestDeviceAliasAttrDistribute(unittest.TestCase):
         self.assertIn(self.d.distribute, [True, False])
 
     def test_distribute_write(self):
-        if self.old:
-            self.d.distribute = False
-            self.assertFalse(self.d.distribute)
-        else:
-            self.d.distribute = True
-            self.assertTrue(self.d.distribute)
-        self.d.distribute = self.old
-        self.assertEqual(self.d.distribute, self.old)
+        fab_not_stable_count = 0
+        while True:
+            try:
+                if self.old:
+                    self.d.distribute = False
+                    self.assertFalse(self.d.distribute)
+                else:
+                    self.d.distribute = True
+                    self.assertTrue(self.d.distribute)
+                    self.d.distribute = self.old
+                    self.assertEqual(self.d.distribute, self.old)
+                break
+            except CLIError as c:
+                if "Fabric is not stable" in c.message:
+                    fab_not_stable_count = fab_not_stable_count + 1
+                    if fab_not_stable_count == 3:
+                        self.skipTest("Skipping the test as changing the mode gave the error Fabric not stable")
 
     def tearDown(self) -> None:
-        self.d.distribute = self.old
-        self.assertEqual(self.d.distribute, self.old)
+        fab_not_stable_count = 0
+        while True:
+            try:
+                self.d.distribute = self.old
+                self.assertEqual(self.d.distribute, self.old)
+            except CLIError as c:
+                if "Fabric is not stable" in c.message:
+                    fab_not_stable_count = fab_not_stable_count + 1
+                    if fab_not_stable_count == 3:
+                        self.skipTest("Skipping the test as changing the mode gave the error Fabric not stable")
