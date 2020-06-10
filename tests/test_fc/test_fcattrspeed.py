@@ -32,11 +32,10 @@ class TestFcAttrSpeed(unittest.TestCase):
         # self.skipTest("needs to be fixed")
         for speed in self.speed_values_write:
             try:
-                self.pc.add_members([self.fc, fc2])
+                self.fc.speed = speed
             except CLIError as c:
                 if "Speed change not allowed" in c.message:
                     self.skipTest("Skipping test as speed change is not allowed. Please rerun the test cases")
-            self.fc.speed = speed
             self.assertEqual(speed, self.fc.speed)
 
     def test_speed_write_invalid(self):
