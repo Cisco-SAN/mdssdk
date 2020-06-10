@@ -32,7 +32,6 @@ class TestZoneSetAddMembers(unittest.TestCase):
                          str(e.exception))
 
     def test_add_members(self):
-        self.skipTest("needs to be fixed")
         zone1 = Zone(self.switch, "test_zone1", self.id)
         zone1.create()
         zone2 = Zone(self.switch, "test_zone2", self.id)

@@ -42,7 +42,7 @@ new = {'da1': '60:66:61:01:0e:00:01:ff'}
 d.create(new)
 
 # Instantiate zone object
-z = Zone(sw, v, "zone1")
+z = Zone(sw, "zone1", v.id)
 
 # Create new zone
 z.create()
@@ -64,7 +64,7 @@ memlist = [{'pwwn': '50:08:01:60:08:9f:4d:00'},
 z.add_members(memlist)
 
 # Instantiating ZoneSet object
-zoneset = ZoneSet(sw, v, "zoneset1")
+zoneset = ZoneSet(sw, "zoneset1", v.id)
 
 # Creating zoneset
 zoneset.create()
@@ -74,6 +74,12 @@ zoneset.add_members([z])
 
 # Activating zoneset
 zoneset.activate(True)
+
+# Display zoneset information
+print("Zoneset name: "+zoneset.name)
+print("Vsan id: "+str(zoneset.vsan.id))
+print("Zoneset members: "+str(zoneset.members))
+print("Activation: "+zonese.is_active())
 
 # Removing members from zoneset
 zoneset.remove_members([z])

@@ -12,12 +12,11 @@ class TestSwitchFeature(unittest.TestCase):
         self.switch = sw
         log.debug(sw.version)
         log.debug(sw.ipaddr)
-        self.name = 'analytics'
+        self.name = 'analytics' # telnetServer
         log.debug("Feature " + self.name)
         self.old = self.switch.feature(self.name)
 
     def test_feature(self):
-        self.skipTest("Needs to be fixed")
         old = self.switch.feature(self.name)
         self.switch.feature(self.name, True)
         self.assertTrue(self.switch.feature(self.name))
