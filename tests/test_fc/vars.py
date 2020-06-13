@@ -24,4 +24,4 @@ speed_values_read = ['1', '2', '4', '8', '16', '32', '--']
 speed_values_write = [1000, 2000, 4000, 8000, 16000, 'auto']
 
 status_values = ["inactive", "notConnected", "errDisabled", "up", "down", "sfpAbsent", "trunking", "channelDown",
-                 "outofServc", "isolated"]
+                 "outofServc", "isolated", "licenseNotAvail"]
