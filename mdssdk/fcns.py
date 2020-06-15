@@ -1,4 +1,5 @@
 import logging
+import re
 
 from .connection_manager.errors import CLIError
 
@@ -35,22 +36,47 @@ class Fcns(object):
         else:
             return None
 
-    def _set_bulk_notify(self, value):
+    @property
+    def no_bulk_notify(self):
+        cmd = "show running section fcns"
+        out = self.__swobj.show(cmd, raw_text=True)
+        pat = "fcns no-bulk-notify"
+        match = re.search(pat, "".join(out))
+        if match:
+            return True  
+        else: 
+            return False 
+
+    @no_bulk_notify.setter
+    def no_bulk_notify(self, value):
         if type(value) is not bool:
             raise TypeError("Only bool value(true/false) supported.")
         if value:
-            cmd = "no fcns no-bulk-notify"
-        else:
             cmd = "terminal dont-ask ; fcns no-bulk-notify"
-        out = self.__swobj.config(cmd)
-        if out is not None:
-            raise CLIError(cmd, out['msg'])
+        else:
+            cmd = "no fcns no-bulk-notify"
+        try:
+            out = self.__swobj.config(cmd)
+        except CLIError as c:
+            if("FCNS bulk notification optimization is necessary" in c.message):
+                log.debug(c.message)
+            else:
+                raise CLIError(cmd, c.message)
         self.__swobj.config("no terminal dont-ask")
 
-    bulk_notify = property(fset=_set_bulk_notify)
-    # for getter, didn't find command
-
-    def _set_zone_lookup_cache(self,value):
+    @property
+    def zone_lookup_cache(self):
+        cmd = "show running section fcns"
+        out = self.__swobj.show(cmd, raw_text=True)
+        pat = "fcns zone-lookup-cache"
+        match = re.search(pat, "".join(out))
+        if match:
+            return True  
+        else: 
+            return False 
+    
+    @zone_lookup_cache.setter
+    def zone_lookup_cache(self,value):
         if type(value) is not bool:
             raise TypeError("Only bool value(true/false) supported.")
         cmd = "fcns zone-lookup-cache"
@@ -59,9 +85,6 @@ class Fcns(object):
         out = self.__swobj.config(cmd)
         if out is not None:
             raise CLIError(cmd, out['msg'])
-
-    zone_lookup_cache = property(fset=_set_zone_lookup_cache)
-    # for getter, didn't find command
     
     def proxy_port(self, pwwn, vsan):
         cmd = "fcns proxy-port "+str(pwwn)+" vsan "+str(vsan)

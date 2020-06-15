@@ -14,7 +14,6 @@ class TestFcnsProxyPort(unittest.TestCase):
         self.fcns_obj = Fcns(switch=self.switch)
 
     def test_proxy_port(self):
-        # don't know how to assert
         self.skipTest("need to fix")
         fcnsdb = self.fcns_obj.database()
         if fcnsdb is not None:

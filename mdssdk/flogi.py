@@ -11,7 +11,6 @@ class Flogi(object):
         self.__swobj = switch
 
     def database(self, vsan = None, interface = None, fcid = None):
-        # TODO npv
         if self.__swobj.npv:
             cmd = "show npv flogi-table"
             out = self.__swobj.show(cmd, raw_text=True)
@@ -26,7 +25,7 @@ class Flogi(object):
             cmd += " fcid "+str(fcid) 
         out = self.__swobj.show(cmd)
         if out :
-            return out['TABLE_flogi_entry']['ROW_flogi_entry'] # replace keys
+            return out['TABLE_flogi_entry']['ROW_flogi_entry']
         else:
             return None
       
@@ -70,3 +69,4 @@ class Flogi(object):
         if out is not None:
             raise CLIError(cmd, out['msg'])
 
+    # TODO npv

@@ -13,10 +13,9 @@ class TestFcnsNoAutoPoll(unittest.TestCase):
         log.debug(sw.ipaddr)
         self.fcns_obj = Fcns(switch=self.switch)
 
-    def test_no_auto_poll(self):
-        self.skipTest("need to fix")
-        # didn't know how to assert 
+    def test_no_auto_poll(self): 
         self.fcns_obj.no_auto_poll()
+        self.skipTest("need to fix")
         fcnsdb = self.fcns_obj.database()
         if fcnsdb is not None:
             if type(fcnsdb) is dict:
