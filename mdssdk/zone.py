@@ -357,8 +357,8 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]['fulldb_dbsize']
         else:
-            retout = out.get(get_key(zonekeys.FULLDB_SIZE, self._SW_VER), None)
-        if retout is not None:
+            retout = out.get(get_key(zonekeys.FULLDB_SIZE, self._SW_VER), '')
+        if retout:
             return int(retout)
         return None
 
@@ -380,8 +380,8 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]['fulldb_zone_count']
         else:
-            retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), None)
-        if retout is not None:
+            retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), '')
+        if retout:
             return int(retout)
         return None
 
@@ -403,8 +403,8 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]['fulldb_zoneset_count']
         else:
-            retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), None)
-        if retout is not None:
+            retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), '')
+        if retout:
             return int(retout)
         return None
 
@@ -426,8 +426,8 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]['activedb_dbsize']
         else:
-            retout = out.get(get_key(zonekeys.ACTIVEDB_SIZE, self._SW_VER), None)
-        if retout is not None:
+            retout = out.get(get_key(zonekeys.ACTIVEDB_SIZE, self._SW_VER), '')
+        if retout:
             return int(retout)
         return None
 
@@ -450,8 +450,8 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]['activedb_zone_count']
         else:
-            retout = out.get(get_key(zonekeys.ACTIVEDB_ZC, self._SW_VER), None)
-        if retout is not None:
+            retout = out.get(get_key(zonekeys.ACTIVEDB_ZC, self._SW_VER), '')
+        if retout:
             return int(retout)
         return None
 
@@ -474,8 +474,8 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]['activedb_zoneset_count']
         else:
-            retout = out.get(get_key(zonekeys.ACTIVEDB_ZSC, self._SW_VER), None)
-        if retout is not None:
+            retout = out.get(get_key(zonekeys.ACTIVEDB_ZSC, self._SW_VER), '')
+        if retout:
             return int(retout)
         return None
 
@@ -522,8 +522,8 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]['maxdb_dbsize']
         else:
-            retout = out.get(get_key(zonekeys.MAXDB_SIZE, self._SW_VER), None)
-        if retout is not None:
+            retout = out.get(get_key(zonekeys.MAXDB_SIZE, self._SW_VER), '')
+        if retout:
             return int(retout)
         return None
 
@@ -546,8 +546,8 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]['effectivedb_dbsize']
         else:
-            retout = out.get(get_key(zonekeys.EFFDB_SIZE, self._SW_VER), None)
-        if retout is not None:
+            retout = out.get(get_key(zonekeys.EFFDB_SIZE, self._SW_VER), '')
+        if retout:
             return int(retout)
         return None
 
@@ -570,8 +570,8 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]['percent_effectivedbsize']
         else:
-            retout = out.get(get_key(zonekeys.EFFDB_PER, self._SW_VER), None)
-        if retout is not None:
+            retout = out.get(get_key(zonekeys.EFFDB_PER, self._SW_VER), '')
+        if retout:
             return str(retout) + "%"
         return None
 
@@ -818,9 +818,6 @@ class Zone(object):
         except CLIError as c:
             if "Duplicate member" in c.message:
                 return False, None
-            # if not self.__swobj.is_connection_type_ssh():
-            #     log.error(c)
-            #     raise CLIError(cmd, c.message)
             self._check_msg(c.message, cmd)
 
         if out is not None and not self.__swobj.is_connection_type_ssh():

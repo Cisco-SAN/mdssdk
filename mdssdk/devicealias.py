@@ -363,7 +363,9 @@ class DeviceAlias(object):
             except CLIError as c:
                 msg = c.message
             if msg is not None:
-                if "There are no pending changes" in msg:
+                if "The following device-alias changes are about to be committed" in msg:
+                    pass
+                elif "There are no pending changes" in msg:
                     self.clear_lock()
                     log.debug("The commit command was not executed because Device Alias already present")
                 elif "Commit in progress. Check the status." in msg:

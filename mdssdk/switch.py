@@ -83,13 +83,12 @@ class Switch(SwitchUtils):
             log.info("Opening up a nxapi connection for switch with ip " + ip_address)
             self.__connection = ConnectNxapi(ip_address, username, password, transport=connection_type, port=port,
                                              verify_ssl=verify_ssl)
+            self._set_connection_type_based_on_version()
 
         # Connect to ssh
         self.connect_to_ssh()
         self.can_connect = False
-
-        # self._verify_supported_version()
-        self._set_connection_type_based_on_version()
+        log.info("is_connection_type_ssh " + str(self.is_connection_type_ssh()))
 
     def connect_to_ssh(self):
         log.info("Opening up a ssh connection for switch with ip " + self.__ip_address)
@@ -114,10 +113,16 @@ class Switch(SwitchUtils):
                 major = int(result_dict['major'])
                 minor = int(result_dict['minor'])
                 patch = result_dict['patch']
-                if majorplus >= 8 and major >= 4 and minor >= 2:
+                if majorplus > 8 and major > 4 and minor > 2:
                     log.debug("Switch version is " + ver + ". This is a supported switch version for using NXAPI")
+                elif majorplus == 8 and major == 4 and minor == 2:
+                    if patch == 'a':
+                        log.debug("Switch version is " + ver + ". This is a supported switch version for using NXAPI")
+                    else:
+                        log.info("Switch version is not 8.4(2a), setting connection type to ssh")
+                        self.connection_type = "ssh"
                 else:
-                    log.debug("Switch version is not 8.4(2), setting connection type to ssh")
+                    log.info("Switch version is not 8.4(2a), setting connection type to ssh")
                     self.connection_type = "ssh"
             except Exception:
                 log.debug("Got execption while getting the switch version, setting connection type to ssh")

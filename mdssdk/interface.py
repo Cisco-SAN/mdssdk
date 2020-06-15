@@ -81,6 +81,8 @@ class Interface(object):
         if self.__swobj.is_connection_type_ssh():
             outlines = self.__swobj.show(cmd)
             shint = ShowInterfaceDescription(outlines)
+            if shint.description == "--":
+                return ""
             return shint.description
         out = self.__swobj.show(cmd)
         desc = out['TABLE_interface']['ROW_interface']['description']
@@ -89,12 +91,17 @@ class Interface(object):
             retval = ''.join(desc)
         else:
             retval = desc
+        if retval == "--":
+            return ""
         return retval
 
     @description.setter
     def description(self, value):
-        cmd = "interface " + self._name + " ; switchport description  " + value
-        log.debug("Sending the cmd: " + cmd)
+        if value == "":
+            cmd = "interface " + self._name + " ; no switchport description"
+        else:
+            cmd = "interface " + self._name + " ; switchport description " + value
+        log.info("Sending the cmd: " + cmd)
         out = self.__swobj.config(cmd)
         log.debug(out)
 

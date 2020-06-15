@@ -37,6 +37,8 @@ class TestDeviceAliasAttrDistribute(unittest.TestCase):
                     fab_not_stable_count = fab_not_stable_count + 1
                     if fab_not_stable_count == 3:
                         self.skipTest("Skipping the test as changing the mode gave the error Fabric not stable")
+                    continue
+                raise CLIError(c.args)
 
     def tearDown(self) -> None:
         fab_not_stable_count = 0
@@ -44,8 +46,11 @@ class TestDeviceAliasAttrDistribute(unittest.TestCase):
             try:
                 self.d.distribute = self.old
                 self.assertEqual(self.d.distribute, self.old)
+                break
             except CLIError as c:
                 if "Fabric is not stable" in c.message:
                     fab_not_stable_count = fab_not_stable_count + 1
                     if fab_not_stable_count == 3:
                         self.skipTest("Skipping the test as changing the mode gave the error Fabric not stable")
+                    continue
+                raise CLIError(c.command, c.message)

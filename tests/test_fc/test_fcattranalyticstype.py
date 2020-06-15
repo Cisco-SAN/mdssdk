@@ -9,10 +9,11 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrAnalyticsType(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
-        self.switch.feature("analytics", True)
+        self.ana_before = self.switch.feature("analytics")
+        if not self.ana_before:
+            self.switch.feature("analytics", True)
         self.anaenabled = self.switch.feature("analytics")
         if not self.anaenabled:
             self.skipTest("Ana feature not enabled or supported")
@@ -67,5 +68,7 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
         try:
             self.fc.analytics_type = self.old
             self.assertEqual(self.old, self.fc.analytics_type)
+            self.switch.feature("analytics", self.ana_before)
+            self.assertEqual(self.ana_before, self.switch.feature("analytics"))
         except CLIError as c:
             pass
