@@ -28,6 +28,8 @@ def get_suite_list():
     suiteList.append(unittest.TestLoader().discover('tests.test_device_alias', 'test_*.py'))
     suiteList.append(unittest.TestLoader().discover('tests.test_fc', 'test_*.py'))
     suiteList.append(unittest.TestLoader().discover('tests.test_port_channel', 'test_*.py'))
+    suiteList.append(unittest.TestLoader().discover('tests.test_fcns', 'test_*.py'))
+    suiteList.append(unittest.TestLoader().discover('tests.test_flogi', 'test_*.py'))
     suiteList.append(unittest.TestLoader().discover('tests.test_switch', 'test_*.py'))
     suiteList.append(unittest.TestLoader().discover('tests.test_vsan', 'test_*.py'))
     suiteList.append(unittest.TestLoader().discover('tests.test_zone', 'test_*.py'))
