@@ -44,7 +44,11 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
                 fc2 = v
                 log.debug(k)
                 break
-        self.pc.add_members([self.fc, fc2])
+        try:
+            self.pc.add_members([self.fc, fc2])
+        except CLIError as c:
+            if "port not compatible" in c.message:
+                self.skipTest("Skipping test as as port not compatible. Please rerun the test cases")
         self.pc.remove_members([self.fc])
         self.assertNotIn(self.fc.name, self.pc.members)
         self.assertIn(fc2.name, self.pc.members)
