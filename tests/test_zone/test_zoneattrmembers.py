@@ -5,13 +5,13 @@ from mdssdk.fc import Fc
 from mdssdk.portchannel import PortChannel
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
+from mdssdk.connection_manager.errors import CLIError
 from tests.test_zone.vars import *
 
 log = logging.getLogger(__name__)
 
 
 class TestZoneAttrMembers(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -48,16 +48,18 @@ class TestZoneAttrMembers(unittest.TestCase):
                 if da_name not in olddb.keys() and da_pwwn not in olddb.values():
                     break
         d.create({da_name: da_pwwn})
-        members = [{'pwwn': '50:08:01:60:08:9f:4d:00'},
-                   {'interface': fc_name},
-                   {'device-alias': da_name},
-                   {'ip-address': '1.1.1.1'},
-                   {'symbolic-nodename': 'symbnodename'},
-                   {'fwwn': '11:12:13:14:15:16:17:18'},
-                   {'fcid': '0x123456'},
-                   {'interface': pc.name},
-                   {'fcalias': 'somefcalias'}]
-        self.switch.config('fcalias name somefcalias vsan ' + str(self.id))
+        members = [
+            {"pwwn": "50:08:01:60:08:9f:4d:00"},
+            {"interface": fc_name},
+            {"device-alias": da_name},
+            {"ip-address": "1.1.1.1"},
+            {"symbolic-nodename": "symbnodename"},
+            {"fwwn": "11:12:13:14:15:16:17:18"},
+            {"fcid": "0x123456"},
+            {"interface": pc.name},
+            {"fcalias": "somefcalias"},
+        ]
+        self.switch.config("fcalias name somefcalias vsan " + str(self.id))
         self.z.add_members(members)
         mem = self.z.members
         d.delete(da_name)
@@ -66,12 +68,14 @@ class TestZoneAttrMembers(unittest.TestCase):
         self.assertEqual(len(members), len(mem))
 
     def test_members_read_nonexisting(self):
-        self.assertIsNone(self.z.members)
+        with self.assertRaises(CLIError) as c:
+            self.z.members
+        self.assertIn("Zone not present", str(c.exception))
 
     def test_members_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.z.members = []
-        self.assertEqual('can\'t set attribute', str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:
         self.v.delete()

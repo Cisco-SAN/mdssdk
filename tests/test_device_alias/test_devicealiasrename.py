@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestDeviceAliasRename(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -22,7 +21,10 @@ class TestDeviceAliasRename(unittest.TestCase):
             while True:
                 self.name = get_random_string()
                 self.pwwn = get_random_pwwn()
-                if self.name not in self.olddb.keys() and self.pwwn not in self.olddb.values():
+                if (
+                        self.name not in self.olddb.keys()
+                        and self.pwwn not in self.olddb.values()
+                ):
                     break
         log.debug({self.name: self.pwwn})
 
@@ -75,7 +77,10 @@ class TestDeviceAliasRename(unittest.TestCase):
 
         with self.assertRaises(CLIError) as e:
             self.d.rename(oldname=self.name, newname=self.name)
-        self.assertIn("Target device-alias name already in use. Please specify a new name.", str(e.exception))
+        self.assertIn(
+            "Target device-alias name already in use. Please specify a new name.",
+            str(e.exception),
+        )
 
         self.d.delete(self.name)
         chkdb = self.d.database
@@ -89,7 +94,7 @@ class TestDeviceAliasRename(unittest.TestCase):
         self.assertIn(self.name, newdb.keys())
         self.assertEqual(self.pwwn, newdb[self.name])
 
-        invalid_name = 'da1&'  # da name a-zA-Z1-9 - _ $ ^    64chars max
+        invalid_name = "da1&"  # da name a-zA-Z1-9 - _ $ ^    64chars max
         with self.assertRaises(CLIError) as e:
             self.d.rename(oldname=self.name, newname=invalid_name)
         self.assertIn("Illegal character present in the name", str(e.exception))

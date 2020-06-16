@@ -29,8 +29,10 @@ class Fc(Interface):
         fcmatch = re.match(PAT_FC, name)
         if not fcmatch:
             raise InvalidInterface(
-                "Interface name " + str(
-                    name) + " is not correct, name must be 'fc' interface. Example: 'fc1/2'.. fcobj = Fc(switch_obj,'fc1/2') ")
+                "Interface name "
+                + str(name)
+                + " is not correct, name must be 'fc' interface. Example: 'fc1/2'.. fcobj = Fc(switch_obj,'fc1/2') "
+            )
         super().__init__(switch, name)
         self.__swobj = switch
         self._swobj = switch
@@ -39,7 +41,11 @@ class Fc(Interface):
     def _set_out_of_service(self, value):
         if type(value) is not bool:
             raise TypeError("Only bool value(true/false) supported.")
-        cmd = "terminal dont-ask ; interface " + self.name + " ; out-of-service force ; no terminal dont-ask "
+        cmd = (
+                "terminal dont-ask ; interface "
+                + self.name
+                + " ; out-of-service force ; no terminal dont-ask "
+        )
         if value:
             # First shutdown the port then
             self.status = SHUTDOWN
@@ -114,17 +120,17 @@ class Fc(Interface):
             m = re.match(pat, newline)
             if m:
                 type = m.group(1)
-                if type == 'scsi':
+                if type == "scsi":
                     is_scsi = True
-                if type == 'nvme':
+                if type == "nvme":
                     is_nvme = True
         if is_scsi:
             if is_nvme:
-                return 'all'
+                return "all"
             else:
-                return 'scsi'
+                return "scsi"
         elif is_nvme:
-            return 'nvme'
+            return "nvme"
         else:
             return None
 
@@ -132,15 +138,18 @@ class Fc(Interface):
     def analytics_type(self, type):
         if type is None:
             cmd = "no analytics type fc-all"
-        elif type == 'scsi':
+        elif type == "scsi":
             cmd = "no analytics type fc-all ; analytics type fc-scsi"
-        elif type == 'nvme':
+        elif type == "nvme":
             cmd = "no analytics type fc-all ; analytics type fc-nvme"
-        elif type == 'all':
+        elif type == "all":
             cmd = "analytics type fc-all"
         else:
             raise InvalidAnalyticsType(
-                "Invalid analytics type '" + type + "'. Valid types are scsi,nvme,all,None(to disable analytics type)")
+                "Invalid analytics type '"
+                + type
+                + "'. Valid types are scsi,nvme,all,None(to disable analytics type)"
+            )
 
         cmdtosend = "interface " + self.name + " ; " + cmd
         self.__swobj.config(cmdtosend)
@@ -152,8 +161,9 @@ class Fc(Interface):
         log.debug(cmd)
         if self.__swobj.is_connection_type_ssh():
             return self.__swobj.show(cmd)
-        out = self.__swobj.show(cmd)['TABLE_interface_trans']['ROW_interface_trans']['TABLE_calib'][
-            'ROW_calib']
+        out = self.__swobj.show(cmd)["TABLE_interface_trans"]["ROW_interface_trans"][
+            "TABLE_calib"
+        ]["ROW_calib"]
         if type(out) is list:
             for d in out:
                 result.update(d)
@@ -195,7 +205,7 @@ class Fc(Interface):
                 shitd = ShowInterfaceTransceiverDetail(out)
                 return shitd.sfp_present
             retout = out.get(get_key(interfacekeys.SFP, self._SW_VER))
-            return ("sfp is present" in retout)
+            return "sfp is present" in retout
 
         @property
         def name(self):
@@ -396,7 +406,9 @@ class Fc(Interface):
                 shitd = ShowInterfaceTransceiverDetail(out)
                 return shitd.temperature
             try:
-                calibdetails = out['TABLE_calibration']['ROW_calibration']['TABLE_detail']['ROW_detail']
+                calibdetails = out["TABLE_calibration"]["ROW_calibration"][
+                    "TABLE_detail"
+                ]["ROW_detail"]
                 temp = get_key(interfacekeys.TEMPERATURE, self._SW_VER)
                 return calibdetails.get(temp, None)
             except KeyError:
@@ -421,7 +433,9 @@ class Fc(Interface):
                 shitd = ShowInterfaceTransceiverDetail(out)
                 return shitd.voltage
             try:
-                calibdetails = out['TABLE_calibration']['ROW_calibration']['TABLE_detail']['ROW_detail']
+                calibdetails = out["TABLE_calibration"]["ROW_calibration"][
+                    "TABLE_detail"
+                ]["ROW_detail"]
                 vol = get_key(interfacekeys.VOLTAGE, self._SW_VER)
                 return calibdetails.get(vol, None)
             except KeyError:
@@ -446,7 +460,9 @@ class Fc(Interface):
                 shitd = ShowInterfaceTransceiverDetail(out)
                 return shitd.current
             try:
-                calibdetails = out['TABLE_calibration']['ROW_calibration']['TABLE_detail']['ROW_detail']
+                calibdetails = out["TABLE_calibration"]["ROW_calibration"][
+                    "TABLE_detail"
+                ]["ROW_detail"]
                 curr = get_key(interfacekeys.CURRENT, self._SW_VER)
                 return calibdetails.get(curr, None)
             except KeyError:
@@ -471,7 +487,9 @@ class Fc(Interface):
                 shitd = ShowInterfaceTransceiverDetail(out)
                 return shitd.tx_power
             try:
-                calibdetails = out['TABLE_calibration']['ROW_calibration']['TABLE_detail']['ROW_detail']
+                calibdetails = out["TABLE_calibration"]["ROW_calibration"][
+                    "TABLE_detail"
+                ]["ROW_detail"]
                 txpow = get_key(interfacekeys.TX_POWER, self._SW_VER)
                 return calibdetails.get(txpow, None)
             except KeyError:
@@ -496,7 +514,9 @@ class Fc(Interface):
                 shitd = ShowInterfaceTransceiverDetail(out)
                 return shitd.rx_power
             try:
-                calibdetails = out['TABLE_calibration']['ROW_calibration']['TABLE_detail']['ROW_detail']
+                calibdetails = out["TABLE_calibration"]["ROW_calibration"][
+                    "TABLE_detail"
+                ]["ROW_detail"]
                 rxpow = get_key(interfacekeys.RX_POWER, self._SW_VER)
                 return calibdetails.get(rxpow, None)
             except KeyError:

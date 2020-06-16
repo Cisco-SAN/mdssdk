@@ -6,11 +6,7 @@ log = logging.getLogger(__name__)
 PAT_DIS = "Fabric Distribution :\s+(?P<distribute>.*)"
 PAT_MODE = "Database:- Device Aliases.*Mode:\s+(?P<mode>.*)"
 PAT_LOCKED = "Locked By:- User\s+(?P<locked_user>.*)\s+SWWN\s+(?P<locked_swwn>.*)"
-ALL_PATS = [
-    PAT_DIS,
-    PAT_MODE,
-    PAT_LOCKED
-]
+ALL_PATS = [PAT_DIS, PAT_MODE, PAT_LOCKED]
 
 
 class ShowDeviceAliasStatus(object):
@@ -30,16 +26,16 @@ class ShowDeviceAliasStatus(object):
 
     @property
     def distribute(self):
-        return self._group_dict.get('distribute', None)
+        return self._group_dict.get("distribute", None)
 
     @property
     def mode(self):
-        return self._group_dict.get('mode', None)
+        return self._group_dict.get("mode", None)
 
     @property
     def locked_user(self):
-        return self._group_dict.get('locked_user', None)
+        return self._group_dict.get("locked_user", None)
 
     @property
     def locked_swwn(self):
-        return self._group_dict.get('locked_swwn', None)
+        return self._group_dict.get("locked_swwn", None)

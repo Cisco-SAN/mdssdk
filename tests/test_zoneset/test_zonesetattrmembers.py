@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneSetAttrMembers(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -31,7 +30,9 @@ class TestZoneSetAttrMembers(unittest.TestCase):
         zone2.create()
         members = [zone1, zone2]
         self.zoneset.add_members(members)
-        self.assertEqual([zone.name for zone in members], list(self.zoneset.members.keys()))
+        self.assertEqual(
+            [zone.name for zone in members], list(self.zoneset.members.keys())
+        )
 
     def test_members_read_nonexisting(self):
         self.assertIsNone(self.zoneset.members)
@@ -39,7 +40,7 @@ class TestZoneSetAttrMembers(unittest.TestCase):
     def test_members_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.zoneset.members = "asdf"
-        self.assertEqual('can\'t set attribute', str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:
         self.v.delete()

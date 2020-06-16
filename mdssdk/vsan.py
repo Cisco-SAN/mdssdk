@@ -132,9 +132,9 @@ class Vsan(object):
             allint = shvsan.interfaces
         else:
             out = self.__swobj.show(cmd)
-            out = out['TABLE_vsan_membership']['ROW_vsan_membership']
+            out = out["TABLE_vsan_membership"]["ROW_vsan_membership"]
             log.debug(out)
-            allint = out.get('interfaces', None)
+            allint = out.get("interfaces", None)
         if allint is None:
             return None
         else:
@@ -153,7 +153,10 @@ class Vsan(object):
                     intobj = PortChannel(switch=self.__swobj, id=int(id))
                 else:
                     log.error(
-                        "Unsupported interface " + eachintname + " , hence skipping it, this type of interface is not supported yet")
+                        "Unsupported interface "
+                        + eachintname
+                        + " , hence skipping it, this type of interface is not supported yet"
+                    )
                 retelements.append(intobj)
             return retelements
 
@@ -215,9 +218,7 @@ class Vsan(object):
         """
 
         try:
-            cmd = "terminal dont-ask ; " \
-                  "vsan database ; " \
-                  "no vsan " + str(self._id)
+            cmd = "terminal dont-ask ; " "vsan database ; " "no vsan " + str(self._id)
             self.__swobj.config(cmd)
         except CLIError as c:
             cmddontask = "no terminal dont-ask"
@@ -250,25 +251,39 @@ class Vsan(object):
         """
 
         if self.id is None:
-            raise VsanNotPresent("Vsan " + str(self._id) + " is not present on the switch.")
+            raise VsanNotPresent(
+                "Vsan " + str(self._id) + " is not present on the switch."
+            )
         else:
             cmd = ""
             for eachint in interfaces:
                 fcmatch = re.match(PAT_FC, eachint.name)
                 pcmatch = re.match(PAT_PC, eachint.name)
                 if fcmatch or pcmatch:
-                    cmd = cmd + "terminal dont-ask ; vsan database ; vsan " + str(
-                        self._id) + " interface " + eachint.name + " ; no terminal dont-ask ; "
+                    cmd = (
+                            cmd
+                            + "terminal dont-ask ; vsan database ; vsan "
+                            + str(self._id)
+                            + " interface "
+                            + eachint.name
+                            + " ; no terminal dont-ask ; "
+                    )
                     # cmdlist.append(cmd)
                 else:
-                    raise InvalidInterface("Interface " + str(eachint.name) +
-                                           " is not supported, and hence cannot be added to the vsan, "
-                                           "supported interface types are 'fc' amd 'port-channel'")
+                    raise InvalidInterface(
+                        "Interface "
+                        + str(eachint.name)
+                        + " is not supported, and hence cannot be added to the vsan, "
+                          "supported interface types are 'fc' amd 'port-channel'"
+                    )
             try:
                 # self.__swobj._config_list(cmdlist)
                 self.__swobj.config(cmd)
             except CLIError as c:
-                if "membership being configured is already configured for the interface" in c.message:
+                if (
+                        "membership being configured is already configured for the interface"
+                        in c.message
+                ):
                     return
                 else:
                     log.error(c)
@@ -282,7 +297,9 @@ class Vsan(object):
         for eachv in listofvsaninfo:
             vsanlist.append(str(eachv[get_key(vsankeys.VSAN_ID, self._SW_VER)]))
         if str(self._id) not in vsanlist:
-            raise VsanNotPresent("Vsan " + str(self._id) + " is not present on the switch.")
+            raise VsanNotPresent(
+                "Vsan " + str(self._id) + " is not present on the switch."
+            )
 
         shvsan_req_out = {}
 

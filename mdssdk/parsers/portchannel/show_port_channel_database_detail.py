@@ -20,21 +20,21 @@ class ShowPortChannelDatabaseDetail(object):
             self._pc_detail = match.groupdict()
             mem = re.finditer(PAT_MEM, outlines)
             if mem:
-                self._pc_detail['members'] = [m.groupdict() for m in mem]
+                self._pc_detail["members"] = [m.groupdict() for m in mem]
 
     @property
     def members(self):
-        mem = self._pc_detail.get('members', None)
+        mem = self._pc_detail.get("members", None)
         if mem:
             return mem
         return None
 
     @property
     def admin_channel_mode(self):
-        return self._pc_detail.get('admin_channel_mode', None)
+        return self._pc_detail.get("admin_channel_mode", None)
 
     @property
     def channel_mode(self):
         if self.members:
-            return self.members[0]['channel_mode']
+            return self.members[0]["channel_mode"]
         return self.admin_channel_mode

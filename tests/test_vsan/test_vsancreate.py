@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestVsanCreate(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -33,16 +32,25 @@ class TestVsanCreate(unittest.TestCase):
             with self.assertRaises(CLIError) as e:
                 v.create()
             self.assertEqual(
-                'The command " vsan database ; vsan ' + str(i) + ' " gave the error " % Invalid command ".',
-                str(e.exception))
+                'The command " vsan database ; vsan '
+                + str(i)
+                + ' " gave the error " % Invalid command ".',
+                str(e.exception),
+            )
 
     def test_create_reserved(self):
         for i in self.reserved_id:
             v = Vsan(switch=self.switch, id=i)
             with self.assertRaises(CLIError) as e:
                 v.create()
-            self.assertEqual('The command " vsan database ; vsan ' + str(i) + ' " gave the error " vsan ' + str(
-                i) + ':vsan(s) reserved ".', str(e.exception))
+            self.assertEqual(
+                'The command " vsan database ; vsan '
+                + str(i)
+                + ' " gave the error " vsan '
+                + str(i)
+                + ':vsan(s) reserved ".',
+                str(e.exception),
+            )
 
     def tearDown(self) -> None:
         if self.v.id is not None:

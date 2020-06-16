@@ -7,7 +7,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelAttrChannelMode(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -31,8 +30,12 @@ class TestPortChannelAttrChannelMode(unittest.TestCase):
     def test_channel_mode_write_nonexisting(self):
         with self.assertRaises(PortChannelNotPresent) as e:
             self.pc.channel_mode = self.channel_mode_values[0]
-        self.assertEqual("PortChannelNotPresent: Port channel " + str(
-            self.pc_id) + " is not present on the switch, please create the PC first", str(e.exception))
+        self.assertEqual(
+            "PortChannelNotPresent: Port channel "
+            + str(self.pc_id)
+            + " is not present on the switch, please create the PC first",
+            str(e.exception),
+        )
 
     def test_channel_mode_write(self):
         self.pc.create()
@@ -47,8 +50,11 @@ class TestPortChannelAttrChannelMode(unittest.TestCase):
         with self.assertRaises(InvalidChannelMode) as e:
             self.pc.channel_mode = channel_mode
         self.assertEqual(
-            "InvalidChannelMode: Invalid channel mode (" + str(channel_mode) + "), Valid values are: on,active",
-            str(e.exception))
+            "InvalidChannelMode: Invalid channel mode ("
+            + str(channel_mode)
+            + "), Valid values are: on,active",
+            str(e.exception),
+        )
         self.pc.delete()
 
     def tearDown(self) -> None:

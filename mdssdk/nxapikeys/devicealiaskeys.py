@@ -11,19 +11,8 @@ from ..constants import DEFAULT
 # "Locked_by_SWWN": "20:00:00:de:fb:b1:8e:b0",
 # "pending_database_device_aliases": "3844",
 # "pending_database_mode": "Enhanced"
-FABRIC_DISTRIBUTE = {
-    DEFAULT: 'fabric_distribution',
-    '8.4(0)': 'dummy_distribution'
-}
-MODE = {
-    DEFAULT: 'database_mode',
-}
-NUM_DA = {
-    DEFAULT: 'database_device_aliases',
-}
-LOCKED_USER = {
-    DEFAULT: 'Locked_by_user',
-}
-LOCKED_SWWN = {
-    DEFAULT: 'Locked_by_SWWN',
-}
+FABRIC_DISTRIBUTE = {DEFAULT: "fabric_distribution", "8.4(0)": "dummy_distribution"}
+MODE = {DEFAULT: "database_mode"}
+NUM_DA = {DEFAULT: "database_device_aliases"}
+LOCKED_USER = {DEFAULT: "Locked_by_user"}
+LOCKED_SWWN = {DEFAULT: "Locked_by_SWWN"}

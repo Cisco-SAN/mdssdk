@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneSetAddMembers(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -28,8 +27,10 @@ class TestZoneSetAddMembers(unittest.TestCase):
         zone = Zone(self.switch, "test_zone", self.id)
         with self.assertRaises(ZoneNotPresent) as e:
             self.zoneset.add_members([zone])
-        self.assertEqual("ZoneNotPresent: The given zoneset member 'test_zone' is not present in the switch.",
-                         str(e.exception))
+        self.assertEqual(
+            "ZoneNotPresent: The given zoneset member 'test_zone' is not present in the switch.",
+            str(e.exception),
+        )
 
     def test_add_members(self):
         zone1 = Zone(self.switch, "test_zone1", self.id)
@@ -38,7 +39,9 @@ class TestZoneSetAddMembers(unittest.TestCase):
         zone2.create()
         members = [zone1, zone2]
         self.zoneset.add_members(members)
-        self.assertEqual([zone.name for zone in members], list(self.zoneset.members.keys()))
+        self.assertEqual(
+            [zone.name for zone in members], list(self.zoneset.members.keys())
+        )
 
     def test_add_members_typeerror(self):
         with self.assertRaises(AttributeError) as e:

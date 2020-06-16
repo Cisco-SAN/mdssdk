@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrTransceiver(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -16,13 +15,13 @@ class TestFcAttrTransceiver(unittest.TestCase):
         interfaces = sw.interfaces
         while True:
             k, v = random.choice(list(interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 self.fc = v
                 log.debug(k)
                 break
 
     def test_transceiver_read(self):
-        dir_trans = [x for x in dir(self.fc.transceiver) if not x.startswith('_')]
+        dir_trans = [x for x in dir(self.fc.transceiver) if not x.startswith("_")]
         log.debug(str(self.fc.name) + " transceiver : ")
         for t in dir_trans:
             log.debug(str(t) + " : " + str(self.fc.transceiver.__getattribute__(t)))

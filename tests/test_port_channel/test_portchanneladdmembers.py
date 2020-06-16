@@ -10,7 +10,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelAddMembers(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -23,7 +22,7 @@ class TestPortChannelAddMembers(unittest.TestCase):
         self.pc = PortChannel(self.switch, self.pc_id)
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 self.fc = v
                 log.debug(k)
                 break
@@ -41,7 +40,9 @@ class TestPortChannelAddMembers(unittest.TestCase):
             self.pc.add_members([self.fc])
         except CLIError as c:
             if "port not compatible" in c.message:
-                self.skipTest("Skipping test as as port not compatible. Please rerun the test cases")
+                self.skipTest(
+                    "Skipping test as as port not compatible. Please rerun the test cases"
+                )
         self.assertIn(self.fc.name, self.pc.members)
         self.pc.delete()
 
@@ -49,7 +50,7 @@ class TestPortChannelAddMembers(unittest.TestCase):
         self.pc.create()
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if (type(v) is Fc and k != self.fc.name):
+            if type(v) is Fc and k != self.fc.name:
                 fc2 = v
                 log.debug(k)
                 break
@@ -57,7 +58,9 @@ class TestPortChannelAddMembers(unittest.TestCase):
             self.pc.add_members([self.fc, fc2])
         except CLIError as c:
             if "port not compatible" in c.message:
-                self.skipTest("Skipping test as as port not compatible. Please rerun the test cases")
+                self.skipTest(
+                    "Skipping test as as port not compatible. Please rerun the test cases"
+                )
         self.assertIn(self.fc.name, self.pc.members)
         self.assertIn(fc2.name, self.pc.members)
         self.pc.delete()
@@ -65,8 +68,12 @@ class TestPortChannelAddMembers(unittest.TestCase):
     def test_add_members_nonexisting(self):
         with self.assertRaises(PortChannelNotPresent) as e:
             self.pc.add_members([self.fc])
-        self.assertEqual("PortChannelNotPresent: Port channel " + str(
-            self.pc_id) + " is not present on the switch, please create the PC first", str(e.exception))
+        self.assertEqual(
+            "PortChannelNotPresent: Port channel "
+            + str(self.pc_id)
+            + " is not present on the switch, please create the PC first",
+            str(e.exception),
+        )
 
     def test_add_members_invalidfc(self):
         invalidfc = "fc48/48"  ### check
@@ -74,8 +81,14 @@ class TestPortChannelAddMembers(unittest.TestCase):
         self.pc.create()
         with self.assertRaises(CLIError) as e:
             self.pc.add_members([fc1])
-        self.assertEqual("The command \" interface " + str(invalidfc) + " ; channel-group " + str(
-            self.pc_id) + " force \" gave the error \" Invalid interface format \".", str(e.exception))
+        self.assertEqual(
+            'The command " interface '
+            + str(invalidfc)
+            + " ; channel-group "
+            + str(self.pc_id)
+            + ' force " gave the error " Invalid interface format ".',
+            str(e.exception),
+        )
         self.pc.delete()
 
     def test_add_members_invalid(self):

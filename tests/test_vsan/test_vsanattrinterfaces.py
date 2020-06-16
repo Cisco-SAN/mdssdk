@@ -7,7 +7,6 @@ log = logging.getLogger(__name__)
 
 
 class TestVsanAttrInterfaces(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)

@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneSetActivate(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)

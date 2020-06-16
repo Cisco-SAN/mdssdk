@@ -19,4 +19,4 @@ class ShowZonesetActive(object):
 
     @property
     def active(self):
-        return self._name.get('name', None)
+        return self._name.get("name", None)

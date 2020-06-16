@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelCreate(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -30,8 +29,11 @@ class TestPortChannelCreate(unittest.TestCase):
             with self.assertRaises(InvalidPortChannelRange) as e:
                 pc = PortChannel(self.switch, i)
             self.assertEqual(
-                "InvalidPortChannelRange: Port channel id " + str(i) + " is invalid, id should range from 1 to 256",
-                str(e.exception))
+                "InvalidPortChannelRange: Port channel id "
+                + str(i)
+                + " is invalid, id should range from 1 to 256",
+                str(e.exception),
+            )
 
     def tearDown(self) -> None:
         self.pc.delete()

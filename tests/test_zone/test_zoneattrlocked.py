@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneAttrLocked(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -32,7 +31,7 @@ class TestZoneAttrLocked(unittest.TestCase):
     def test_locked_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.z.locked = "asdf"
-        self.assertEqual('can\'t set attribute', str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:
         self.v.delete()

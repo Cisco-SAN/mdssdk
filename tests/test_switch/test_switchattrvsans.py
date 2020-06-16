@@ -6,7 +6,6 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchAttrVsans(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -18,7 +17,7 @@ class TestSwitchAttrVsans(unittest.TestCase):
 
     def test_vsans_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.switch.vsans = 'asdf'
+            self.switch.vsans = "asdf"
         self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:

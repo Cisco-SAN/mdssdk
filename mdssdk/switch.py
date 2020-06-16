@@ -1,4 +1,4 @@
-__author__ = 'Suhas Bharadwaj (subharad)'
+__author__ = "Suhas Bharadwaj (subharad)"
 
 import logging
 import re
@@ -7,8 +7,13 @@ import time
 from .analytics import Analytics
 from .connection_manager.connect_netmiko import SSHSession
 from .connection_manager.connect_nxapi import ConnectNxapi
-from .connection_manager.errors import CLIError, UnsupportedVersion, VersionNotFound, UnsupportedFeature, \
-    UnsupportedConfig
+from .connection_manager.errors import (
+    CLIError,
+    UnsupportedVersion,
+    VersionNotFound,
+    UnsupportedFeature,
+    UnsupportedConfig,
+)
 from .constants import DEFAULT
 from .nxapikeys import versionkeys, featurekeys
 from .parsers.switch import ShowTopology
@@ -69,7 +74,16 @@ class Switch(SwitchUtils):
 
     """
 
-    def __init__(self, ip_address, username, password, connection_type='https', port=8443, timeout=30, verify_ssl=True):
+    def __init__(
+            self,
+            ip_address,
+            username,
+            password,
+            connection_type="https",
+            port=8443,
+            timeout=30,
+            verify_ssl=True,
+    ):
 
         self.__ip_address = ip_address
         self.__username = username
@@ -79,29 +93,43 @@ class Switch(SwitchUtils):
         self.timeout = timeout
         self.__verify_ssl = verify_ssl
 
-        if self.connection_type != 'ssh':
+        if self.connection_type != "ssh":
             log.info("Opening up a nxapi connection for switch with ip " + ip_address)
-            self.__connection = ConnectNxapi(ip_address, username, password, transport=connection_type, port=port,
-                                             verify_ssl=verify_ssl)
-            self._set_connection_type_based_on_version()
+            self.__connection = ConnectNxapi(
+                ip_address,
+                username,
+                password,
+                transport=connection_type,
+                port=port,
+                verify_ssl=verify_ssl,
+            )
 
         # Connect to ssh
         self.connect_to_ssh()
         self.can_connect = False
+        self._set_connection_type_based_on_version()
         log.info("is_connection_type_ssh " + str(self.is_connection_type_ssh()))
 
     def connect_to_ssh(self):
         log.info("Opening up a ssh connection for switch with ip " + self.__ip_address)
-        self._ssh_handle = SSHSession(host=self.__ip_address, username=self.__username, password=self.__password,
-                                      timeout=self.timeout)
+        self._ssh_handle = SSHSession(
+            host=self.__ip_address,
+            username=self.__username,
+            password=self.__password,
+            timeout=self.timeout,
+        )
 
     def _set_connection_type_based_on_version(self):
         try:
             ver = self.version
             if ver is None:
-                raise VersionNotFound("Unable to get the switch version, please check the log file")
+                raise VersionNotFound(
+                    "Unable to get the switch version, please check the log file"
+                )
         except KeyError:
-            log.debug("Got keyerror while getting version, setting connection type to ssh")
+            log.debug(
+                "Got keyerror while getting version, setting connection type to ssh"
+            )
             self.connection_type = "ssh"
         PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>.*)\)"
         RE_COMP = re.compile(PAT_VER)
@@ -109,26 +137,42 @@ class Switch(SwitchUtils):
         if result_ver:
             try:
                 result_dict = result_ver.groupdict()
-                majorplus = int(result_dict['major_plus'])
-                major = int(result_dict['major'])
-                minor = int(result_dict['minor'])
-                patch = result_dict['patch']
+                majorplus = int(result_dict["major_plus"])
+                major = int(result_dict["major"])
+                minor = int(result_dict["minor"])
+                patch = result_dict["patch"]
                 if majorplus > 8 and major > 4 and minor > 2:
-                    log.debug("Switch version is " + ver + ". This is a supported switch version for using NXAPI")
+                    log.debug(
+                        "Switch version is "
+                        + ver
+                        + ". This is a supported switch version for using NXAPI"
+                    )
                 elif majorplus == 8 and major == 4 and minor == 2:
-                    if patch == 'a':
-                        log.debug("Switch version is " + ver + ". This is a supported switch version for using NXAPI")
+                    if patch == "a":
+                        log.debug(
+                            "Switch version is "
+                            + ver
+                            + ". This is a supported switch version for using NXAPI"
+                        )
                     else:
-                        log.info("Switch version is not 8.4(2a), setting connection type to ssh")
+                        log.info(
+                            "Switch version is not 8.4(2a), setting connection type to ssh"
+                        )
                         self.connection_type = "ssh"
                 else:
-                    log.info("Switch version is not 8.4(2a), setting connection type to ssh")
+                    log.info(
+                        "Switch version is not 8.4(2a), setting connection type to ssh"
+                    )
                     self.connection_type = "ssh"
             except Exception:
-                log.debug("Got execption while getting the switch version, setting connection type to ssh")
+                log.debug(
+                    "Got execption while getting the switch version, setting connection type to ssh"
+                )
                 self.connection_type = "ssh"
         else:
-            log.debug("Could not get the pattern match for version, setting connection type to ssh")
+            log.debug(
+                "Could not get the pattern match for version, setting connection type to ssh"
+            )
             self.connection_type = "ssh"
 
     def _verify_supported_version(self):
@@ -140,27 +184,43 @@ class Switch(SwitchUtils):
         if result_ver:
             try:
                 result_dict = result_ver.groupdict()
-                majorplus = int(result_dict['major_plus'])
-                major = int(result_dict['major'])
-                minor = int(result_dict['minor'])
-                patch = result_dict['patch']
+                majorplus = int(result_dict["major_plus"])
+                major = int(result_dict["major"])
+                minor = int(result_dict["minor"])
+                patch = result_dict["patch"]
                 if majorplus >= 8 and major >= 4 and minor >= 2:
-                    log.debug("Switch version is " + ver + ". This is a supported switch version for SDK")
+                    log.debug(
+                        "Switch version is "
+                        + ver
+                        + ". This is a supported switch version for SDK"
+                    )
                 else:
                     raise UnsupportedVersion(
-                        "Switch version: " + ver + "\n SDK does not support this switch version. Supported version are 8.4(2) and above")
+                        "Switch version: "
+                        + ver
+                        + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
+                    )
             except KeyError:
                 raise UnsupportedVersion(
-                    "Switch version: " + ver + "\n SDK does not support this switch version. Supported version are 8.4(2) and above")
+                    "Switch version: "
+                    + ver
+                    + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
+                )
             except ValueError:
                 raise UnsupportedVersion(
-                    "Switch version: " + ver + "\n SDK does not support this switch version. Supported version are 8.4(2) and above")
+                    "Switch version: "
+                    + ver
+                    + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
+                )
         else:
             raise UnsupportedVersion(
-                "Switch version: " + ver + "\n SDK does not support this switch version. Supported version are 8.4(2) and above")
+                "Switch version: "
+                + ver
+                + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
+            )
 
     def is_connection_type_ssh(self):
-        return self.connection_type == 'ssh'
+        return self.connection_type == "ssh"
 
     @property
     def ipaddr(self):
@@ -258,13 +318,15 @@ class Switch(SwitchUtils):
         log.debug("Running version API")
         if self.is_connection_type_ssh():
             outlines = self.show(cmd)
-            # print(outlines)
-            ver = outlines[0]['version']
+            ver = outlines[0]["version"]
+            log.debug("ssh: " + ver)
         else:
             out = self.show(cmd)
             if not out:
-                raise CLIError(cmd,
-                               'Unable to fetch the switch software version using show version command. Need to debug further')
+                raise CLIError(
+                    cmd,
+                    "Unable to fetch the switch software version using show version command. Need to debug further",
+                )
             found = False
             allkeys = versionkeys.VER_STR.keys()
             for eachkey in allkeys:
@@ -274,6 +336,7 @@ class Switch(SwitchUtils):
             if not found:
                 fullversion = out[versionkeys.VER_STR[DEFAULT]]
             ver = fullversion.split()[0]
+            log.debug("nxapi: " + ver)
         self._SW_VER = ver
         return ver
 
@@ -296,7 +359,7 @@ class Switch(SwitchUtils):
         cmd = "show version"
         if self.is_connection_type_ssh():
             outlines = self.show(cmd)
-            return outlines[0]['model']
+            return outlines[0]["model"]
             # shver = ShowVersion(outlines)
             # return shver.model
         else:
@@ -424,7 +487,7 @@ class Switch(SwitchUtils):
         cmd = "show version"
         if self.is_connection_type_ssh():
             outlines = self.show(cmd)
-            return outlines[0]['kickstart_image']
+            return outlines[0]["kickstart_image"]
             # shver = ShowVersion(outlines)
             # return shver.kickstart_image
 
@@ -452,7 +515,7 @@ class Switch(SwitchUtils):
         cmd = "show version"
         if self.is_connection_type_ssh():
             outlines = self.show(cmd)
-            return outlines[0]['system_image']
+            return outlines[0]["system_image"]
             # shver = ShowVersion(outlines)
             # return shver.system_image
 
@@ -508,7 +571,9 @@ class Switch(SwitchUtils):
         # Do a type check on the enable flag
         if enable is not None:
             if type(enable) is not bool:
-                raise TypeError("enable flag must be True(to enable the feature) or False(to disable the feature)")
+                raise TypeError(
+                    "enable flag must be True(to enable the feature) or False(to disable the feature)"
+                )
 
         if enable is None:
             log.debug("Get the status of the feature " + name)
@@ -517,34 +582,46 @@ class Switch(SwitchUtils):
             # Bug doesnt work on npv, NXOS needs to fix
             if self.is_connection_type_ssh():
                 for eachrow in out:
-                    if eachrow['feature'] == name:
-                        if eachrow['state'] == 'enabled':
+                    if eachrow["feature"] == name:
+                        if eachrow["state"] == "enabled":
                             return True
                         else:
                             return False
                 return False
 
-            list_of_features = out['TABLE_cfcFeatureCtrl2Table']['ROW_cfcFeatureCtrl2Table']
+            list_of_features = out["TABLE_cfcFeatureCtrl2Table"][
+                "ROW_cfcFeatureCtrl2Table"
+            ]
             for eachfeature in list_of_features:
-                feature_name = eachfeature[get_key(featurekeys.NAME, self._SW_VER)].strip()
-                feature_status = eachfeature[get_key(featurekeys.STATUS, self._SW_VER)].strip()
+                feature_name = eachfeature[
+                    get_key(featurekeys.NAME, self._SW_VER)
+                ].strip()
+                feature_status = eachfeature[
+                    get_key(featurekeys.STATUS, self._SW_VER)
+                ].strip()
                 if name == feature_name:
-                    return feature_status == 'enabled'
+                    return feature_status == "enabled"
             return False
         elif enable:
             log.debug("Trying to enable the feature " + name)
             cmd = "feature " + name
         else:
             # if we try to disable ssh or nxapi via this SDK then throw an exception
-            if name == 'ssh' or name == 'nxapi':
-                raise UnsupportedConfig("Disabling the feature '" + name + "' via this SDK API is not allowed!!")
+            if name == "ssh" or name == "nxapi":
+                raise UnsupportedConfig(
+                    "Disabling the feature '"
+                    + name
+                    + "' via this SDK API is not allowed!!"
+                )
             log.debug("Trying to disable the feature " + name)
             cmd = "no feature " + name
         try:
             out = self.config(cmd)
         except CLIError as c:
             if "Invalid command" in c.message:
-                raise UnsupportedFeature("This feature '" + name + "' is not supported on this switch ")
+                raise UnsupportedFeature(
+                    "This feature '" + name + "' is not supported on this switch "
+                )
 
     @property
     def cores(self):
@@ -563,24 +640,26 @@ class Switch(SwitchUtils):
         return out
 
     def _cli_error_check(self, command_response):
-        error = command_response.get(u'error')
+        error = command_response.get(u"error")
         if error:
-            command = command_response.get(u'command')
-            if u'data' in error:
-                raise CLIError(command, error[u'data'][u'msg'])
+            command = command_response.get(u"command")
+            if u"data" in error:
+                raise CLIError(command, error[u"data"][u"msg"])
             else:
-                raise CLIError(command, 'Invalid command.')
+                raise CLIError(command, "Invalid command.")
 
-        error = command_response.get(u'clierror')
+        error = command_response.get(u"clierror")
         if error:
-            command = command_response.get(u'input')
+            command = command_response.get(u"input")
             raise CLIError(command, error)
 
-    def _cli_command(self, commands, rpc=u'2.0', method=u'cli'):
+    def _cli_command(self, commands, rpc=u"2.0", method=u"cli"):
         if not isinstance(commands, list):
             commands = [commands]
 
-        conn_response = self.__connection.send_request(commands, rpc_version=rpc, method=method, timeout=self.timeout)
+        conn_response = self.__connection.send_request(
+            commands, rpc_version=rpc, method=method, timeout=self.timeout
+        )
         log.debug("conn_response is")
         log.debug(conn_response)
 
@@ -588,12 +667,12 @@ class Switch(SwitchUtils):
         if rpc is not None:
             for command_response in conn_response:
                 self._cli_error_check(command_response)
-                text_response_list.append(command_response[u'result'])
+                text_response_list.append(command_response[u"result"])
         else:
             text_response_list = []
             for command_response in conn_response:
-                if 'ins_api' in command_response.keys():
-                    retout = command_response['ins_api']['outputs']['output']
+                if "ins_api" in command_response.keys():
+                    retout = command_response["ins_api"]["outputs"]["output"]
                     if type(retout) is dict:
                         fullout = [retout]
                     else:
@@ -601,11 +680,11 @@ class Switch(SwitchUtils):
                     for eachoutput in fullout:
                         # print(eachoutput)
                         self._cli_error_check(eachoutput)
-                        text_response_list.append(eachoutput[u'body'])
+                        text_response_list.append(eachoutput[u"body"])
         return text_response_list
 
     def _show_ssh(self, command, timeout, expect_string):
-        log.debug("_show_ssh : Show cmd to be sent is " + ' -- ' + command)
+        log.debug("_show_ssh : Show cmd to be sent is " + " -- " + command)
         outlines, error = self._ssh_handle.show(command, timeout, expect_string)
         if error is not None:
             raise CLIError(command, error)
@@ -623,13 +702,13 @@ class Switch(SwitchUtils):
         :return: The output of the show command, which could be raw text(str) or structured data(dict).
         :rtype: dict
         """
-        log.debug("Show cmd to be sent is " + ' -- ' + command)
+        log.debug("Show cmd to be sent is " + " -- " + command)
         if self.is_connection_type_ssh() or use_ssh:
             outlines, error = self._ssh_handle.show(command, timeout)
             if error is not None:
                 raise CLIError(command, error)
             if raw_text:
-                return '\n'.join(outlines)
+                return "\n".join(outlines)
             return outlines
 
         commands = [command]
@@ -651,7 +730,7 @@ class Switch(SwitchUtils):
         :return: The output of the show command, which could be raw text(str) or structured data(dict).
         :rtype: list
         """
-        log.debug("Show cmds to be sent are " + ' -- '.join(commands))
+        log.debug("Show cmds to be sent are " + " -- ".join(commands))
         if self.is_connection_type_ssh() or use_ssh:
             retdict = {}
             for cmd in commands:
@@ -668,15 +747,15 @@ class Switch(SwitchUtils):
 
         return_list = []
         if raw_text:
-            response_list = self._cli_command(commands, method=u'cli_ascii')
+            response_list = self._cli_command(commands, method=u"cli_ascii")
             for response in response_list:
                 if response:
-                    return_list.append(response[u'msg'].strip())
+                    return_list.append(response[u"msg"].strip())
         else:
             response_list = self._cli_command(commands)
             for response in response_list:
                 if response:
-                    return_list.append(response[u'body'])
+                    return_list.append(response[u"body"])
 
         log.debug("Show commands sent are :")
         log.debug(commands)
@@ -685,7 +764,7 @@ class Switch(SwitchUtils):
 
         return return_list
 
-    def config(self, command, rpc=u'2.0', method=u'cli', use_ssh=False):
+    def config(self, command, rpc=u"2.0", method=u"cli", use_ssh=False):
         """
         Send any command to run from the config mode
 
@@ -695,7 +774,7 @@ class Switch(SwitchUtils):
         :return: command output
 
         """
-        log.debug("Config cmd to be sent is " + ' -- ' + command)
+        log.debug("Config cmd to be sent is " + " -- " + command)
         if self.is_connection_type_ssh() or use_ssh:
             outlines, error = self._ssh_handle.config(command)
             if error is not None:
@@ -705,10 +784,10 @@ class Switch(SwitchUtils):
         commands = [command]
         list_result = self._config_list(commands, rpc, method)
         if list_result[0] is not None:
-            raise CLIError(command, list_result[0]['msg'])
+            raise CLIError(command, list_result[0]["msg"])
         return list_result[0]
 
-    def _config_list(self, commands, rpc=u'2.0', method=u'cli', use_ssh=False):
+    def _config_list(self, commands, rpc=u"2.0", method=u"cli", use_ssh=False):
         """
         Send any list of commands to run from the config mode
 
@@ -718,7 +797,7 @@ class Switch(SwitchUtils):
         :return: command output
 
         """
-        log.debug("Config cmds to be sent are " + ' -- '.join(commands))
+        log.debug("Config cmds to be sent are " + " -- ".join(commands))
         if self.is_connection_type_ssh() or use_ssh:
             retdict = {}
             for cmd in commands:
@@ -761,12 +840,12 @@ class Switch(SwitchUtils):
             if copyrs:
                 log.info("Reloading switch after copy running-config startup-config")
                 crs = self.show("copy running-config startup-config", raw_text=True)
-                if 'Copy complete' in crs:
-                    log.info('copy running-config startup-config is successful')
+                if "Copy complete" in crs:
+                    log.info("copy running-config startup-config is successful")
                 else:
-                    log.error('copy running-config startup-config failed')
+                    log.error("copy running-config startup-config failed")
                     log.error(crs.split("\n")[-1])
-                    return {'FAILED': crs}
+                    return {"FAILED": crs}
             else:
                 log.info("Reloading switch without copy running-config startup-config")
 
@@ -776,16 +855,24 @@ class Switch(SwitchUtils):
             cmd = "terminal dont-ask ; reload module " + mod
             action_string = "reload module " + str(mod)
             if copyrs:
-                log.info("Reloading the module " + mod + " after copy running-config startup-config")
+                log.info(
+                    "Reloading the module "
+                    + mod
+                    + " after copy running-config startup-config"
+                )
                 crs = self.show("copy running-config startup-config", raw_text=True)
-                if 'Copy complete' in crs:
-                    log.info('copy running-config startup-config is successful')
+                if "Copy complete" in crs:
+                    log.info("copy running-config startup-config is successful")
                 else:
-                    log.error('copy running-config startup-config failed')
+                    log.error("copy running-config startup-config failed")
                     log.error(crs.split("\n")[-1])
-                    return {'FAILED': crs}
+                    return {"FAILED": crs}
             else:
-                log.info("Reloading the module " + mod + " without copy running-config startup-config")
+                log.info(
+                    "Reloading the module "
+                    + mod
+                    + " without copy running-config startup-config"
+                )
 
         out = self._verify_basic_stuff(cmd, action_string, timeout)
         return out
@@ -794,7 +881,9 @@ class Switch(SwitchUtils):
         self.issu_status = None
         # Set the switch timeout
         if timeout < 1800:
-            log.info(self.ipaddr + ": Timeout for ISSU cannot be less than 10 mins (600 sec)")
+            log.info(
+                self.ipaddr + ": Timeout for ISSU cannot be less than 10 mins (600 sec)"
+            )
             timeout = 1800
 
         # Check if any compatibilty issues
@@ -807,10 +896,16 @@ class Switch(SwitchUtils):
             if "No incompatible configurations" in eachline:
                 noincompat += 1
         if noincompat != 2:
-            log.error(self.ipaddr + ": Incompatibilty check failed, please fix the incompatibilities. Skipping upgrade")
+            log.error(
+                self.ipaddr
+                + ": Incompatibilty check failed, please fix the incompatibilities. Skipping upgrade"
+            )
             log.error(out)
-            return ('FAILED', out)
-        print_and_log(self.ipaddr + ": No incompatible configurations, so continuing with ISSU checks")
+            return ("FAILED", out)
+        print_and_log(
+            self.ipaddr
+            + ": No incompatible configurations, so continuing with ISSU checks"
+        )
 
         # Check impact status to determine if its disruptive or non-disruptive
         # show install all impact kickstart m9700-sf4ek9-kickstart-mz.8.4.1.bin system m9700-sf4ek9-mz.8.4.1.bin
@@ -821,15 +916,26 @@ class Switch(SwitchUtils):
         for eachline in alllines:
             if "non-disruptive" in eachline:
                 nondisruptive = True
-                log.debug(self.ipaddr + ": 'show install all impact' was success, continuing with non-disruptive ISSU ")
+                log.debug(
+                    self.ipaddr
+                    + ": 'show install all impact' was success, continuing with non-disruptive ISSU "
+                )
                 break
         if not nondisruptive:
-            log.error(self.ipaddr + ": ERROR!!! Cannot do non-disruptive upgrade. Skipping upgrade")
+            log.error(
+                self.ipaddr
+                + ": ERROR!!! Cannot do non-disruptive upgrade. Skipping upgrade"
+            )
             log.error(out)
-            return ('FAILED', out)
+            return ("FAILED", out)
 
         log.info(self.ipaddr + ": Starting install all cmd for non-disruptive ISSU")
-        cmd = "terminal dont-ask ; install all kickstart " + kickstart + " system " + system
+        cmd = (
+                "terminal dont-ask ; install all kickstart "
+                + kickstart
+                + " system "
+                + system
+        )
         if post_issu_checks:
             status, out = self._verify_basic_stuff(cmd, "install all", timeout)
         else:
@@ -840,16 +946,29 @@ class Switch(SwitchUtils):
     def _execute_install_all(self, cmd, timeout):
         # Send install all cmd
         try:
-            out = self._show_ssh(cmd, timeout, "All telnet and ssh connections will now be temporarily terminated")
+            out = self._show_ssh(
+                cmd,
+                timeout,
+                "All telnet and ssh connections will now be temporarily terminated",
+            )
         except CLIError as e:
-            if "Installer will perform compatibility check first. Please wait" not in e.message:
+            if (
+                    "Installer will perform compatibility check first. Please wait"
+                    not in e.message
+            ):
                 raise CLIError
-        print_and_log(self.ipaddr + ": Please wait for install all to complete. This will take a while...")
+        print_and_log(
+            self.ipaddr
+            + ": Please wait for install all to complete. This will take a while..."
+        )
 
         # Wait for switch reboot after install all so that you can reconnect back to switch via ssh
         time.sleep(240)
         log.debug(self.ipaddr + ": Reconnecting back to switch via ssh after upgrade")
-        log.info(self.ipaddr + ": Ignore the error 'Socket exception: Connection reset by peer' if seen")
+        log.info(
+            self.ipaddr
+            + ": Ignore the error 'Socket exception: Connection reset by peer' if seen"
+        )
         self.connect_to_ssh()
 
         # Wait for atleast half hr for ISSU to complete, means all LC to be upgraded
@@ -862,7 +981,10 @@ class Switch(SwitchUtils):
         timestocheck = int(waittime / 120)
 
         for i in range(timestocheck):
-            print_and_log(self.ipaddr + ": Checking if install is complete and successful. Please wait...")
+            print_and_log(
+                self.ipaddr
+                + ": Checking if install is complete and successful. Please wait..."
+            )
 
             # show install all status - Install has been successful
             cmd = "show install all status"
@@ -872,16 +994,20 @@ class Switch(SwitchUtils):
             for eachline in alllines:
                 if "Install has been successful" in eachline:
                     print_and_log(self.ipaddr + ": Upgrade has been successfully done")
-                    return ('SUCCESS', None)
+                    return ("SUCCESS", None)
             time.sleep(120)
 
         log.error(
-            self.ipaddr + ": ERROR!!!Could not get install all success message from show install all status cmd, please check the log file for more details")
+            self.ipaddr
+            + ": ERROR!!!Could not get install all success message from show install all status cmd, please check the log file for more details"
+        )
         log.info(out)
-        return ('FAILED', out)
+        return ("FAILED", out)
 
     def _verify_basic_stuff(self, cmd, action_string, timeout):
-        print_and_log(self.ipaddr + ": Collecting basic info before '" + action_string + "'")
+        print_and_log(
+            self.ipaddr + ": Collecting basic info before '" + action_string + "'"
+        )
         shmod_before = self.show("show module", raw_text=True).split("\n")
         shintb_before = self.show("show interface brief", raw_text=True).split("\n")
         print_and_log(self.ipaddr + ": Started " + action_string + " . Please wait...")
@@ -893,22 +1019,30 @@ class Switch(SwitchUtils):
             out = self.config(cmd)
             print_and_log(self.ipaddr + ": Please wait for " + str(timeout) + "secs..")
             time.sleep(timeout)
-        print_and_log(self.ipaddr + ": Collecting basic info after '" + action_string + "'")
+        print_and_log(
+            self.ipaddr + ": Collecting basic info after '" + action_string + "'"
+        )
         shmod_after = self.show("show module", raw_text=True).split("\n")
         shintb_after = self.show("show interface brief", raw_text=True).split("\n")
 
         cores = self.cores
         if cores is not None:
             log.error(
-                self.ipaddr + ": Cores present on the switch, please check the switch and also the log file")
+                self.ipaddr
+                + ": Cores present on the switch, please check the switch and also the log file"
+            )
             log.error(cores)
-            return ('FAILED', out)
+            return ("FAILED", out)
 
         if shmod_before == shmod_after:
             log.debug(self.ipaddr + ": 'show module' is correct after " + action_string)
         else:
             log.error(
-                self.ipaddr + ": 'show module' output is different from before and after " + action_string + ", please check the log file")
+                self.ipaddr
+                + ": 'show module' output is different from before and after "
+                + action_string
+                + ", please check the log file"
+            )
             log.debug(self.ipaddr + ": 'show module' before " + action_string)
             log.debug(shmod_before)
             log.debug(self.ipaddr + ": 'show module' after " + action_string)
@@ -921,13 +1055,21 @@ class Switch(SwitchUtils):
             log.debug(self.ipaddr + ": diff of before after " + action_string)
             log.debug(bef)
             log.debug(aft)
-            return ('FAILED', [bef, aft])
+            return ("FAILED", [bef, aft])
 
         if shintb_before == shintb_after:
-            log.debug(self.ipaddr + ": 'show interface brief' is correct after " + action_string)
+            log.debug(
+                self.ipaddr
+                + ": 'show interface brief' is correct after "
+                + action_string
+            )
         else:
             log.error(
-                self.ipaddr + ": 'show interface brief' output is different from before and after " + action_string + ", please check the log file")
+                self.ipaddr
+                + ": 'show interface brief' output is different from before and after "
+                + action_string
+                + ", please check the log file"
+            )
             log.debug(self.ipaddr + ": 'show interface brief' before " + action_string)
             log.debug(shintb_before)
             log.debug(self.ipaddr + ": 'show interface brief' after " + action_string)
@@ -940,9 +1082,9 @@ class Switch(SwitchUtils):
             log.debug(self.ipaddr + ": diff of before after " + action_string)
             log.debug(bef)
             log.debug(aft)
-            return ('FAILED', [bef, aft])
+            return ("FAILED", [bef, aft])
         log.info(self.ipaddr + ": Basic info is correct after " + action_string)
-        return ('SUCCESS', None)
+        return ("SUCCESS", None)
 
     def get_peer_switches(self):
         peer_sw_list = []
@@ -950,7 +1092,7 @@ class Switch(SwitchUtils):
         sh = ShowTopology(shtopoout.splitlines())
         for vsan, interfacelist in sh.parse_data.items():
             for eachinterface in interfacelist:
-                peer_sw_ip = eachinterface['peer_ip']
+                peer_sw_ip = eachinterface["peer_ip"]
                 peer_sw_list.append(peer_sw_ip)
         peerlist = list(dict.fromkeys(peer_sw_list))
         log.debug("Peer NPIV list of switch : " + self.ipaddr + " are: ")
@@ -960,17 +1102,19 @@ class Switch(SwitchUtils):
     def get_peer_npv_switches(self):
         retout = []
         try:
-            fcnsout = self.show("show fcns database detail")['TABLE_fcns_vsan']['ROW_fcns_vsan']
+            fcnsout = self.show("show fcns database detail")["TABLE_fcns_vsan"][
+                "ROW_fcns_vsan"
+            ]
         except KeyError:
             return None
         if type(fcnsout) is dict:
             fcnsout = [fcnsout]
         for eachline in fcnsout:
-            temp = eachline['TABLE_fcns_database']['ROW_fcns_database']
+            temp = eachline["TABLE_fcns_database"]["ROW_fcns_database"]
             # print(temp)
-            if type(temp['fc4_types_fc4_features']) is str:
-                if temp['fc4_types_fc4_features'].strip() == 'npv':
-                    ip = temp['node_ip_addr']
+            if type(temp["fc4_types_fc4_features"]) is str:
+                if temp["fc4_types_fc4_features"].strip() == "npv":
+                    ip = temp["node_ip_addr"]
                     retout.append(ip)
         peerlist = list(dict.fromkeys(retout))
         log.debug("Peer NPV list of switch : " + self.ipaddr + " are: ")

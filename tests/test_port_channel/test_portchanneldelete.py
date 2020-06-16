@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelDelete(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)

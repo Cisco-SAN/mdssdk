@@ -6,7 +6,6 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchAttrIpAddr(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -18,7 +17,7 @@ class TestSwitchAttrIpAddr(unittest.TestCase):
 
     def test_ipaddr_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.switch.ipaddr = '10.197.155.244'
+            self.switch.ipaddr = "10.197.155.244"
         self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:

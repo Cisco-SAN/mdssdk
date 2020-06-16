@@ -19,4 +19,4 @@ class ShowInterfaceDescription(object):
 
     @property
     def description(self):
-        return self._group_dict.get('description', None)
+        return self._group_dict.get("description", None)

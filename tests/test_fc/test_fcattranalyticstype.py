@@ -23,7 +23,7 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
         interfaces = sw.interfaces
         while True:
             k, v = random.choice(list(interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 self.fc = v
                 mod, port = get_mod_port(self.fc.name)
                 modobj = self.switch.modules[mod]
@@ -48,7 +48,9 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
                 except CLIError as e:
                     if "Unsupported Port mode of interface" in str(e.message):
                         self.skipTest("Skipping test, port mode is unsupported")
-                self.assertEqual(val, self.fc.analytics_type, "port is: " + self.fc.name)
+                self.assertEqual(
+                    val, self.fc.analytics_type, "port is: " + self.fc.name
+                )
             self.fc.analytics_type = self.old
             self.assertEqual(self.old, self.fc.analytics_type)
         except CLIError as c:
@@ -61,8 +63,11 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
         with self.assertRaises(InvalidAnalyticsType) as e:
             self.fc.analytics_type = analytics_type
         self.assertEqual(
-            "InvalidAnalyticsType: Invalid analytics type '" + analytics_type + "'. Valid types are scsi,nvme,all,None(to disable analytics type)",
-            str(e.exception))
+            "InvalidAnalyticsType: Invalid analytics type '"
+            + analytics_type
+            + "'. Valid types are scsi,nvme,all,None(to disable analytics type)",
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         try:

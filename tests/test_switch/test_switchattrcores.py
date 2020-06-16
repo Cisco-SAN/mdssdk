@@ -6,7 +6,6 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchAttrCores(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)

@@ -6,7 +6,6 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchAttrKickstartImage(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -19,7 +18,7 @@ class TestSwitchAttrKickstartImage(unittest.TestCase):
 
     def test_kickstart_image_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.switch.kickstart_image = 'asdf'
+            self.switch.kickstart_image = "asdf"
         self.assertEqual("can't set attribute", str(e.exception))
 
     def test_system_image_read(self):
@@ -29,7 +28,7 @@ class TestSwitchAttrKickstartImage(unittest.TestCase):
 
     def test_system_image_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.switch.system_image = 'asdf'
+            self.switch.system_image = "asdf"
         self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:

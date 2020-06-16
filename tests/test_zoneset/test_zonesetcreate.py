@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneSetCreate(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -40,28 +39,45 @@ class TestZoneSetCreate(unittest.TestCase):
         z = ZoneSet(self.switch, invalid, self.id)
         with self.assertRaises(CLIError) as e:
             z.create()
-        self.assertEqual("The command \" zoneset name " + str(invalid) + " vsan " + str(
-            self.id) + " \" gave the error \" Illegal character present in the name \".", str(e.exception))
+        self.assertEqual(
+            'The command " zoneset name '
+            + str(invalid)
+            + " vsan "
+            + str(self.id)
+            + ' " gave the error " Illegal character present in the name ".',
+            str(e.exception),
+        )
 
     def test_create_name_invalidfirstchar(self):
         invalid = "1zoneset"
         z = ZoneSet(self.switch, invalid, self.id)
         with self.assertRaises(CLIError) as e:
             z.create()
-        self.assertEqual("The command \" zoneset name " + str(invalid) + " vsan " + str(
-            self.id) + " \" gave the error \" Illegal first character (name must start with a letter) \".",
-                         str(e.exception))
+        self.assertEqual(
+            'The command " zoneset name '
+            + str(invalid)
+            + " vsan "
+            + str(self.id)
+            + ' " gave the error " Illegal first character (name must start with a letter) ".',
+            str(e.exception),
+        )
 
     def test_create_name_beyondmax(self):
-        name = 'zo123456789123456789123456789123456789123456789123456789123456789'
+        name = "zo123456789123456789123456789123456789123456789123456789123456789"
         z = ZoneSet(self.switch, name, self.id)
         with self.assertRaises(CLIError) as e:
             z.create()
-        self.assertEqual("The command \" zoneset name " + name + " vsan " + str(
-            self.id) + " \" gave the error \" % String exceeded max length of (64) \".", str(e.exception))
+        self.assertEqual(
+            'The command " zoneset name '
+            + name
+            + " vsan "
+            + str(self.id)
+            + ' " gave the error " % String exceeded max length of (64) ".',
+            str(e.exception),
+        )
 
     def test_create_name_max(self):
-        name = 'z123456789123456789123456789123456789123456789123456789123456789'
+        name = "z123456789123456789123456789123456789123456789123456789123456789"
         z = ZoneSet(self.switch, name, self.id)
         z.create()
         self.assertEqual(name, z.name)

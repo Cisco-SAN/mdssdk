@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestDeviceAliasDelete(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -22,7 +21,10 @@ class TestDeviceAliasDelete(unittest.TestCase):
             while True:
                 self.name = get_random_string()
                 self.pwwn = get_random_pwwn()
-                if self.name not in self.olddb.keys() and self.pwwn not in self.olddb.values():
+                if (
+                        self.name not in self.olddb.keys()
+                        and self.pwwn not in self.olddb.values()
+                ):
                     break
         log.debug({self.name: self.pwwn})
 

@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestDeviceAliasCreate(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -22,7 +21,10 @@ class TestDeviceAliasCreate(unittest.TestCase):
             while True:
                 self.name = get_random_string()
                 self.pwwn = get_random_pwwn()
-                if self.name not in self.olddb.keys() and self.pwwn not in self.olddb.values():
+                if (
+                        self.name not in self.olddb.keys()
+                        and self.pwwn not in self.olddb.values()
+                ):
                     break
         log.debug({self.name: self.pwwn})
 
@@ -38,35 +40,55 @@ class TestDeviceAliasCreate(unittest.TestCase):
             self.assertNotIn(self.pwwn, newdb.values())
 
     def test_create_name_invalid(self):
-        invalid_name = {'da1&': get_random_pwwn()}  # da name a-zA-Z1-9 - _ $ ^    64chars max
+        invalid_name = {
+            "da1&": get_random_pwwn()
+        }  # da name a-zA-Z1-9 - _ $ ^    64chars max
         name = list(invalid_name.keys())[0]
         pwwn = list(invalid_name.values())[0]
         with self.assertRaises(CLIError) as e:
             self.d.create(invalid_name)
-        self.assertEqual("The command \" device-alias database ;  device-alias name " + str(name) + " pwwn " + str(
-            pwwn) + " ; \" gave the error \" Illegal character present in the name \".", str(e.exception))
+        self.assertEqual(
+            'The command " device-alias database ;  device-alias name '
+            + str(name)
+            + " pwwn "
+            + str(pwwn)
+            + ' ; " gave the error " Illegal character present in the name ".',
+            str(e.exception),
+        )
         self.d.clear_lock()
 
     def test_create_name_invalidfirstchar(self):
-        invalidfirstchar = {'1da': '53:66:61:01:0e:00:01:ff'}
+        invalidfirstchar = {"1da": "53:66:61:01:0e:00:01:ff"}
         name = list(invalidfirstchar.keys())[0]
         pwwn = list(invalidfirstchar.values())[0]
         with self.assertRaises(CLIError) as e:
             self.d.create(invalidfirstchar)
-        self.assertEqual("The command \" device-alias database ;  device-alias name " + str(name) + " pwwn " + str(
-            pwwn) + " ; \" gave the error \" Illegal first character. Name must start with a letter \".",
-                         str(e.exception))
+        self.assertEqual(
+            'The command " device-alias database ;  device-alias name '
+            + str(name)
+            + " pwwn "
+            + str(pwwn)
+            + ' ; " gave the error " Illegal first character. Name must start with a letter ".',
+            str(e.exception),
+        )
         self.d.clear_lock()
 
     def test_create_name_beyondmax(self):
         beyondmax = {
-            'da123456789123456789123456789123456789123456789123456789123456789': get_random_pwwn()}
+            "da123456789123456789123456789123456789123456789123456789123456789": get_random_pwwn()
+        }
         name = list(beyondmax.keys())[0]
         pwwn = list(beyondmax.values())[0]
         with self.assertRaises(CLIError) as e:
             self.d.create(beyondmax)
-        self.assertEqual("The command \" device-alias database ;  device-alias name " + str(name) + " pwwn " + str(
-            pwwn) + " ; \" gave the error \" % String exceeded max length of (64) \".", str(e.exception))
+        self.assertEqual(
+            'The command " device-alias database ;  device-alias name '
+            + str(name)
+            + " pwwn "
+            + str(pwwn)
+            + ' ; " gave the error " % String exceeded max length of (64) ".',
+            str(e.exception),
+        )
 
     def test_create_pwwn_existing(self):
         self.d.create({self.name: self.pwwn})
@@ -77,7 +99,9 @@ class TestDeviceAliasCreate(unittest.TestCase):
         newname = get_random_string()
         with self.assertRaises(CLIError) as e:
             self.d.create({newname: self.pwwn})
-        self.assertIn("Another device-alias already present with the same pwwn", str(e.exception))
+        self.assertIn(
+            "Another device-alias already present with the same pwwn", str(e.exception)
+        )
 
         # DB should not be updated with the new name
         self.assertIn(self.name, newdb.keys())

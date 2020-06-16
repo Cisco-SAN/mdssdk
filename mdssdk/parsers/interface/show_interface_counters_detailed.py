@@ -91,37 +91,47 @@ class ShowInterfaceCountersDetailed(object):
         outlines = "".join([eachline.strip("\n") for eachline in outlines])
         match = re.search(PAT_TS, outlines)
         if match:
-            self._group_dict['total_stats'] = {k: int(v) for k, v in match.groupdict().items()}
+            self._group_dict["total_stats"] = {
+                k: int(v) for k, v in match.groupdict().items()
+            }
         match = re.search(PAT_LS, outlines)
         if match:
-            self._group_dict['link_stats'] = {k: int(v) for k, v in match.groupdict().items()}
+            self._group_dict["link_stats"] = {
+                k: int(v) for k, v in match.groupdict().items()
+            }
         match = re.search(PAT_LOS, outlines)
         if match:
-            self._group_dict['loop_stats'] = {k: int(v) for k, v in match.groupdict().items()}
+            self._group_dict["loop_stats"] = {
+                k: int(v) for k, v in match.groupdict().items()
+            }
         match = re.search(PAT_CS, outlines)
         if match:
-            self._group_dict['congestion_stats'] = {k: int(v) for k, v in match.groupdict().items() if v is not None}
+            self._group_dict["congestion_stats"] = {
+                k: int(v) for k, v in match.groupdict().items() if v is not None
+            }
         match = re.search(PAT_OS, outlines)
         if match:
-            self._group_dict['other_stats'] = {k: int(v) for k, v in match.groupdict().items()}
+            self._group_dict["other_stats"] = {
+                k: int(v) for k, v in match.groupdict().items()
+            }
         log.debug(self._group_dict)
 
     @property
     def total_stats(self):
-        return self._group_dict.get('total_stats', None)
+        return self._group_dict.get("total_stats", None)
 
     @property
     def link_stats(self):
-        return self._group_dict.get('link_stats', None)
+        return self._group_dict.get("link_stats", None)
 
     @property
     def loop_stats(self):
-        return self._group_dict.get('loop_stats', None)
+        return self._group_dict.get("loop_stats", None)
 
     @property
     def congestion_stats(self):
-        return self._group_dict.get('congestion_stats', None)
+        return self._group_dict.get("congestion_stats", None)
 
     @property
     def other_stats(self):
-        return self._group_dict.get('other_stats', None)
+        return self._group_dict.get("other_stats", None)

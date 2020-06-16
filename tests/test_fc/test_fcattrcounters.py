@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrCounters(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -16,13 +15,13 @@ class TestFcAttrCounters(unittest.TestCase):
         interfaces = sw.interfaces
         while True:
             k, v = random.choice(list(interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 self.fc = v
                 log.debug(k)
                 break
 
     def test_counters_read(self):
-        dir_counters = [x for x in dir(self.fc.counters) if not x.startswith('_')]
+        dir_counters = [x for x in dir(self.fc.counters) if not x.startswith("_")]
         log.debug("Counters " + str(self.fc.name))
         for t in dir_counters:
             log.debug(str(t) + " : " + str(self.fc.counters.__getattribute__(t)))

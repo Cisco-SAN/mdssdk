@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrSpeed(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -17,7 +16,7 @@ class TestFcAttrSpeed(unittest.TestCase):
         interfaces = sw.interfaces
         while True:
             k, v = random.choice(list(interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 self.fc = v
                 log.debug(k)
                 break
@@ -35,23 +34,33 @@ class TestFcAttrSpeed(unittest.TestCase):
                 self.fc.speed = speed
             except CLIError as c:
                 if "Speed change not allowed" in c.message:
-                    self.skipTest("Skipping test as speed change is not allowed. Please rerun the test cases")
+                    self.skipTest(
+                        "Skipping test as speed change is not allowed. Please rerun the test cases"
+                    )
             self.assertEqual(speed, self.fc.speed)
 
     def test_speed_write_invalid(self):
         speed = "asdf"
         with self.assertRaises(CLIError) as e:
             self.fc.speed = speed
-        self.assertEqual("The command \" interface " + self.fc.name + " ; switchport speed  " + str(
-            speed) + " \" gave the error \" % Invalid command \".", str(e.exception))
+        self.assertEqual(
+            'The command " interface '
+            + self.fc.name
+            + " ; switchport speed  "
+            + str(speed)
+            + ' " gave the error " % Invalid command ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
-        if (self.fc.speed != self.old):
+        if self.fc.speed != self.old:
             try:
-                if ("--" in self.old):
-                    self.fc.speed = 'auto'
+                if "--" in self.old:
+                    self.fc.speed = "auto"
                 else:
-                    self.fc.speed = ((int)(self.old)) * 1000  # read in Gbps, write in Mbps
+                    self.fc.speed = (
+                                        (int)(self.old)
+                                    ) * 1000  # read in Gbps, write in Mbps
                 self.assertEqual(self.old, self.fc.speed)
             except CLIError as e:
                 if "port already in a port-channel, no config allowed" in str(e.msg):

@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneAttrFulldbSize(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -34,7 +33,7 @@ class TestZoneAttrFulldbSize(unittest.TestCase):
     def test_fulldb_size_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.z.fulldb_size = "asdf"
-        self.assertEqual('can\'t set attribute', str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:
         self.v.delete()

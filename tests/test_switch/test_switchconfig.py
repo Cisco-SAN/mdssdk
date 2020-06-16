@@ -7,7 +7,6 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchConfig(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -23,7 +22,9 @@ class TestSwitchConfig(unittest.TestCase):
     def test_config_error(self):
         with self.assertRaises(CLIError) as e:
             self.switch.config(self.commands_clierror)
-        log.debug("Config : " + str(self.commands_clierror) + " raises " + str(e.exception))
+        log.debug(
+            "Config : " + str(self.commands_clierror) + " raises " + str(e.exception)
+        )
 
     def tearDown(self) -> None:
         pass

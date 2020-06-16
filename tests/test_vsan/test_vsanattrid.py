@@ -7,7 +7,6 @@ log = logging.getLogger(__name__)
 
 
 class TestVsanAttrId(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -21,7 +20,9 @@ class TestVsanAttrId(unittest.TestCase):
 
     def test_id_read(self):
         if self.vsandb:
-            self.assertEqual(str(list(self.vsandb.keys())[0]), str(list(self.vsandb.values())[0].id))
+            self.assertEqual(
+                str(list(self.vsandb.keys())[0]), str(list(self.vsandb.values())[0].id)
+            )
         else:
             self.v.create()
             self.assertEqual(self.id, self.v.id)

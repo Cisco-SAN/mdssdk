@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneDelete(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -25,15 +24,16 @@ class TestZoneDelete(unittest.TestCase):
 
     def test_delete(self):
         self.z.create()
-        self.assertEqual('test_zone', self.z.name)
+        self.assertEqual("test_zone", self.z.name)
         self.z.delete()
-        self.assertIsNone(self.z.name)
+        with self.assertRaises(CLIError) as e:
+            self.z.name
+        self.assertIn("Zone not present", str(e.exception))
 
     def test_delete_nonexisting(self):
         with self.assertRaises(CLIError) as e:
             self.z.delete()
-        self.assertEqual('The command " no zone name test_zone vsan ' + str(
-            self.id) + ' " gave the error " Zone not present ".', str(e.exception))
+        self.assertIn("Zone not present", str(e.exception))
 
     def tearDown(self) -> None:
         self.v.delete()

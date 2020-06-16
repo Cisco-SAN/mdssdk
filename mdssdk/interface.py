@@ -3,8 +3,12 @@ import re
 
 from .constants import PAT_PC, PAT_FC
 from .nxapikeys import interfacekeys
-from .parsers.interface import ShowInterfaceBrief, ShowInterfaceDescription, ShowInterfaceCountersBrief, \
-    ShowInterfaceCountersDetailed
+from .parsers.interface import (
+    ShowInterfaceBrief,
+    ShowInterfaceDescription,
+    ShowInterfaceCountersBrief,
+    ShowInterfaceCountersDetailed,
+)
 from .utility.utils import get_key
 
 log = logging.getLogger(__name__)
@@ -35,7 +39,8 @@ class Interface(object):
         if cls is Interface:
             raise TypeError(
                 "Interface class is a Base class and cannot be instantiated, "
-                "please use specific interface classes(Child/Derived class) like Fc,PortChannel etc.. to instantiate")
+                "please use specific interface classes(Child/Derived class) like Fc,PortChannel etc.. to instantiate"
+            )
         return object.__new__(cls)
 
     @property
@@ -85,10 +90,10 @@ class Interface(object):
                 return ""
             return shint.description
         out = self.__swobj.show(cmd)
-        desc = out['TABLE_interface']['ROW_interface']['description']
+        desc = out["TABLE_interface"]["ROW_interface"]["description"]
         # IF the string is a big one then the return element is of type list
         if type(desc) is list:
-            retval = ''.join(desc)
+            retval = "".join(desc)
         else:
             retval = desc
         if retval == "--":
@@ -255,7 +260,13 @@ class Interface(object):
 
     @status.setter
     def status(self, value):
-        cmd = "terminal dont-ask ; interface " + self._name + " ; " + value + " ; no terminal dont-ask "
+        cmd = (
+                "terminal dont-ask ; interface "
+                + self._name
+                + " ; "
+                + value
+                + " ; no terminal dont-ask "
+        )
         log.debug("Sending the cmd: " + cmd)
         out = self.__swobj.config(cmd)
 
@@ -280,22 +291,28 @@ class Interface(object):
         fcmatch = re.match(PAT_FC, self._name)
         pcmatch = re.match(PAT_PC, self._name)
         if fcmatch:
-            out = out['TABLE_interface_brief_fc']['ROW_interface_brief_fc']
+            out = out["TABLE_interface_brief_fc"]["ROW_interface_brief_fc"]
             for eachout in out:
-                if eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)] == self._name:
+                if (
+                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                        == self._name
+                ):
                     return eachout
         elif pcmatch:
             # Need to check if "sh int brief" has PC info
-            pcinfo = out.get('TABLE_interface_brief_portchannel', None)
+            pcinfo = out.get("TABLE_interface_brief_portchannel", None)
             if pcinfo is None:
                 return None
-            out = pcinfo['ROW_interface_brief_portchannel']
+            out = pcinfo["ROW_interface_brief_portchannel"]
             if type(out) is dict:
                 outlist = [out]
             else:
                 outlist = out
             for eachout in outlist:
-                if eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)] == self._name:
+                if (
+                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                        == self._name
+                ):
                     return eachout
         return None
 
@@ -307,7 +324,7 @@ class Interface(object):
             out = self.__swobj.show(cmd)
             return out
         out = self.__swobj.show(cmd)
-        return out['TABLE_counters']['ROW_counters']
+        return out["TABLE_counters"]["ROW_counters"]
 
     def _execute_counters_brief_cmd(self):
         cmd = "show interface " + self._name + " counters brief"
@@ -388,9 +405,9 @@ class Interface(object):
             if self.__swobj.is_connection_type_ssh():
                 shintcd = ShowInterfaceCountersDetailed(out)
                 return shintcd.total_stats
-            total = out.get('TABLE_total', None)
+            total = out.get("TABLE_total", None)
             if total is not None:
-                return total.get('ROW_total', None)
+                return total.get("ROW_total", None)
             return None
 
         @property
@@ -415,9 +432,9 @@ class Interface(object):
             if self.__swobj.is_connection_type_ssh():
                 shintcd = ShowInterfaceCountersDetailed(out)
                 return shintcd.link_stats
-            total = out.get('TABLE_link', None)
+            total = out.get("TABLE_link", None)
             if total is not None:
-                return total.get('ROW_link', None)
+                return total.get("ROW_link", None)
             return None
 
         @property
@@ -438,9 +455,9 @@ class Interface(object):
             if self.__swobj.is_connection_type_ssh():
                 shintcd = ShowInterfaceCountersDetailed(out)
                 return shintcd.loop_stats
-            total = out.get('TABLE_loop', None)
+            total = out.get("TABLE_loop", None)
             if total is not None:
-                return total.get('ROW_loop', None)
+                return total.get("ROW_loop", None)
             return None
 
         @property
@@ -463,9 +480,9 @@ class Interface(object):
             if self.__swobj.is_connection_type_ssh():
                 shintcd = ShowInterfaceCountersDetailed(out)
                 return shintcd.congestion_stats
-            total = out.get('TABLE_congestion', None)
+            total = out.get("TABLE_congestion", None)
             if total is not None:
-                return total.get('ROW_congestion', None)
+                return total.get("ROW_congestion", None)
             return None
 
         @property
@@ -487,7 +504,7 @@ class Interface(object):
             if self.__swobj.is_connection_type_ssh():
                 shintcd = ShowInterfaceCountersDetailed(out)
                 return shintcd.other_stats
-            total = out.get('TABLE_others', None)
+            total = out.get("TABLE_others", None)
             if total is not None:
-                return total.get('ROW_others', None)
+                return total.get("ROW_others", None)
             return None

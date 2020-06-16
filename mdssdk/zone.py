@@ -2,7 +2,12 @@ import logging
 import re
 import time
 
-from .connection_manager.errors import CLIError, InvalidZoneMode, InvalidDefaultZone, InvalidZoneMemberType
+from .connection_manager.errors import (
+    CLIError,
+    InvalidZoneMode,
+    InvalidDefaultZone,
+    InvalidZoneMemberType,
+)
 from .constants import ENHANCED, BASIC, PERMIT, DENY, PAT_WWN
 from .fc import Fc
 from .nxapikeys import zonekeys
@@ -38,7 +43,7 @@ class Zone(object):
         self._name = name
         self.__zones = None
         self.__rpc = None
-        self.__method = u'cli_conf'
+        self.__method = u"cli_conf"
         self._part_of_active_zs = False
 
     def _set_part_of_active(self, val):
@@ -63,7 +68,7 @@ class Zone(object):
         out = self.__show_zone_name()
         if out:
             if self.__swobj.is_connection_type_ssh():
-                return out[0]['zone_name']
+                return out[0]["zone_name"]
             else:
                 return out[get_key(zonekeys.NAME, self._SW_VER)]
         return None
@@ -103,79 +108,38 @@ class Zone(object):
             >>>
 
         """
-
+        retout = []
         out = self.__show_zone_name()
         if out:
             if self.__swobj.is_connection_type_ssh():
-                return self.__format_members_ssh(out)
-                # return out
-            try:
-                retout = out['TABLE_zone_member']['ROW_zone_member']
-            except KeyError:
-                return None
-            if type(retout) is dict:
-                # means there is only one member for the zone, so convert to list and return
-                # return self.__format_members([retout])
-                return [retout]
-            return retout
-            # return self.__format_members(retout)
-        return None
+                retout = self.__format_members_ssh(out)
+            else:
+                try:
+                    retout = out["TABLE_zone_member"]["ROW_zone_member"]
+                except KeyError:
+                    return retout
+                if type(retout) is dict:
+                    # means there is only one member for the zone, so convert to list and return
+                    # return self.__format_members([retout])
+                    retout = [retout]
+        return retout
 
     def __format_members_ssh(self, out):
+        # SSH o/p via textfsm template
         log.debug(out)
         retout = []
         for eachmem in out:
             mem_dict = {}
             for k, v in eachmem.items():
-                if k == 'type' and v == '':
+                if k == "type" and v == "":
                     break
-                elif k == 'vsan' or k == 'zone_name' or v == '':
+                elif k == "vsan" or k == "zone_name" or v == "":
                     continue
                 else:
                     mem_dict[k] = v
             if mem_dict:
                 retout.append(mem_dict)
-        if retout:
-            return retout
-        return None
-
-    # def __format_members(self, retout):
-    #     print(retout)
-    #     #
-    #     # This function converts the input retout from this
-    #     #
-    #     # [{'type': 'pwwn', 'wwn': '50:08:01:60:08:9f:4d:00', 'dev_alias': 'JDSU-180-Lrow-1'},
-    #     #  {'type': 'pwwn', 'wwn': '50:08:01:60:08:9f:4d:01', 'dev_alias': 'JDSU-180-Lrow-2'},
-    #     #  {'type': 'interface', 'intf_fc': 'fc1/4', 'wwn': '20:00:00:de:fb:b1:96:10'},
-    #     #  {'type': 'device-alias', 'dev_alias': 'hello'}, {'type': 'ip-address', 'ipaddr': '1.1.1.1'},
-    #     #  {'type': 'symbolic-nodename', 'symnodename': 'symbnodename'},
-    #     #  {'type': 'fwwn', 'wwn': '11:12:13:14:15:16:17:18'}, {'type': 'fcid', 'fcid': '0x123456'},
-    #     #  {'type': 'interface', 'intf_port_ch': 1, 'wwn': '20:00:00:de:fb:b1:96:10'},
-    #     #  {'type': 'symbolic-nodename', 'symnodename': 'testsymnode'},
-    #     #  {'type': 'fcalias', 'fcalias_name': 'somefcalias', 'fcalias_vsan_id': 1}]
-    #     #
-    #     # to this one
-    #     #
-    #     # [{'pwwn': '50:08:01:60:08:9f:4d:00'},
-    #     #  {'pwwn': '50:08:01:60:08:9f:4d:01'},
-    #     #  {'interface': 'fc1/4'},
-    #     #  {'device-alias': 'hello'}, {'ip-address': '1.1.1.1'},
-    #     #  {'symbolic-nodename': 'symbnodename'},
-    #     #  {'fwwn': '11:12:13:14:15:16:17:18'}, {'fcid': '0x123456'},
-    #     #  {'interface': 1},
-    #     #  {'symbolic-nodename': 'testsymnode'},
-    #     #  {'fcalias': 'somefcalias'}]
-    #     log.debug(retout)
-    #     retvalues = []
-    #     valid_zone_members = get_key(zonekeys.VALID_MEMBERS, self._SW_VER)
-    #     for eachmem in retout:
-    #         type = eachmem[get_key(zonekeys.ZONE_MEMBER_TYPE, self._SW_VER)]
-    #         nxapikey = valid_zone_members.get(type)
-    #         for eachkey in eachmem.keys():
-    #             if eachkey.startswith(nxapikey):
-    #                 value = eachmem[eachkey]
-    #                 retvalues.append({type: value})
-    #     return retvalues
+        return retout
 
     @property
     def locked(self):
@@ -193,7 +157,7 @@ class Zone(object):
         """
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            self._lock_details = out[0]['session']
+            self._lock_details = out[0]["session"]
         else:
             self._lock_details = out[get_key(zonekeys.SESSION, self._SW_VER)]
         if "none" in self._lock_details:
@@ -230,13 +194,18 @@ class Zone(object):
         """
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            return out[0]['mode']
+            return out[0]["mode"]
         return out[get_key(zonekeys.MODE, self._SW_VER)]
 
     @mode.setter
     def mode(self, value):
-        cmd = "terminal dont-ask ; zone mode " + ENHANCED + " vsan " + str(
-            self._vsan) + " ; no terminal dont-ask"
+        cmd = (
+                "terminal dont-ask ; zone mode "
+                + ENHANCED
+                + " vsan "
+                + str(self._vsan)
+                + " ; no terminal dont-ask"
+        )
         if value.lower() == ENHANCED:
             self._send_zone_cmd(cmd)
         elif value.lower() == BASIC:
@@ -244,7 +213,13 @@ class Zone(object):
             self._send_zone_cmd(cmd)
         else:
             raise InvalidZoneMode(
-                "Invalid zone mode " + value + " . Valid values are: " + BASIC + "," + ENHANCED)
+                "Invalid zone mode "
+                + value
+                + " . Valid values are: "
+                + BASIC
+                + ","
+                + ENHANCED
+            )
 
     @property
     def default_zone(self):
@@ -275,13 +250,18 @@ class Zone(object):
         """
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            return out[0]['default_zone']
+            return out[0]["default_zone"]
         return out[get_key(zonekeys.DEFAULT_ZONE, self._SW_VER)]
 
     @default_zone.setter
     def default_zone(self, value):
-        cmd = "terminal dont-ask ; zone default-zone " + PERMIT + " vsan " + str(
-            self._vsan) + " ; no terminal dont-ask"
+        cmd = (
+                "terminal dont-ask ; zone default-zone "
+                + PERMIT
+                + " vsan "
+                + str(self._vsan)
+                + " ; no terminal dont-ask"
+        )
         if value.lower() == PERMIT:
             self._send_zone_cmd(cmd)
         elif value.lower() == DENY:
@@ -289,7 +269,13 @@ class Zone(object):
             self._send_zone_cmd(cmd)
         else:
             raise InvalidDefaultZone(
-                "Invalid default-zone value " + value + " . Valid values are: " + PERMIT + "," + DENY)
+                "Invalid default-zone value "
+                + value
+                + " . Valid values are: "
+                + PERMIT
+                + ","
+                + DENY
+            )
 
     @property
     def smart_zone(self):
@@ -319,10 +305,10 @@ class Zone(object):
 
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            val = out[0]['smart_zoning']
+            val = out[0]["smart_zoning"]
         else:
             val = out[get_key(zonekeys.SMART_ZONE, self._SW_VER)]
-        if val.lower() == 'enabled':
+        if val.lower() == "enabled":
             return True
         return False
 
@@ -355,9 +341,9 @@ class Zone(object):
         """
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout = out[0]['fulldb_dbsize']
+            retout = out[0]["fulldb_dbsize"]
         else:
-            retout = out.get(get_key(zonekeys.FULLDB_SIZE, self._SW_VER), '')
+            retout = out.get(get_key(zonekeys.FULLDB_SIZE, self._SW_VER), "")
         if retout:
             return int(retout)
         return None
@@ -378,9 +364,9 @@ class Zone(object):
         """
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout = out[0]['fulldb_zone_count']
+            retout = out[0]["fulldb_zone_count"]
         else:
-            retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), '')
+            retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), "")
         if retout:
             return int(retout)
         return None
@@ -401,9 +387,9 @@ class Zone(object):
         """
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout = out[0]['fulldb_zoneset_count']
+            retout = out[0]["fulldb_zoneset_count"]
         else:
-            retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), '')
+            retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), "")
         if retout:
             return int(retout)
         return None
@@ -424,9 +410,9 @@ class Zone(object):
         """
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout = out[0]['activedb_dbsize']
+            retout = out[0]["activedb_dbsize"]
         else:
-            retout = out.get(get_key(zonekeys.ACTIVEDB_SIZE, self._SW_VER), '')
+            retout = out.get(get_key(zonekeys.ACTIVEDB_SIZE, self._SW_VER), "")
         if retout:
             return int(retout)
         return None
@@ -448,9 +434,9 @@ class Zone(object):
 
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout = out[0]['activedb_zone_count']
+            retout = out[0]["activedb_zone_count"]
         else:
-            retout = out.get(get_key(zonekeys.ACTIVEDB_ZC, self._SW_VER), '')
+            retout = out.get(get_key(zonekeys.ACTIVEDB_ZC, self._SW_VER), "")
         if retout:
             return int(retout)
         return None
@@ -472,9 +458,9 @@ class Zone(object):
 
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout = out[0]['activedb_zoneset_count']
+            retout = out[0]["activedb_zoneset_count"]
         else:
-            retout = out.get(get_key(zonekeys.ACTIVEDB_ZSC, self._SW_VER), '')
+            retout = out.get(get_key(zonekeys.ACTIVEDB_ZSC, self._SW_VER), "")
         if retout:
             return int(retout)
         return None
@@ -496,7 +482,7 @@ class Zone(object):
 
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout = out[0]['activedb_zoneset_name']
+            retout = out[0]["activedb_zoneset_name"]
             if not retout:
                 return None
             return retout
@@ -520,9 +506,9 @@ class Zone(object):
 
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout = out[0]['maxdb_dbsize']
+            retout = out[0]["maxdb_dbsize"]
         else:
-            retout = out.get(get_key(zonekeys.MAXDB_SIZE, self._SW_VER), '')
+            retout = out.get(get_key(zonekeys.MAXDB_SIZE, self._SW_VER), "")
         if retout:
             return int(retout)
         return None
@@ -544,9 +530,9 @@ class Zone(object):
 
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout = out[0]['effectivedb_dbsize']
+            retout = out[0]["effectivedb_dbsize"]
         else:
-            retout = out.get(get_key(zonekeys.EFFDB_SIZE, self._SW_VER), '')
+            retout = out.get(get_key(zonekeys.EFFDB_SIZE, self._SW_VER), "")
         if retout:
             return int(retout)
         return None
@@ -568,9 +554,9 @@ class Zone(object):
 
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout = out[0]['percent_effectivedbsize']
+            retout = out[0]["percent_effectivedbsize"]
         else:
-            retout = out.get(get_key(zonekeys.EFFDB_PER, self._SW_VER), '')
+            retout = out.get(get_key(zonekeys.EFFDB_PER, self._SW_VER), "")
         if retout:
             return str(retout) + "%"
         return None
@@ -592,8 +578,8 @@ class Zone(object):
 
         out = self.__show_zone_status()
         if self.__swobj.is_connection_type_ssh():
-            retout1 = out[0]['status']
-            retout2 = out[0]['status_at']
+            retout1 = out[0]["status"]
+            retout2 = out[0]["status_at"]
             return retout1 + " " + retout2
         else:
             return out.get(get_key(zonekeys.STATUS, self._SW_VER), None)
@@ -608,13 +594,17 @@ class Zone(object):
             >>> zoneObj.clear_lock()
         """
 
-        cmd = "terminal dont-ask ; clear zone lock vsan  " + str(self._vsan) + " ; no terminal dont-ask"
+        cmd = (
+                "terminal dont-ask ; clear zone lock vsan  "
+                + str(self._vsan)
+                + " ; no terminal dont-ask"
+        )
         out = self.__swobj.config(cmd)
         if out is not None:
             if self.__swobj.is_connection_type_ssh():
                 msg = out
             else:
-                msg = out['msg']
+                msg = out["msg"]
             if msg:
                 if "Zone database not locked" in msg:
                     log.debug(msg)
@@ -756,7 +746,8 @@ class Zone(object):
                 cmdlist.append(cmd)
             else:
                 raise InvalidZoneMemberType(
-                    "Invalid zone member type, currently we support member of type pwwn or device-alias or interface only")
+                    "Invalid zone member type, currently we support member of type pwwn or device-alias or interface only"
+                )
         cmds_to_send = " ; ".join(cmdlist)
         self._send_zone_cmd(cmds_to_send)
 
@@ -771,8 +762,11 @@ class Zone(object):
             return cmd
         else:
             raise InvalidZoneMemberType(
-                "Invalid zone member type (" + key + ") supported types are " + ', '.join(
-                    list(valid_zone_members.keys())))
+                "Invalid zone member type ("
+                + key
+                + ") supported types are "
+                + ", ".join(list(valid_zone_members.keys()))
+            )
 
     def __show_zone_name(self):
         log.debug("Executing the cmd show zone name <> vsan <> ")
@@ -785,12 +779,8 @@ class Zone(object):
                     if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
                         raise CLIError(cmd, out[0])
                     if "Zone not present" == out[0].strip():
-                        return None
-                        # raise CLIError(cmd, out[0])
-            # print(out)
-            return out
-        else:
-            return None
+                        raise CLIError(cmd, out[0])
+        return out
 
     def __show_zone_status(self):
         log.debug("Executing the cmd show zone status vsan <> ")
@@ -811,7 +801,11 @@ class Zone(object):
         out = None
         msg = ""
         if self.locked:
-            raise CLIError(cmd, "ERROR!! Zone lock is acquired. Lock details are: " + self._lock_details)
+            raise CLIError(
+                cmd,
+                "ERROR!! Zone lock is acquired. Lock details are: "
+                + self._lock_details,
+            )
         try:
             out = self.__swobj.config(cmd)
             log.debug(out)
@@ -820,11 +814,12 @@ class Zone(object):
                 return False, None
             self._check_msg(c.message, cmd)
 
-        if out is not None and not self.__swobj.is_connection_type_ssh():
-            msg = out['msg'].strip()
-            log.debug("------" + msg)
-            if msg:
-                self._check_msg(msg, cmd)
+        if out is not None:
+            if not self.__swobj.is_connection_type_ssh():
+                msg = out["msg"].strip()
+                log.debug("------" + msg)
+                if msg:
+                    self._check_msg(msg, cmd)
         self.__commit_config_if_locked()
 
     def _check_msg(self, msg, cmd):
@@ -872,7 +867,7 @@ class Zone(object):
             try:
                 o = self.__swobj.config(cmd)
                 if o is not None:
-                    msg = o['msg']
+                    msg = o["msg"]
                     if msg:
                         if "Commit operation initiated. Check zone status" in msg:
                             return

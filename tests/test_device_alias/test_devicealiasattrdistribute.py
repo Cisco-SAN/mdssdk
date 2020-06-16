@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestDeviceAliasAttrDistribute(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -36,7 +35,9 @@ class TestDeviceAliasAttrDistribute(unittest.TestCase):
                 if "Fabric is not stable" in c.message:
                     fab_not_stable_count = fab_not_stable_count + 1
                     if fab_not_stable_count == 3:
-                        self.skipTest("Skipping the test as changing the mode gave the error Fabric not stable")
+                        self.skipTest(
+                            "Skipping the test as changing the mode gave the error Fabric not stable"
+                        )
                     continue
                 raise CLIError(c.args)
 
@@ -51,6 +52,8 @@ class TestDeviceAliasAttrDistribute(unittest.TestCase):
                 if "Fabric is not stable" in c.message:
                     fab_not_stable_count = fab_not_stable_count + 1
                     if fab_not_stable_count == 3:
-                        self.skipTest("Skipping the test as changing the mode gave the error Fabric not stable")
+                        self.skipTest(
+                            "Skipping the test as changing the mode gave the error Fabric not stable"
+                        )
                     continue
                 raise CLIError(c.command, c.message)

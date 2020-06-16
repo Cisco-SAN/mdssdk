@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneSetDelete(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -25,15 +24,19 @@ class TestZoneSetDelete(unittest.TestCase):
 
     def test_delete(self):
         self.zoneset.create()
-        self.assertEqual('test_zoneset', self.zoneset.name)
+        self.assertEqual("test_zoneset", self.zoneset.name)
         self.zoneset.delete()
         self.assertIsNone(self.zoneset.name)
 
     def test_delete_nonexisting(self):
         with self.assertRaises(CLIError) as e:
             self.zoneset.delete()
-        self.assertEqual('The command " no zoneset name test_zoneset vsan ' + str(
-            self.id) + ' " gave the error " Zoneset not present ".', str(e.exception))
+        self.assertEqual(
+            'The command " no zoneset name test_zoneset vsan '
+            + str(self.id)
+            + ' " gave the error " Zoneset not present ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.v.delete()

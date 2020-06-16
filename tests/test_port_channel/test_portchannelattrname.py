@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelAttrName(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -22,7 +21,7 @@ class TestPortChannelAttrName(unittest.TestCase):
 
     def test_name_read(self):
         self.pc.create()
-        self.assertEqual('port-channel' + str(self.pc_id), self.pc.name)
+        self.assertEqual("port-channel" + str(self.pc_id), self.pc.name)
         self.pc.delete()
 
     def test_name_write_error(self):

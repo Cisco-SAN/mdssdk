@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelAttrDescription(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -44,7 +43,7 @@ class TestPortChannelAttrDescription(unittest.TestCase):
         desc = "switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678switch12345678912345678912345678"
         with self.assertRaises(CLIError) as e:
             self.pc.description = desc
-        self.assertIn('String exceeded max length of (254)', str(e.exception))
+        self.assertIn("String exceeded max length of (254)", str(e.exception))
         self.pc.delete()
 
     def tearDown(self) -> None:

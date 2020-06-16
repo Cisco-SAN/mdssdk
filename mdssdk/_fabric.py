@@ -1,4 +1,4 @@
-__author__ = 'Suhas Bharadwaj (subharad)'
+__author__ = "Suhas Bharadwaj (subharad)"
 
 import logging
 import threading
@@ -24,7 +24,7 @@ def wait_till_connect_threads_complete(fn):
         # Wait till all 'connect' threads are complete
         for t in threading.enumerate():
             # print t.getName()
-            if t.getName() == 'connect':
+            if t.getName() == "connect":
                 t.join()
         return ret
 
@@ -68,8 +68,16 @@ class Fabric(object):
         """
         return self.__sw_obj_dict
 
-    def connect_to_switches(self, switch_list, username, password, connection_type='https', port=None, timeout=30,
-                            verify_ssl=True):
+    def connect_to_switches(
+            self,
+            switch_list,
+            username,
+            password,
+            connection_type="https",
+            port=None,
+            timeout=30,
+            verify_ssl=True,
+    ):
         """
 
         :param switch_list: List of switch ips that needs to be connected to
@@ -90,13 +98,29 @@ class Fabric(object):
         :rtype: dict
         """
         for eachsw_ip in switch_list:
-            swobj = Switch(eachsw_ip, username=username, password=password, connection_type=connection_type, port=port,
-                           timeout=timeout, verify_ssl=verify_ssl)
+            swobj = Switch(
+                eachsw_ip,
+                username=username,
+                password=password,
+                connection_type=connection_type,
+                port=port,
+                timeout=timeout,
+                verify_ssl=verify_ssl,
+            )
             self.__sw_obj_dict[eachsw_ip] = swobj
         return self.__sw_obj_dict
 
-    def discover_all_switches_in_fabric(self, seed_switch_ip, username, password, connection_type='https', port=8443,
-                                        timeout=30, verify_ssl=True, discover_npv=True):
+    def discover_all_switches_in_fabric(
+            self,
+            seed_switch_ip,
+            username,
+            password,
+            connection_type="https",
+            port=8443,
+            timeout=30,
+            verify_ssl=True,
+            discover_npv=True,
+    ):
         """
         Discover all the switches in the fabric using the seed switch ip
 
@@ -120,23 +144,41 @@ class Fabric(object):
         :rtype: bool
         """
         discovered_switches = {}
-        log.info("Discovering all switches in the fabric with the seed switch : " + seed_switch_ip)
-        swobj = Switch(seed_switch_ip, username=username, password=password, connection_type=connection_type, port=port,
-                       timeout=timeout, verify_ssl=verify_ssl)
+        log.info(
+            "Discovering all switches in the fabric with the seed switch : "
+            + seed_switch_ip
+        )
+        swobj = Switch(
+            seed_switch_ip,
+            username=username,
+            password=password,
+            connection_type=connection_type,
+            port=port,
+            timeout=timeout,
+            verify_ssl=verify_ssl,
+        )
 
         if swobj.can_connect:
             discovered_switches[swobj.ipaddr] = swobj
         else:
-            msg = "ERROR!! Unable to connect to the seed switch : " + swobj.ipaddr + \
-                  " via " + swobj.connection_type + " with port " + str(
-                swobj.port) + " . Make sure that NXAPI is enabled."
+            msg = (
+                    "ERROR!! Unable to connect to the seed switch : "
+                    + swobj.ipaddr
+                    + " via "
+                    + swobj.connection_type
+                    + " with port "
+                    + str(swobj.port)
+                    + " . Make sure that NXAPI is enabled."
+            )
             log.error(msg)
             return False
 
-        if (swobj.__is_npv_switch()):
+        if swobj.__is_npv_switch():
             log.error(
-                "The seed switch({0}) is a NPV switch, please provide a NPIV switch as seed switch to discover the entire fabric".
-                    format(swobj.ipaddr))
+                "The seed switch({0}) is a NPV switch, please provide a NPIV switch as seed switch to discover the entire fabric".format(
+                    swobj.ipaddr
+                )
+            )
             return False
 
         peer_switches = swobj.get_peer_switches()
@@ -151,18 +193,30 @@ class Fabric(object):
                 continue
             else:
                 # print(discovered_switches)
-                swobj = Switch(each_ip, username=username, password=password, connection_type=connection_type,
-                               port=port,
-                               timeout=timeout, verify_ssl=verify_ssl)
+                swobj = Switch(
+                    each_ip,
+                    username=username,
+                    password=password,
+                    connection_type=connection_type,
+                    port=port,
+                    timeout=timeout,
+                    verify_ssl=verify_ssl,
+                )
 
                 if swobj.can_connect:
                     discovered_switches[swobj.ipaddr] = swobj
                     peers = swobj.get_peer_switches()
                     peer_switches = peer_switches + peers
                 else:
-                    msg = "ERROR!! Unable to connect to the switch : " + swobj.ipaddr + \
-                          " via " + swobj.connection_type + " with port " + str(
-                        port) + " . Make sure that NXAPI is enabled."
+                    msg = (
+                            "ERROR!! Unable to connect to the switch : "
+                            + swobj.ipaddr
+                            + " via "
+                            + swobj.connection_type
+                            + " with port "
+                            + str(port)
+                            + " . Make sure that NXAPI is enabled."
+                    )
                     log.debug(msg)
 
         # print(discovered_switches)
@@ -174,15 +228,27 @@ class Fabric(object):
             allswlist = list(dict.fromkeys(allswlist))
             for eachswip in allswlist:
                 if eachswip not in discovered_switches.keys():
-                    swobj = Switch(eachswip, username=username, password=password, connection_type=connection_type,
-                                   port=port,
-                                   timeout=timeout, verify_ssl=verify_ssl)
+                    swobj = Switch(
+                        eachswip,
+                        username=username,
+                        password=password,
+                        connection_type=connection_type,
+                        port=port,
+                        timeout=timeout,
+                        verify_ssl=verify_ssl,
+                    )
                     if swobj.can_connect:
                         discovered_switches[swobj.ipaddr] = swobj
                     else:
-                        msg = "ERROR!! Unable to connect to the seed switch : " + swobj.ipaddr + \
-                              " via " + swobj.connection_type + " with port " + str(
-                            port) + " . Make sure that NXAPI is enabled."
+                        msg = (
+                                "ERROR!! Unable to connect to the seed switch : "
+                                + swobj.ipaddr
+                                + " via "
+                                + swobj.connection_type
+                                + " with port "
+                                + str(port)
+                                + " . Make sure that NXAPI is enabled."
+                        )
                         log.debug(msg)
 
         self.discovered_switches = discovered_switches

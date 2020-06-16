@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrDescription(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -17,7 +16,7 @@ class TestFcAttrDescription(unittest.TestCase):
         interfaces = sw.interfaces
         while True:
             k, v = random.choice(list(interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 self.fc = v
                 log.debug(k)
                 break

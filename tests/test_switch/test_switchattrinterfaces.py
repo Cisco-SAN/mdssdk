@@ -6,7 +6,6 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchAttrInterfaces(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -19,7 +18,7 @@ class TestSwitchAttrInterfaces(unittest.TestCase):
 
     def test_interfaces_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.switch.interfaces = 'asdf'
+            self.switch.interfaces = "asdf"
         self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:

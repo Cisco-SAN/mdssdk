@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelAttrStatus(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -23,7 +22,7 @@ class TestPortChannelAttrStatus(unittest.TestCase):
 
     def test_status_read(self):
         self.pc.create()
-        self.assertEqual('noOperMembers', self.pc.status)
+        self.assertEqual("noOperMembers", self.pc.status)
         self.pc.delete()
 
     def test_status_read_nonexisting(self):
@@ -43,8 +42,14 @@ class TestPortChannelAttrStatus(unittest.TestCase):
         status = "asdf"
         with self.assertRaises(CLIError) as e:
             self.pc.status = status
-        self.assertEqual("The command \" terminal dont-ask ; interface port-channel" + str(self.pc_id) + " ; " + str(
-            status) + " ; no terminal dont-ask \" gave the error \" % Invalid command \".", str(e.exception))
+        self.assertEqual(
+            'The command " terminal dont-ask ; interface port-channel'
+            + str(self.pc_id)
+            + " ; "
+            + str(status)
+            + ' ; no terminal dont-ask " gave the error " % Invalid command ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.pc.delete()

@@ -32,28 +32,42 @@ class ShowInterfaceBrief(object):
             fcmatch = re.match(PAT_FC, self.name)
             pcmatch = re.match(PAT_PC, self.name)
             if fcmatch:
-                self._group_dict = next((i for i in self._fc_interfaces if i["interface"] == str(self.name)), {})
+                self._group_dict = next(
+                    (
+                        i
+                        for i in self._fc_interfaces
+                        if i["interface"] == str(self.name)
+                    ),
+                    {},
+                )
             elif pcmatch:
-                self._group_dict = next((i for i in self._pc_interfaces if i["interface"] == str(self.name)), {})
+                self._group_dict = next(
+                    (
+                        i
+                        for i in self._pc_interfaces
+                        if i["interface"] == str(self.name)
+                    ),
+                    {},
+                )
 
     @property
     def mode(self):
-        return self._group_dict.get('oper_mode', None)
+        return self._group_dict.get("oper_mode", None)
 
     @property
     def speed(self):
-        return self._group_dict.get('oper_speed', None)
+        return self._group_dict.get("oper_speed", None)
 
     @property
     def trunk(self):
-        return self._group_dict.get('admin_trunk_mode', None)
+        return self._group_dict.get("admin_trunk_mode", None)
 
     @property
     def status(self):
-        return self._group_dict.get('status', None)
+        return self._group_dict.get("status", None)
 
     @property
     def interfaces(self):
-        allfc = [fc['interface'] for fc in self._fc_interfaces]
-        allpc = [pc['interface'] for pc in self._pc_interfaces]
+        allfc = [fc["interface"] for fc in self._fc_interfaces]
+        allpc = [pc["interface"] for pc in self._pc_interfaces]
         return allfc, allpc

@@ -11,7 +11,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneRemoveMembers(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -48,21 +47,23 @@ class TestZoneRemoveMembers(unittest.TestCase):
                 if da_name not in olddb.keys() and da_pwwn not in olddb.values():
                     break
         d.create({da_name: da_pwwn})
-        members = [{'pwwn': '50:08:01:60:08:9f:4d:00'},
-                   {'interface': fc_name},
-                   {'device-alias': da_name},
-                   {'ip-address': '1.1.1.1'},
-                   {'symbolic-nodename': 'symbnodename'},
-                   {'fwwn': '11:12:13:14:15:16:17:18'},
-                   {'fcid': '0x123456'},
-                   {'interface': pc.name},
-                   {'fcalias': 'somefcalias'}]
-        self.switch.config('fcalias name somefcalias vsan ' + str(self.id))
+        members = [
+            {"pwwn": "50:08:01:60:08:9f:4d:00"},
+            {"interface": fc_name},
+            {"device-alias": da_name},
+            {"ip-address": "1.1.1.1"},
+            {"symbolic-nodename": "symbnodename"},
+            {"fwwn": "11:12:13:14:15:16:17:18"},
+            {"fcid": "0x123456"},
+            {"interface": pc.name},
+            {"fcalias": "somefcalias"},
+        ]
+        self.switch.config("fcalias name somefcalias vsan " + str(self.id))
         self.z.add_members(members)
         mem = self.z.members
         self.assertIsNotNone(self.z.members)
         self.z.remove_members(members)
-        self.assertIsNone(self.z.members)
+        self.assertEqual([], self.z.members)
         d.delete(da_name)
 
     def test_remove_members_list(self):
@@ -80,7 +81,7 @@ class TestZoneRemoveMembers(unittest.TestCase):
         self.z.add_members(members)
         self.assertIsNotNone(self.z.members)
         self.z.remove_members(members)
-        self.assertIsNone(self.z.members)
+        self.assertEqual([], self.z.members)
         self.z.delete()
 
     def tearDown(self) -> None:

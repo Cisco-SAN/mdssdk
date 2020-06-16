@@ -6,7 +6,6 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchAttrModel(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -19,7 +18,7 @@ class TestSwitchAttrModel(unittest.TestCase):
 
     def test_model_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.switch.model = 'mds'
+            self.switch.model = "mds"
         self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:

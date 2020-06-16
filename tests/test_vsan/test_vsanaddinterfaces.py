@@ -10,7 +10,6 @@ log = logging.getLogger(__name__)
 
 
 class TestVsanAddInterfaces(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -28,7 +27,9 @@ class TestVsanAddInterfaces(unittest.TestCase):
             if "port-channel" + str(self.pc_id) not in self.interfaces.keys():
                 break
         self.pc = PortChannel(self.switch, self.pc_id)
-        self.invalid_fc = Fc(self.switch, "fc48/48")  ## matches fc pattern but is not present on switch
+        self.invalid_fc = Fc(
+            self.switch, "fc48/48"
+        )  ## matches fc pattern but is not present on switch
 
     def test_addinterfaces_type_error(self):
         self.v.create()
@@ -50,7 +51,7 @@ class TestVsanAddInterfaces(unittest.TestCase):
         self.v.create()
         with self.assertRaises(CLIError) as e:
             self.v.add_interfaces([self.invalid_fc])
-        self.assertIn('Invalid interface format', str(e.exception))
+        self.assertIn("Invalid interface format", str(e.exception))
         self.v.delete()
 
     def test_addinterfaces_invalid(self):
@@ -63,12 +64,17 @@ class TestVsanAddInterfaces(unittest.TestCase):
     def test_addinterfaces_nonexistingvsan(self):
         with self.assertRaises(VsanNotPresent) as e:
             self.v.add_interfaces([self.fc])
-        self.assertEqual("VsanNotPresent: Vsan " + str(self.id) + " is not present on the switch.", str(e.exception))
+        self.assertEqual(
+            "VsanNotPresent: Vsan " + str(self.id) + " is not present on the switch.",
+            str(e.exception),
+        )
 
     def test_addinterfaces_repeated(self):
         self.v.create()
         self.pc.create()
-        self.v.add_interfaces([self.fc, self.fc, self.pc])  ## self.fc even though repeated will not be added
+        self.v.add_interfaces(
+            [self.fc, self.fc, self.pc]
+        )  ## self.fc even though repeated will not be added
         self.assertEqual(self.fc.name, self.v.interfaces[0].name)
         self.assertEqual(2, len(self.v.interfaces))
         self.pc.delete()
@@ -78,9 +84,14 @@ class TestVsanAddInterfaces(unittest.TestCase):
         self.v.create()
         with self.assertRaises(CLIError) as e:
             self.v.add_interfaces([self.pc])
-        self.assertRegex(str(e.exception),
-                         '.*The command.*vsan database ; vsan ' + str(self.id) + ' interface port-channel' + str(
-                             self.pc.id) + '.*gave the error.*Invalid range .*')
+        self.assertRegex(
+            str(e.exception),
+            ".*The command.*vsan database ; vsan "
+            + str(self.id)
+            + " interface port-channel"
+            + str(self.pc.id)
+            + ".*gave the error.*Invalid range .*",
+        )
         self.v.delete()
 
     def tearDown(self) -> None:

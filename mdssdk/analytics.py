@@ -15,29 +15,33 @@ log = logging.getLogger(__name__)
 # limit: 10
 
 # Be extra careful while changing the patterns or the keys of the patten
-METRICS = 'metrics'
-PROTOCOL = 'protocol'
-VIEW = 'view'
-WHERE = 'where'
-SORT = 'sort'
+METRICS = "metrics"
+PROTOCOL = "protocol"
+VIEW = "view"
+WHERE = "where"
+SORT = "sort"
 ASC = "asc"
 LIMIT = "limit"
 
-VALID_PROTOCOLS = ['scsi', 'nvme']
-MOD_PAT = "^\|\s+(?P<module>\d+)\s+\|\s+(?P<scsi_npu_load>\d+)\s+(?P<nvme_npu_load>\d+)\s+(?P<total_npu_load>\d+)\s+\|" \
-          "\s+(?P<scsi_itls>\d+)\s+(?P<nvme_itns>\d+)\s+(?P<both_itls_itns>\d+)\s+\|" \
-          "\s+(?P<scsi_initiators>\d+)\s+(?P<nvme_initiators>\d+)\s+(?P<total_initiators>\d+)\s+\|" \
-          "\s+(?P<scsi_targets>\d+)\s+(?P<nvme_targets>\d+)\s+(?P<total_targets>\d+)\s+\|$"
+VALID_PROTOCOLS = ["scsi", "nvme"]
+MOD_PAT = (
+    "^\|\s+(?P<module>\d+)\s+\|\s+(?P<scsi_npu_load>\d+)\s+(?P<nvme_npu_load>\d+)\s+(?P<total_npu_load>\d+)\s+\|"
+    "\s+(?P<scsi_itls>\d+)\s+(?P<nvme_itns>\d+)\s+(?P<both_itls_itns>\d+)\s+\|"
+    "\s+(?P<scsi_initiators>\d+)\s+(?P<nvme_initiators>\d+)\s+(?P<total_initiators>\d+)\s+\|"
+    "\s+(?P<scsi_targets>\d+)\s+(?P<nvme_targets>\d+)\s+(?P<total_targets>\d+)\s+\|$"
+)
 MOD_PAT_COMP = re.compile(MOD_PAT)
-TOTAL_PAT = "^\| Total  \| n\/a  n\/a  n\/a   \|\s+(?P<scsi_itls>\d+)\s+(?P<nvme_itns>\d+)\s+(?P<both_itls_itns>\d+)\s+\|" \
-            "\s+(?P<scsi_initiators>\d+)\s+(?P<nvme_initiators>\d+)\s+(?P<total_initiators>\d+)\s+\|" \
-            "\s+(?P<scsi_targets>\d+)\s+(?P<nvme_targets>\d+)\s+(?P<total_targets>\d+)\s+\|$"
+TOTAL_PAT = (
+    "^\| Total  \| n\/a  n\/a  n\/a   \|\s+(?P<scsi_itls>\d+)\s+(?P<nvme_itns>\d+)\s+(?P<both_itls_itns>\d+)\s+\|"
+    "\s+(?P<scsi_initiators>\d+)\s+(?P<nvme_initiators>\d+)\s+(?P<total_initiators>\d+)\s+\|"
+    "\s+(?P<scsi_targets>\d+)\s+(?P<nvme_targets>\d+)\s+(?P<total_targets>\d+)\s+\|$"
+)
 TOTAL_PAT_COMP = re.compile(TOTAL_PAT)
 TIME_PAT = "As of (?P<collected_at>.*)"
 TIME_PAT_COMP = re.compile(TIME_PAT)
 
 
-class Analytics():
+class Analytics:
     """
     Analytics Module
 
@@ -150,15 +154,25 @@ class Analytics():
 
         if proto is None:
             raise InvalidProfile(
-                "'" + PROTOCOL + "' key is missing from the profile, this is mandatory and it needs to one of " + ",".join(
-                    VALID_PROTOCOLS))
+                "'"
+                + PROTOCOL
+                + "' key is missing from the profile, this is mandatory and it needs to one of "
+                + ",".join(VALID_PROTOCOLS)
+            )
         if metrics is None:
             raise InvalidProfile(
-                "'" + METRICS + "' key is missing from the profile, this is mandatory. A blank list represents 'all'")
+                "'"
+                + METRICS
+                + "' key is missing from the profile, this is mandatory. A blank list represents 'all'"
+            )
         if view is None:
-            raise InvalidProfile("'" + VIEW + "' key is missing from the profile, this is mandatory")
+            raise InvalidProfile(
+                "'" + VIEW + "' key is missing from the profile, this is mandatory"
+            )
         if proto not in VALID_PROTOCOLS:
-            raise InvalidProfile("'" + PROTOCOL + "' key needs to one of " + ",".join(VALID_PROTOCOLS))
+            raise InvalidProfile(
+                "'" + PROTOCOL + "' key needs to one of " + ",".join(VALID_PROTOCOLS)
+            )
         if where is not None:
             if type(where) is not list:
                 raise InvalidProfile("where ")
@@ -176,10 +190,19 @@ class Analytics():
         limit = profile.get(LIMIT, None)
 
         if (metrics is None) or (len(metrics) == 0):
-            selq = "select all from fc-" + profile.get(PROTOCOL) + "." + profile.get(VIEW)
+            selq = (
+                    "select all from fc-" + profile.get(PROTOCOL) + "." + profile.get(VIEW)
+            )
         else:
-            allmetrics = ','.join(metrics)
-            selq = "select " + allmetrics + " from fc-" + profile.get(PROTOCOL) + "." + profile.get(VIEW)
+            allmetrics = ",".join(metrics)
+            selq = (
+                    "select "
+                    + allmetrics
+                    + " from fc-"
+                    + profile.get(PROTOCOL)
+                    + "."
+                    + profile.get(VIEW)
+            )
         return selq
 
     def create_query(self, name, profile, clear=False, differential=False, interval=30):
@@ -215,7 +238,14 @@ class Analytics():
         """
         if self._validate_profile(profile):
             selq = self._get_select_query_string(profile)
-            cmd = 'analytics query "' + selq + '" name ' + name + " type periodic interval " + str(interval)
+            cmd = (
+                    'analytics query "'
+                    + selq
+                    + '" name '
+                    + name
+                    + " type periodic interval "
+                    + str(interval)
+            )
             if clear:
                 if differential:
                     cmd = cmd + " clear differential"
@@ -276,7 +306,9 @@ class Analytics():
              'logical_port_count': '2', 'scsi_target_app_count': '2',...}
         """
         if (name is not None) and (profile is not None):
-            raise TypeError("Need to pass either query name(for installed query) or profile(for pull query) not both")
+            raise TypeError(
+                "Need to pass either query name(for installed query) or profile(for pull query) not both"
+            )
         if name is None:
             # Profile is set so its a pull query
             if self._validate_profile(profile):
@@ -382,14 +414,14 @@ class Analytics():
         if out is None:
             return None
         for eachrow in out:
-            mod_str = eachrow.get('module', None)
+            mod_str = eachrow.get("module", None)
             if mod_str == str(module):
-                if protocol == 'scsi':
-                    return str(eachrow.get('scsi_npu_load')) + "%"
-                if protocol == 'nvme':
-                    return str(eachrow.get('nvme_npu_load')) + "%"
+                if protocol == "scsi":
+                    return str(eachrow.get("scsi_npu_load")) + "%"
+                if protocol == "nvme":
+                    return str(eachrow.get("nvme_npu_load")) + "%"
                 if protocol is None:
-                    return str(eachrow.get('total_npu_load')) + "%"
+                    return str(eachrow.get("total_npu_load")) + "%"
 
     def itls(self, module=None):
         """
@@ -416,13 +448,13 @@ class Analytics():
         if out is None:
             return None
         for eachrow in out:
-            mod_str = eachrow.get('module', None)
+            mod_str = eachrow.get("module", None)
             if module is None:
                 if mod_str is None:
-                    return eachrow.get('scsi_itls')
+                    return eachrow.get("scsi_itls")
             else:
                 if mod_str == str(module):
-                    return eachrow.get('scsi_itls')
+                    return eachrow.get("scsi_itls")
 
     def itns(self, module=None):
         """
@@ -449,13 +481,13 @@ class Analytics():
         if out is None:
             return None
         for eachrow in out:
-            mod_str = eachrow.get('module', None)
+            mod_str = eachrow.get("module", None)
             if module is None:
                 if mod_str is None:
-                    return eachrow.get('nvme_itns')
+                    return eachrow.get("nvme_itns")
             else:
                 if mod_str == str(module):
-                    return eachrow.get('nvme_itns')
+                    return eachrow.get("nvme_itns")
 
     def itls_itns(self, module=None):
         """
@@ -482,13 +514,13 @@ class Analytics():
         if out is None:
             return None
         for eachrow in out:
-            mod_str = eachrow.get('module', None)
+            mod_str = eachrow.get("module", None)
             if module is None:
                 if mod_str is None:
-                    return eachrow.get('both_itls_itns')
+                    return eachrow.get("both_itls_itns")
             else:
                 if mod_str == str(module):
-                    return eachrow.get('both_itls_itns')
+                    return eachrow.get("both_itls_itns")
 
     def initiators(self, module=None, protocol=None):
         """
@@ -519,23 +551,23 @@ class Analytics():
         if out is None:
             return None
         for eachrow in out:
-            mod_str = eachrow.get('module', None)
+            mod_str = eachrow.get("module", None)
             if module is None:
                 if mod_str is None:
-                    if protocol == 'scsi':
-                        return eachrow.get('scsi_initiators')
-                    if protocol == 'nvme':
-                        return eachrow.get('nvme_initiators')
+                    if protocol == "scsi":
+                        return eachrow.get("scsi_initiators")
+                    if protocol == "nvme":
+                        return eachrow.get("nvme_initiators")
                     if protocol is None:
-                        return eachrow.get('total_initiators')
+                        return eachrow.get("total_initiators")
             else:
                 if mod_str == str(module):
-                    if protocol == 'scsi':
-                        return eachrow.get('scsi_initiators')
-                    if protocol == 'nvme':
-                        return eachrow.get('nvme_initiators')
+                    if protocol == "scsi":
+                        return eachrow.get("scsi_initiators")
+                    if protocol == "nvme":
+                        return eachrow.get("nvme_initiators")
                     if protocol is None:
-                        return eachrow.get('total_initiators')
+                        return eachrow.get("total_initiators")
 
     def targets(self, module=None, protocol=None):
         """
@@ -565,20 +597,20 @@ class Analytics():
         if out is None:
             return None
         for eachrow in out:
-            mod_str = eachrow.get('module', None)
+            mod_str = eachrow.get("module", None)
             if module is None:
                 if mod_str is None:
-                    if protocol == 'scsi':
-                        return eachrow.get('scsi_targets')
-                    if protocol == 'nvme':
-                        return eachrow.get('nvme_targets')
+                    if protocol == "scsi":
+                        return eachrow.get("scsi_targets")
+                    if protocol == "nvme":
+                        return eachrow.get("nvme_targets")
                     if protocol is None:
-                        return eachrow.get('total_targets')
+                        return eachrow.get("total_targets")
             else:
                 if mod_str == str(module):
-                    if protocol == 'scsi':
-                        return eachrow.get('scsi_targets')
-                    if protocol == 'nvme':
-                        return eachrow.get('nvme_targets')
+                    if protocol == "scsi":
+                        return eachrow.get("scsi_targets")
+                    if protocol == "nvme":
+                        return eachrow.get("nvme_targets")
                     if protocol is None:
-                        return eachrow.get('total_targets')
+                        return eachrow.get("total_targets")

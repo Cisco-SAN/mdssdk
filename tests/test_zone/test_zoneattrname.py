@@ -3,12 +3,12 @@ import unittest
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
 from tests.test_zone.vars import *
+from mdssdk.connection_manager.errors import CLIError
 
 log = logging.getLogger(__name__)
 
 
 class TestZoneAttrName(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -27,12 +27,14 @@ class TestZoneAttrName(unittest.TestCase):
         self.assertEqual("test_zone", self.z.name)
 
     def test_name_read_nonexisting(self):
-        self.assertIsNone(self.z.name)
+        with self.assertRaises(CLIError) as c:
+            self.z.name
+        self.assertIn("Zone not present", str(c.exception))
 
     def test_name_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.z.name = "asdf"
-        self.assertEqual('can\'t set attribute', str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:
         self.v.delete()

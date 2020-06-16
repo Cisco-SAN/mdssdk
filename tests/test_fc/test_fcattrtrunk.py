@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrTrunk(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -17,7 +16,7 @@ class TestFcAttrTrunk(unittest.TestCase):
         interfaces = sw.interfaces
         while True:
             k, v = random.choice(list(interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 self.fc = v
                 log.debug(k)
                 break
@@ -38,8 +37,14 @@ class TestFcAttrTrunk(unittest.TestCase):
         trunk = "asdf"
         with self.assertRaises(CLIError) as e:
             self.fc.trunk = trunk
-        self.assertEqual("The command \" interface " + str(self.fc.name) + " ; switchport trunk mode  " + str(
-            trunk) + " \" gave the error \" % Invalid command \".", str(e.exception))
+        self.assertEqual(
+            'The command " interface '
+            + str(self.fc.name)
+            + " ; switchport trunk mode  "
+            + str(trunk)
+            + ' " gave the error " % Invalid command ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.fc.trunk = self.old

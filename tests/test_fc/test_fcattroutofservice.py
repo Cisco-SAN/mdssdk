@@ -10,7 +10,6 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrOutOfService(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -18,7 +17,7 @@ class TestFcAttrOutOfService(unittest.TestCase):
         interfaces = sw.interfaces
         while True:
             k, v = random.choice(list(interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 self.fc = v
                 log.debug(k)
                 break
@@ -32,19 +31,22 @@ class TestFcAttrOutOfService(unittest.TestCase):
 
     def test_out_of_service_write(self):
         # self.skipTest("needs to be fixed")
-        if (self.fc.status == 'outOfServc'):
+        if self.fc.status == "outOfServc":
             self.fc.out_of_service = False
             self.assertIn(self.fc.status, self.status_values)
             self.fc.out_of_service = True
-            self.assertEqual('outOfServc', self.fc.status)
+            self.assertEqual("outOfServc", self.fc.status)
         else:
             try:
                 self.fc.out_of_service = True
             except CLIError as c:
                 if "requested config not allowed on bundle member" in c.message:
                     self.skipTest(
-                        "Port " + self.fc.name + " is part of a PC and hence cannot set to out-of-service, Please rerun the tests")
-            self.assertEqual('outOfServc', self.fc.status)
+                        "Port "
+                        + self.fc.name
+                        + " is part of a PC and hence cannot set to out-of-service, Please rerun the tests"
+                    )
+            self.assertEqual("outOfServc", self.fc.status)
             self.fc.out_of_service = False
             self.fc.status = "no shutdown"
             time.sleep(2)

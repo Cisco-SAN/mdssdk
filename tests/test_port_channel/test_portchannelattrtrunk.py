@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelAttrTrunk(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -43,8 +42,14 @@ class TestPortChannelAttrTrunk(unittest.TestCase):
         trunk = "asdf"
         with self.assertRaises(CLIError) as e:
             self.pc.trunk = trunk
-        self.assertEqual("The command \" interface port-channel" + str(self.pc_id) + " ; switchport trunk mode  " + str(
-            trunk) + " \" gave the error \" % Invalid command \".", str(e.exception))
+        self.assertEqual(
+            'The command " interface port-channel'
+            + str(self.pc_id)
+            + " ; switchport trunk mode  "
+            + str(trunk)
+            + ' " gave the error " % Invalid command ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.pc.delete()

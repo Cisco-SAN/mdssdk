@@ -62,7 +62,7 @@ class ZoneSet(object):
                 shzoneset = ShowZoneset(outlines)
                 return shzoneset.name
             else:
-                out = out.get('TABLE_zoneset').get('ROW_zoneset')
+                out = out.get("TABLE_zoneset").get("ROW_zoneset")
                 return out[get_key(zonekeys.NAME, self._SW_VER)]
         return None
 
@@ -112,18 +112,16 @@ class ZoneSet(object):
                 out = shzoneset.members
                 if out is not None:
                     for eachzdb in out:
-                        zname = eachzdb['name']
+                        zname = eachzdb["name"]
                         zobj = Zone(self.__swobj, zname, self._vsan)
                         zobj._set_part_of_active(active)
                         retlist[zname] = zobj
-                    return retlist
-                return None
             else:
-                zonesetdata = out.get('TABLE_zoneset', None).get('ROW_zoneset', None)
+                zonesetdata = out.get("TABLE_zoneset", None).get("ROW_zoneset", None)
                 if zonesetdata is not None:
-                    zonedata = zonesetdata.get('TABLE_zone', None)
+                    zonedata = zonesetdata.get("TABLE_zone", None)
                     if zonedata is not None:
-                        zdb = zonedata.get('ROW_zone', None)
+                        zdb = zonedata.get("ROW_zone", None)
                         if type(zdb) is dict:
                             zname = zdb[get_key(zonekeys.NAME, self._SW_VER)]
                             zobj = Zone(self.__swobj, zname, self._vsan)
@@ -135,8 +133,7 @@ class ZoneSet(object):
                                 zobj = Zone(self.__swobj, zname, self._vsan)
                                 zobj._set_part_of_active(active)
                                 retlist[zname] = zobj
-                        return retlist
-        return None
+        return retlist
 
     def create(self):
         """
@@ -223,16 +220,28 @@ class ZoneSet(object):
         time.sleep(1)
         if self.name is not None:
             if action:
-                cmd = "terminal dont-ask ; zoneset activate name " + self._name + " vsan " + str(
-                    self._vsan) + " ; no terminal dont-ask"
+                cmd = (
+                        "terminal dont-ask ; zoneset activate name "
+                        + self._name
+                        + " vsan "
+                        + str(self._vsan)
+                        + " ; no terminal dont-ask"
+                )
             else:
-                cmd = "terminal dont-ask ; no zoneset activate name " + self._name + " vsan " + str(
-                    self._vsan) + " ; no terminal dont-ask"
+                cmd = (
+                        "terminal dont-ask ; no zoneset activate name "
+                        + self._name
+                        + " vsan "
+                        + str(self._vsan)
+                        + " ; no terminal dont-ask"
+                )
             try:
                 self.__zoneObj._send_zone_cmd(cmd)
             except CLIError as c:
                 if "Fabric unstable" in c.message:
-                    log.error("Fabric is currently unstable, executing activation after few secs")
+                    log.error(
+                        "Fabric is currently unstable, executing activation after few secs"
+                    )
                     time.sleep(5)
                     self.__zoneObj._send_zone_cmd(cmd)
 
@@ -259,7 +268,7 @@ class ZoneSet(object):
         out = self.__swobj.show(cmd)
         log.debug(out)
         if out:
-            azsdetails = out['TABLE_zoneset']['ROW_zoneset']
+            azsdetails = out["TABLE_zoneset"]["ROW_zoneset"]
             azs = azsdetails[get_key(zonekeys.NAME, self._SW_VER)]
             if azs == self._name:
                 return True
@@ -273,7 +282,10 @@ class ZoneSet(object):
             if name_of_zone is None:
                 self.__zoneObj._clear_lock_if_enhanced()
                 raise ZoneNotPresent(
-                    "The given zoneset member '" + eachmem._name + "' is not present in the switch.")
+                    "The given zoneset member '"
+                    + eachmem._name
+                    + "' is not present in the switch."
+                )
             else:
                 if remove:
                     cmd = "no member " + name_of_zone
@@ -291,7 +303,10 @@ class ZoneSet(object):
         if out:
             if self.__swobj.is_connection_type_ssh():
                 if type(out[0]) is str:
-                    if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
+                    if (
+                            "VSAN " + str(self._vsan) + " is not configured"
+                            == out[0].strip()
+                    ):
                         raise CLIError(cmd, out[0])
                     if "Zoneset not present" == out[0].strip():
                         return None

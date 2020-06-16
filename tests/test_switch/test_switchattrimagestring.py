@@ -6,7 +6,6 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchAttrImageString(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -19,7 +18,7 @@ class TestSwitchAttrImageString(unittest.TestCase):
 
     def test_image_string_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.switch.image_string = 'asdf'
+            self.switch.image_string = "asdf"
         self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:

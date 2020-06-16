@@ -1,4 +1,4 @@
-__author__ = 'Suhas Bharadwaj (subharad)'
+__author__ = "Suhas Bharadwaj (subharad)"
 
 import re
 
@@ -7,7 +7,9 @@ class ShowTopology(object):
     def __init__(self, cmdoutput):
         self.__alloutput = cmdoutput
         self.__pat_for_vsan = "^FC Topology for VSAN ([0-9]+) :"
-        self.__pat_for_value_line = "\s+(\S+)\s+(0x[0-9a-f]+)\S+\s+(\S+)\s+(\d+\.\d+\.\d+\.\d+)"
+        self.__pat_for_value_line = (
+            "\s+(\S+)\s+(0x[0-9a-f]+)\S+\s+(\S+)\s+(\d+\.\d+\.\d+\.\d+)"
+        )
 
         # Stored format is
         # {'vsan':((local_int,peer_dom,peer_int,peer_ip),(local_int,peer_dom,peer_int,peer_ip),'vsan':((local_int,peer_dom,peer_int,peer_ip),(local_int,peer_dom,peer_int,peer_ip))
@@ -31,16 +33,16 @@ class ShowTopology(object):
                 if vsan is not None:
                     self.parse_data[vsan] = intlist
                     intlist = []
-                vsan = matchvsan.group('vsan')
+                vsan = matchvsan.group("vsan")
 
             matchint = re.search(int_regex, line)
             if matchint:
                 dummy = {}
-                dummy['interface'] = matchint.group('interface')
-                dummy['peer_domain'] = matchint.group('peer_domain')
-                dummy['peer_interface'] = matchint.group('peer_interface')
-                dummy['peer_ip'] = matchint.group('peer_ip')
-                dummy['peer_switch_name'] = matchint.group('peer_switch_name')
+                dummy["interface"] = matchint.group("interface")
+                dummy["peer_domain"] = matchint.group("peer_domain")
+                dummy["peer_interface"] = matchint.group("peer_interface")
+                dummy["peer_ip"] = matchint.group("peer_ip")
+                dummy["peer_switch_name"] = matchint.group("peer_switch_name")
                 intlist.append(dummy)
         # print(self.parse_data)
 

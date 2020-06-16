@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneAttrSmartZone(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -37,8 +36,10 @@ class TestZoneAttrSmartZone(unittest.TestCase):
 
     def test_smart_zone_write_invalid(self):
         with self.assertRaises(ValueError) as e:
-            self.z.smart_zone = 'asdf'
-        self.assertEqual("Smart zone value must be of typr bool, True/False", str(e.exception))
+            self.z.smart_zone = "asdf"
+        self.assertEqual(
+            "Smart zone value must be of typr bool, True/False", str(e.exception)
+        )
 
     def tearDown(self) -> None:
         self.z.smart_zone = self.old

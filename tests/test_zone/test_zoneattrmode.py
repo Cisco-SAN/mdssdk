@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneAttrMode(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -35,11 +34,15 @@ class TestZoneAttrMode(unittest.TestCase):
         self.assertEqual(ENHANCED, self.z.mode)
 
     def test_mode_write_invalid(self):
-        mode = 'asdf'
+        mode = "asdf"
         with self.assertRaises(InvalidZoneMode) as e:
             self.z.mode = mode
-        self.assertEqual('InvalidZoneMode: Invalid zone mode ' + str(mode) + ' . Valid values are: basic,enhanced',
-                         str(e.exception))
+        self.assertEqual(
+            "InvalidZoneMode: Invalid zone mode "
+            + str(mode)
+            + " . Valid values are: basic,enhanced",
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.z.mode = self.old

@@ -10,7 +10,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneSetRemoveMembers(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -31,8 +30,12 @@ class TestZoneSetRemoveMembers(unittest.TestCase):
         self.assertIsNone(self.zoneset.members)
         with self.assertRaises(CLIError) as e:
             self.zoneset.remove_members([self.zone])
-        self.assertEqual('The command " zoneset name test_zoneset vsan ' + str(
-            self.id) + ' ; no member test_zone " gave the error " Zone not present ".', str(e.exception))
+        self.assertEqual(
+            'The command " zoneset name test_zoneset vsan '
+            + str(self.id)
+            + ' ; no member test_zone " gave the error " Zone not present ".',
+            str(e.exception),
+        )
 
     def test_remove_members(self):
         zone1 = self.zone

@@ -21,7 +21,7 @@ class NXOSError(Exception):
 
         :return:
         """
-        return '%s: %s' % (self.__class__.__name__, self.message)
+        return "%s: %s" % (self.__class__.__name__, self.message)
 
     __str__ = __repr__
 
@@ -45,7 +45,10 @@ class CLIError(NXOSError):
 
         :return:
         """
-        return 'The command " %s " gave the error " %s ".' % (self.command, self.message)
+        return 'The command " %s " gave the error " %s ".' % (
+            self.command,
+            self.message,
+        )
 
     __str__ = __repr__
 
@@ -72,7 +75,7 @@ class CustomException(Exception):
 
         :return:
         """
-        return '%s: %s' % (self.__class__.__name__, self.message)
+        return "%s: %s" % (self.__class__.__name__, self.message)
 
     __str__ = __repr__
 

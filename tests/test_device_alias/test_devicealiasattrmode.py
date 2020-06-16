@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestDeviceAliasAttrMode(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -29,26 +28,36 @@ class TestDeviceAliasAttrMode(unittest.TestCase):
                 self.assertEqual(BASIC, self.d.mode.lower())
             except CLIError as c:
                 if "Device-alias enhanced zone member present" in c.message:
-                    self.skipTest("Device-alias enhanced zone member present, so we cant change mode to basic")
+                    self.skipTest(
+                        "Device-alias enhanced zone member present, so we cant change mode to basic"
+                    )
         else:
             try:
                 self.d.mode = BASIC
                 self.assertEqual(BASIC, self.d.mode.lower())
             except CLIError as c:
                 if "Device-alias enhanced zone member present" in c.message:
-                    self.skipTest("Device-alias enhanced zone member present, so we cant change mode to basic")
+                    self.skipTest(
+                        "Device-alias enhanced zone member present, so we cant change mode to basic"
+                    )
             self.d.mode = ENHANCED
             self.assertEqual(ENHANCED, self.d.mode.lower())
         self.d.mode = self.oldmode
         self.assertEqual(self.oldmode.lower(), self.d.mode.lower())
 
     def test_mode_write_invalid(self):
-        mode = 'asdf'
+        mode = "asdf"
         with self.assertRaises(InvalidMode) as e:
             self.d.mode = mode
         self.assertEqual(
-            "InvalidMode: Invalid device alias mode: " + str(mode) + ". Valid values are " + ENHANCED + "," + BASIC,
-            str(e.exception))
+            "InvalidMode: Invalid device alias mode: "
+            + str(mode)
+            + ". Valid values are "
+            + ENHANCED
+            + ","
+            + BASIC,
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.d.mode = self.oldmode

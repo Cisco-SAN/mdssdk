@@ -1,7 +1,12 @@
 import logging
 import re
 
-from .connection_manager.errors import PortChannelNotPresent, InvalidPortChannelRange, InvalidChannelMode, CLIError
+from .connection_manager.errors import (
+    PortChannelNotPresent,
+    InvalidPortChannelRange,
+    InvalidChannelMode,
+    CLIError,
+)
 from .constants import ON, ACTIVE, PAT_FC, PAT_PC, VALID_PC_RANGE
 from .fc import Fc
 from .interface import Interface
@@ -29,8 +34,14 @@ class PortChannel(Interface):
 
     def __init__(self, switch, id):
         if id not in VALID_PC_RANGE:
-            raise InvalidPortChannelRange("Port channel id " + str(id) + " is invalid, id should range from " + str(
-                VALID_PC_RANGE[0]) + " to " + str(VALID_PC_RANGE[-1]))
+            raise InvalidPortChannelRange(
+                "Port channel id "
+                + str(id)
+                + " is invalid, id should range from "
+                + str(VALID_PC_RANGE[0])
+                + " to "
+                + str(VALID_PC_RANGE[-1])
+            )
         self._id = id
         name = "port-channel" + str(self._id)
 
@@ -84,16 +95,21 @@ class PortChannel(Interface):
         if not self.__is_pc_present():
             return None
         if self.__swobj.is_connection_type_ssh():
-            outlines = self.__swobj.show("show port-channel database detail interface port-channel " + str(self._id))
+            outlines = self.__swobj.show(
+                "show port-channel database detail interface port-channel "
+                + str(self._id)
+            )
             shpc = ShowPortChannelDatabaseDetail(outlines)
             return shpc.channel_mode
         detailout = self.__get_pc_facts()
-        self.__admin_ch_mode = detailout[get_key(portchanelkeys.ADMIN_CHN_MODE, self._SW_VER)]
-        memdetail = detailout.get('TABLE_port_channel_member_detail', None)
+        self.__admin_ch_mode = detailout[
+            get_key(portchanelkeys.ADMIN_CHN_MODE, self._SW_VER)
+        ]
+        memdetail = detailout.get("TABLE_port_channel_member_detail", None)
         if memdetail is None:
             return self.__admin_ch_mode
         else:
-            allmem = memdetail['ROW_port_channel_member_detail']
+            allmem = memdetail["ROW_port_channel_member_detail"]
             if type(allmem) is dict:
                 # it means there is only one port member in the port-channel
                 return allmem[get_key(portchanelkeys.OPER_CHN_MODE, self._SW_VER)]
@@ -107,7 +123,10 @@ class PortChannel(Interface):
     def channel_mode(self, mode):
         if not self.__is_pc_present():
             raise PortChannelNotPresent(
-                "Port channel " + str(self._id) + " is not present on the switch, please create the PC first")
+                "Port channel "
+                + str(self._id)
+                + " is not present on the switch, please create the PC first"
+            )
         mode = mode.lower()
         cmd = "interface port-channel " + str(self._id)
         if mode == ACTIVE:
@@ -115,7 +134,14 @@ class PortChannel(Interface):
         elif mode == ON:
             cmd = cmd + " ; no channel mode active"
         else:
-            raise InvalidChannelMode("Invalid channel mode (" + str(mode) + "), Valid values are: " + ON + "," + ACTIVE)
+            raise InvalidChannelMode(
+                "Invalid channel mode ("
+                + str(mode)
+                + "), Valid values are: "
+                + ON
+                + ","
+                + ACTIVE
+            )
         self.__swobj.config(cmd)
 
     @property
@@ -130,7 +156,10 @@ class PortChannel(Interface):
         if not self.__is_pc_present():
             return None
         if self.__swobj.is_connection_type_ssh():
-            outlines = self.__swobj.show("show port-channel database detail interface port-channel " + str(self._id))
+            outlines = self.__swobj.show(
+                "show port-channel database detail interface port-channel "
+                + str(self._id)
+            )
             shpc = ShowPortChannelDatabaseDetail(outlines)
             memdetail = shpc.members
             if memdetail is None:
@@ -138,23 +167,27 @@ class PortChannel(Interface):
             else:
                 allintnames = []
                 for eachmem in memdetail:
-                    allintnames.append(eachmem['port'])
+                    allintnames.append(eachmem["port"])
         else:
             detailout = self.__get_pc_facts()
-            memdetail = detailout.get('TABLE_port_channel_member_detail', None)
+            memdetail = detailout.get("TABLE_port_channel_member_detail", None)
             if memdetail is None:
                 return None
             else:
                 allintnames = []
-                allmem = memdetail['ROW_port_channel_member_detail']
+                allmem = memdetail["ROW_port_channel_member_detail"]
                 if type(allmem) is dict:
                     # it means there is only one port member in the port-channel
-                    allintnames.append(allmem[get_key(portchanelkeys.PORT, self._SW_VER)])
+                    allintnames.append(
+                        allmem[get_key(portchanelkeys.PORT, self._SW_VER)]
+                    )
                 else:
                     # it means there is more than one member in the port-channel
                     # get the one of the member in the port-channel and return its channel mode
                     for eachmem in allmem:
-                        allintnames.append(eachmem[get_key(portchanelkeys.PORT, self._SW_VER)])
+                        allintnames.append(
+                            eachmem[get_key(portchanelkeys.PORT, self._SW_VER)]
+                        )
         retelements = {}
         for eachintname in allintnames:
             fcmatch = re.match(PAT_FC, eachintname)
@@ -163,7 +196,10 @@ class PortChannel(Interface):
                 retelements[eachintname] = intobj
             else:
                 log.error(
-                    "Unsupported interface " + eachintname + " , hence skipping it, this type of interface is not supported yet")
+                    "Unsupported interface "
+                    + eachintname
+                    + " , hence skipping it, this type of interface is not supported yet"
+                )
         return retelements
 
     def create(self):
@@ -192,7 +228,12 @@ class PortChannel(Interface):
             try:
                 self.__swobj.config(cmd)
             except CLIError as c:
-                if not "port-channel " + str(self._id) + " deleted and all its members disabled" in c.message:
+                if (
+                        not "port-channel "
+                            + str(self._id)
+                            + " deleted and all its members disabled"
+                            in c.message
+                ):
                     raise CLIError(cmd, c.message)
 
     def add_members(self, interfaces):
@@ -215,13 +256,28 @@ class PortChannel(Interface):
 
         if not self.__is_pc_present():
             raise PortChannelNotPresent(
-                "Port channel " + str(self._id) + " is not present on the switch, please create the PC first")
+                "Port channel "
+                + str(self._id)
+                + " is not present on the switch, please create the PC first"
+            )
         for eachint in interfaces:
-            cmd = "interface " + eachint.name + " ; channel-group " + str(self._id) + " force "
+            cmd = (
+                    "interface "
+                    + eachint.name
+                    + " ; channel-group "
+                    + str(self._id)
+                    + " force "
+            )
             try:
                 out = self.__swobj.config(cmd)
             except CLIError as c:
-                if str(eachint.name) + " added to port-channel " + str(self._id) + " and disabled" in c.message:
+                if (
+                        str(eachint.name)
+                        + " added to port-channel "
+                        + str(self._id)
+                        + " and disabled"
+                        in c.message
+                ):
                     continue
                 raise CLIError(cmd, c.message)
 
@@ -241,22 +297,33 @@ class PortChannel(Interface):
         """
         if not self.__is_pc_present():
             raise PortChannelNotPresent(
-                "Port channel " + str(self._id) + " is not present on the switch, please create the PC first")
+                "Port channel "
+                + str(self._id)
+                + " is not present on the switch, please create the PC first"
+            )
 
         for eachint in interfaces:
             cmd = "interface " + eachint.name + " ; no channel-group " + str(self._id)
             try:
                 out = self.__swobj.config(cmd)
             except CLIError as c:
-                if str(eachint.name) + " removed from port-channel " + str(self._id) + " and disabled" in c.message:
+                if (
+                        str(eachint.name)
+                        + " removed from port-channel "
+                        + str(self._id)
+                        + " and disabled"
+                        in c.message
+                ):
                     continue
                 raise CLIError(cmd, c.message)
 
     def __get_pc_facts(self):
-        cmd = "show port-channel database detail interface port-channel " + str(self._id)
+        cmd = "show port-channel database detail interface port-channel " + str(
+            self._id
+        )
         out = self.__swobj.show(cmd)
         log.debug(out)
-        detailoutput = out['TABLE_port_channel_database']['ROW_port_channel_database']
+        detailoutput = out["TABLE_port_channel_database"]["ROW_port_channel_database"]
         return detailoutput
 
     def __is_pc_present(self):
@@ -268,7 +335,7 @@ class PortChannel(Interface):
             return shpc.present
         if out:
             # There is atleast one PC in the switch
-            pcdb = out['TABLE_port_channel_database']['ROW_port_channel_database']
+            pcdb = out["TABLE_port_channel_database"]["ROW_port_channel_database"]
             if type(pcdb) is dict:
                 # There is only one PC in the switch
                 pcdblist = [pcdb]

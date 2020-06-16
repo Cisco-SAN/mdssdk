@@ -32,7 +32,7 @@ class TestDeviceAliasAttrLocked(unittest.TestCase):
     def test_locked_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.d.locked = True
-        self.assertEqual('can\'t set attribute', str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def test_acquire_lock(self):
         # Verify that lock is not acquired first
@@ -41,7 +41,12 @@ class TestDeviceAliasAttrLocked(unittest.TestCase):
         if not self.old:
             self.d.distribute = True
             self.assertTrue(self.d.distribute)
-        self.switch.config("device-alias database ; device-alias name " + self.name + " pwwn " + self.pwwn)
+        self.switch.config(
+            "device-alias database ; device-alias name "
+            + self.name
+            + " pwwn "
+            + self.pwwn
+        )
         self.assertTrue(self.d.locked)
         self.d.clear_lock()
         self.assertFalse(self.d.locked)

@@ -19,11 +19,11 @@ class SSHSession(object):
         """
         self._host = host
         self._cisco_device = {
-            'device_type': 'cisco_nxos',
-            'host': self._host,
-            'username': username,
-            'password': password,
-            'timeout': 60
+            "device_type": "cisco_nxos",
+            "host": self._host,
+            "username": username,
+            "password": password,
+            "timeout": 60,
         }
         self._connect()
 
@@ -69,8 +69,13 @@ class SSHSession(object):
 
     def show(self, cmd, timeout=100, expect_string=None):
         df = int(timeout / 100)
-        output = self._connection.send_command(cmd, delay_factor=df, expect_string=expect_string, use_textfsm=True,
-                                               strip_prompt=True)
+        output = self._connection.send_command(
+            cmd,
+            delay_factor=df,
+            expect_string=expect_string,
+            use_textfsm=True,
+            strip_prompt=True,
+        )
         if type(output) == str:
             # Output did not go through textFSM, as maybe there was no template
             if self._check_error(output):
@@ -92,29 +97,31 @@ class SSHSession(object):
             eachline = eachline.replace("^", "")
             if "Enter configuration commands, one per line" in eachline:
                 continue
-            if re.match(r'^\s*$', eachline):
+            if re.match(r"^\s*$", eachline):
                 continue
             if self.prompt in eachline:
                 continue
-            if re.match(r'^.*$', eachline):
+            if re.match(r"^.*$", eachline):
                 retout.append(eachline)
         if retout:
-            return retout, ' '.join(retout)  # There is some error
+            return retout, " ".join(retout)  # There is some error
         return retout, None  # there is no error
 
     def config(self, cmd):
         retout = []
-        output = self._connection.send_config_set(cmd,
-                                                  strip_prompt=True,
-                                                  strip_command=True,
-                                                  config_mode_command="configure terminal",
-                                                  exit_config_mode=True)
+        output = self._connection.send_config_set(
+            cmd,
+            strip_prompt=True,
+            strip_command=True,
+            config_mode_command="configure terminal",
+            exit_config_mode=True,
+        )
         start = False
         for eachline in output.strip().splitlines():
             eachline = eachline.strip()
             eachline = eachline.replace("at '^' marker.", "")
             eachline = eachline.replace("^", "")
-            if re.match(r'^\s*$', eachline):
+            if re.match(r"^\s*$", eachline):
                 continue
             if cmd.strip() in eachline:
                 start = True
@@ -124,5 +131,5 @@ class SSHSession(object):
             if start:
                 retout.append(eachline)
         if retout:
-            return retout, ' '.join(retout)  # There is some error
+            return retout, " ".join(retout)  # There is some error
         return retout, None  # there is no error

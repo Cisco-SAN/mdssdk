@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestDeviceAliasAttrDatabase(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -42,7 +41,7 @@ class TestDeviceAliasAttrDatabase(unittest.TestCase):
         log.debug("Starting test test_database_write_error")
         with self.assertRaises(AttributeError) as e:
             self.d.database = {self.name: self.pwwn}
-        self.assertEqual('can\'t set attribute', str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:
         try:

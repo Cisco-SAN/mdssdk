@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelAttrMode(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -37,8 +36,8 @@ class TestPortChannelAttrMode(unittest.TestCase):
         for mode in self.mode_values:
             self.pc.mode = mode
             self.assertEqual(mode, self.pc.mode)
-        if ('--' in oldmode):
-            oldmode = 'auto'
+        if "--" in oldmode:
+            oldmode = "auto"
         self.pc.mode = oldmode
         self.pc.delete()
 
@@ -46,8 +45,14 @@ class TestPortChannelAttrMode(unittest.TestCase):
         mode = "asdf"
         with self.assertRaises(CLIError) as e:
             self.pc.mode = mode
-        self.assertEqual("The command \" interface port-channel" + str(self.pc_id) + " ; switchport mode  " + str(
-            mode) + " \" gave the error \" % Invalid command \".", str(e.exception))
+        self.assertEqual(
+            'The command " interface port-channel'
+            + str(self.pc_id)
+            + " ; switchport mode  "
+            + str(mode)
+            + ' " gave the error " % Invalid command ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.pc.delete()

@@ -18,4 +18,4 @@ def get_key(nxapikey, version=None):
     if version in nxapikey.keys():
         return nxapikey[version]
     else:
-        return nxapikey['DEFAULT']
+        return nxapikey["DEFAULT"]

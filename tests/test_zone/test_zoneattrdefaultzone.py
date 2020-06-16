@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneAttrDefaultZone(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -35,11 +34,18 @@ class TestZoneAttrDefaultZone(unittest.TestCase):
 
     def test_default_zone_write_invalid(self):
         self.z.create()
-        default_zone = 'asdf'
+        default_zone = "asdf"
         with self.assertRaises(InvalidDefaultZone) as e:
             self.z.default_zone = default_zone
-        self.assertIn("Invalid default-zone value " + default_zone + " . Valid values are: " + PERMIT + "," + DENY,
-                      str(e.exception))
+        self.assertIn(
+            "Invalid default-zone value "
+            + default_zone
+            + " . Valid values are: "
+            + PERMIT
+            + ","
+            + DENY,
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.z.default_zone = self.old

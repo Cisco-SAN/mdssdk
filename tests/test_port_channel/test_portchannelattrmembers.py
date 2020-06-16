@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelAttrMembers(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -28,7 +27,7 @@ class TestPortChannelAttrMembers(unittest.TestCase):
         self.pc.create()
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 fc = v
                 log.debug(k)
                 break

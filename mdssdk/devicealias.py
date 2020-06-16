@@ -73,7 +73,13 @@ class DeviceAlias(object):
             cmd = "device-alias database ; no device-alias mode enhanced"
         else:
             raise InvalidMode(
-                "Invalid device alias mode: " + str(mode) + ". Valid values are " + ENHANCED + "," + BASIC)
+                "Invalid device alias mode: "
+                + str(mode)
+                + ". Valid values are "
+                + ENHANCED
+                + ","
+                + BASIC
+            )
         try:
             out = self.__swobj.config(cmd)
         except CLIError as c:
@@ -121,7 +127,7 @@ class DeviceAlias(object):
             facts_out = self.__get_facts()
             dis = self.__get_distribute(facts_out)
 
-        if dis.lower() == 'enabled':
+        if dis.lower() == "enabled":
             return True
         else:
             return False
@@ -183,7 +189,7 @@ class DeviceAlias(object):
 
         retout = {}
         facts_out = self.__get_facts()
-        allentries = facts_out.get('device_alias_entries', None)
+        allentries = facts_out.get("device_alias_entries", None)
         if allentries is None:
             # Means there are no entries
             return None
@@ -194,7 +200,7 @@ class DeviceAlias(object):
                 # one entry in the database then allentries will not be a dict it will be a list
                 allentries = [allentries]
             for eachentry in allentries:
-                retout[eachentry['dev_alias_name']] = eachentry['pwwn']
+                retout[eachentry["dev_alias_name"]] = eachentry["pwwn"]
             return retout
 
     def create(self, namepwwn):
@@ -330,11 +336,11 @@ class DeviceAlias(object):
         retoutput = {}
         out = self.__swobj.show("show device-alias database")
         if out:
-            num = out['number_of_entries']
-            da = out['TABLE_device_alias_database']['ROW_device_alias_database']
+            num = out["number_of_entries"]
+            da = out["TABLE_device_alias_database"]["ROW_device_alias_database"]
 
-            retoutput['number_of_entries'] = num
-            retoutput['device_alias_entries'] = da
+            retoutput["number_of_entries"] = num
+            retoutput["device_alias_entries"] = da
         shdastatus = self.__swobj.show("show device-alias status")
 
         return dict(retoutput, **shdastatus)
@@ -363,13 +369,20 @@ class DeviceAlias(object):
             except CLIError as c:
                 msg = c.message
             if msg is not None:
-                if "The following device-alias changes are about to be committed" in msg:
+                if (
+                        "The following device-alias changes are about to be committed"
+                        in msg
+                ):
                     pass
                 elif "There are no pending changes" in msg:
                     self.clear_lock()
-                    log.debug("The commit command was not executed because Device Alias already present")
+                    log.debug(
+                        "The commit command was not executed because Device Alias already present"
+                    )
                 elif "Commit in progress. Check the status." in msg:
-                    log.info("Commit in progress...sleeping for 5 sec, please check again.")
+                    log.info(
+                        "Commit in progress...sleeping for 5 sec, please check again."
+                    )
                     time.sleep(5)
                     self.__send_commit()
                 elif "Device-alias enhanced zone member present" in msg:

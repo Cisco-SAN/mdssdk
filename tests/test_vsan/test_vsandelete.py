@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestVsanDelete(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -33,15 +32,25 @@ class TestVsanDelete(unittest.TestCase):
         with self.assertRaises(CLIError) as e:
             v.delete()
         self.assertEqual(
-            'The command " terminal dont-ask ; vsan database ; no vsan ' + str(i) + ' " gave the error " vsan ' + str(
-                i) + ':cannot delete default vsan ".', str(e.exception))
+            'The command " terminal dont-ask ; vsan database ; no vsan '
+            + str(i)
+            + ' " gave the error " vsan '
+            + str(i)
+            + ':cannot delete default vsan ".',
+            str(e.exception),
+        )
 
     def test_delete_nonexistingvsan(self):
         with self.assertRaises(CLIError) as e:
             self.v.delete()
         self.assertEqual(
-            'The command " terminal dont-ask ; vsan database ; no vsan ' + str(
-                self.id) + ' " gave the error " vsan ' + str(self.id) + ':vsan not configured ".', str(e.exception))
+            'The command " terminal dont-ask ; vsan database ; no vsan '
+            + str(self.id)
+            + ' " gave the error " vsan '
+            + str(self.id)
+            + ':vsan not configured ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         if self.v.id is not None:

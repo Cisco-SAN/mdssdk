@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelAttrSpeed(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -38,8 +37,8 @@ class TestPortChannelAttrSpeed(unittest.TestCase):
         for speed in self.speed_values_write:
             self.pc.speed = speed
             self.assertEqual(speed, self.pc.speed)
-        if ('--' in oldspeed):
-            oldspeed = 'auto'
+        if "--" in oldspeed:
+            oldspeed = "auto"
         self.pc.speed = oldspeed
         self.pc.delete()
 
@@ -47,8 +46,14 @@ class TestPortChannelAttrSpeed(unittest.TestCase):
         speed = "asdf"
         with self.assertRaises(CLIError) as e:
             self.pc.speed = speed
-        self.assertEqual("The command \" interface port-channel" + str(self.pc_id) + " ; switchport speed  " + str(
-            speed) + " \" gave the error \" % Invalid command \".", str(e.exception))
+        self.assertEqual(
+            'The command " interface port-channel'
+            + str(self.pc_id)
+            + " ; switchport speed  "
+            + str(speed)
+            + ' " gave the error " % Invalid command ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.pc.delete()

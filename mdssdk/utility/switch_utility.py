@@ -15,7 +15,6 @@ log = logging.getLogger(__name__)
 
 
 class SwitchUtils:
-
     @property
     def interfaces(self):
         """
@@ -51,9 +50,9 @@ class SwitchUtils:
             return retlist
 
         # Get FC related data
-        fcout = out.get('TABLE_interface_brief_fc', None)
+        fcout = out.get("TABLE_interface_brief_fc", None)
         if fcout is not None:
-            allfc = fcout['ROW_interface_brief_fc']
+            allfc = fcout["ROW_interface_brief_fc"]
             if type(allfc) is dict:
                 allfc = [allfc]
             for eacfc in allfc:
@@ -62,9 +61,9 @@ class SwitchUtils:
                 retlist[fcname] = fcobj
 
         # Get PC related data
-        pcout = out.get('TABLE_interface_brief_portchannel', None)
+        pcout = out.get("TABLE_interface_brief_portchannel", None)
         if pcout is not None:
-            allpc = pcout['ROW_interface_brief_portchannel']
+            allpc = pcout["ROW_interface_brief_portchannel"]
             if type(allpc) is dict:
                 allpc = [allpc]
             for eacpc in allpc:
@@ -99,11 +98,11 @@ class SwitchUtils:
             shvsan = ShowVsan(outlines)
             out = shvsan.vsans
             for eachele in out:
-                id = int(eachele.get('vsan'))
+                id = int(eachele.get("vsan"))
                 vobj = Vsan(switch=self, id=id)
                 retlist[int(id)] = vobj
             return retlist
-        out = self.show(cmd)['TABLE_vsan']['ROW_vsan']
+        out = self.show(cmd)["TABLE_vsan"]["ROW_vsan"]
         for eachele in out:
             id = eachele.get(get_key(vsankeys.VSAN_ID, self._SW_VER))
             vobj = Vsan(switch=self, id=id)
@@ -126,8 +125,8 @@ class SwitchUtils:
         return (vsanid, zobj)
 
     def _return_zone_obj_ssh(self, eachzone):
-        vsan = eachzone.get('vsan')
-        zone_name = eachzone.get('zone_name')
+        vsan = eachzone.get("vsan")
+        zone_name = eachzone.get("zone_name")
         return (vsan, zone_name)
 
     @property
@@ -141,8 +140,8 @@ class SwitchUtils:
             if self.is_connection_type_ssh():
                 zone_vsan_dict = {}
                 for eachzone in out:
-                    vsan = eachzone.get('vsan')
-                    zone_name = eachzone.get('zone_name')
+                    vsan = eachzone.get("vsan")
+                    zone_name = eachzone.get("zone_name")
                     zone_vsan_dict[zone_name] = int(vsan)
 
                 # with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -151,8 +150,11 @@ class SwitchUtils:
                 #     for r in results:
                 #         vsan, zname = r
                 #         zone_vsan_dict[zname] = int(vsan)
-                print("There are a total of " + str(
-                    len(zone_vsan_dict.items())) + " zones across vsan(s). Please wait while we get the zone info...")
+                print(
+                    "There are a total of "
+                    + str(len(zone_vsan_dict.items()))
+                    + " zones across vsan(s). Please wait while we get the zone info..."
+                )
                 for zone, vsanid in zone_vsan_dict.items():
                     # vobj = Vsan(switch=self, id=vsanid)
                     zobj = zone
@@ -164,11 +166,14 @@ class SwitchUtils:
                         listofzones.append(zobj)
                     retlist[vsanid] = listofzones
             else:
-                allzones = out['TABLE_zone']['ROW_zone']
+                allzones = out["TABLE_zone"]["ROW_zone"]
                 if type(allzones) is dict:
                     allzones = [allzones]
-                print("There are a total of " + str(
-                    len(allzones)) + " zones across vsan(s). Please wait while we get the zone info...")
+                print(
+                    "There are a total of "
+                    + str(len(allzones))
+                    + " zones across vsan(s). Please wait while we get the zone info..."
+                )
                 for eachzone in allzones:
                     vsanid = eachzone.get(get_key(zonekeys.VSAN_ID, self._SW_VER))
                     # vobj = Vsan(switch=self, id=vsanid)
@@ -241,11 +246,11 @@ class SwitchUtils:
         out = self.show("show module")
         if self.is_connection_type_ssh():
             for eachrow in out:
-                modnum = eachrow['module']
+                modnum = eachrow["module"]
                 m = Module(self, modnum, eachrow)
                 mret[int(modnum)] = m
         else:
-            modinfo = out['TABLE_modinfo']['ROW_modinfo']
+            modinfo = out["TABLE_modinfo"]["ROW_modinfo"]
             # For 1RU switch modinfo is a dict
             if type(modinfo) is dict:
                 modinfo = [modinfo]

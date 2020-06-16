@@ -12,7 +12,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneAddMembers(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -50,16 +49,18 @@ class TestZoneAddMembers(unittest.TestCase):
                 if da_name not in olddb.keys() and da_pwwn not in olddb.values():
                     break
         d.create({da_name: da_pwwn})
-        members = [{'pwwn': '50:08:01:60:08:9f:4d:00'},
-                   {'interface': fc_name},
-                   {'device-alias': da_name},
-                   {'ip-address': '1.1.1.1'},
-                   {'symbolic-nodename': 'symbnodename'},
-                   {'fwwn': '11:12:13:14:15:16:17:18'},
-                   {'fcid': '0x123456'},
-                   {'interface': pc.name},
-                   {'fcalias': 'somefcalias'}]
-        self.switch.config('fcalias name somefcalias vsan ' + str(self.id))
+        members = [
+            {"pwwn": "50:08:01:60:08:9f:4d:00"},
+            {"interface": fc_name},
+            {"device-alias": da_name},
+            {"ip-address": "1.1.1.1"},
+            {"symbolic-nodename": "symbnodename"},
+            {"fwwn": "11:12:13:14:15:16:17:18"},
+            {"fcid": "0x123456"},
+            {"interface": pc.name},
+            {"fcalias": "somefcalias"},
+        ]
+        self.switch.config("fcalias name somefcalias vsan " + str(self.id))
         self.z.add_members(members)
         mem = self.z.members
         d.delete(da_name)
@@ -85,41 +86,59 @@ class TestZoneAddMembers(unittest.TestCase):
         self.assertEqual(len(members), len(self.z.members))
 
     def test_add_members_error_pwwn(self):
-        members = [{'pwwn': '50:08:01:60:08:9f:4d:00:01'}]
+        members = [{"pwwn": "50:08:01:60:08:9f:4d:00:01"}]
         with self.assertRaises(CLIError) as e:
             self.z.add_members(members)
-        self.assertEqual('The command " zone name test_zone vsan ' + str(
-            self.id) + ' ; member pwwn 50:08:01:60:08:9f:4d:00:01 " gave the error " % Invalid command ".',
-                         str(e.exception))
+        self.assertEqual(
+            'The command " zone name test_zone vsan '
+            + str(self.id)
+            + ' ; member pwwn 50:08:01:60:08:9f:4d:00:01 " gave the error " % Invalid command ".',
+            str(e.exception),
+        )
 
     def test_add_members_error_ip(self):
-        members = [{'ip-address': '1.1.1.1.1'}]
+        members = [{"ip-address": "1.1.1.1.1"}]
         with self.assertRaises(CLIError) as e:
             self.z.add_members(members)
-        self.assertEqual('The command " zone name test_zone vsan ' + str(
-            self.id) + ' ; member ip-address 1.1.1.1.1 " gave the error " % Invalid ip address ".', str(e.exception))
+        self.assertEqual(
+            'The command " zone name test_zone vsan '
+            + str(self.id)
+            + ' ; member ip-address 1.1.1.1.1 " gave the error " % Invalid ip address ".',
+            str(e.exception),
+        )
 
     def test_add_members_error_fcid(self):
-        members = [{'fcid': '0x123'}]
+        members = [{"fcid": "0x123"}]
         with self.assertRaises(CLIError) as e:
             self.z.add_members(members)
-        self.assertEqual('The command " zone name test_zone vsan ' + str(
-            self.id) + ' ; member fcid 0x123 " gave the error " Invalid FCID ".', str(e.exception))
+        self.assertEqual(
+            'The command " zone name test_zone vsan '
+            + str(self.id)
+            + ' ; member fcid 0x123 " gave the error " Invalid FCID ".',
+            str(e.exception),
+        )
 
     def test_add_members_error_fwwn(self):
-        members = [{'fwwn': '11:12:13:14:15:16:17:18:19'}]
+        members = [{"fwwn": "11:12:13:14:15:16:17:18:19"}]
         with self.assertRaises(CLIError) as e:
             self.z.add_members(members)
-        self.assertEqual('The command " zone name test_zone vsan ' + str(
-            self.id) + ' ; member fwwn 11:12:13:14:15:16:17:18:19 " gave the error " % Invalid command ".',
-                         str(e.exception))
+        self.assertEqual(
+            'The command " zone name test_zone vsan '
+            + str(self.id)
+            + ' ; member fwwn 11:12:13:14:15:16:17:18:19 " gave the error " % Invalid command ".',
+            str(e.exception),
+        )
 
     def test_add_members_error_fcalias(self):
-        members = [{'fcalias': 'somefcalias'}]
+        members = [{"fcalias": "somefcalias"}]
         with self.assertRaises(CLIError) as e:
             self.z.add_members(members)
-        self.assertEqual('The command " zone name test_zone vsan ' + str(
-            self.id) + ' ; member fcalias somefcalias " gave the error " Alias not present ".', str(e.exception))
+        self.assertEqual(
+            'The command " zone name test_zone vsan '
+            + str(self.id)
+            + ' ; member fcalias somefcalias " gave the error " Alias not present ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.v.delete()

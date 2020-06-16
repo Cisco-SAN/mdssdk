@@ -6,7 +6,6 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchAttrVersion(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -19,7 +18,7 @@ class TestSwitchAttrVersion(unittest.TestCase):
 
     def test_version_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.switch.version = '8.4'
+            self.switch.version = "8.4"
         self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:

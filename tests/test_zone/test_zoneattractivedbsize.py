@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestZoneAttrActivedbSize(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -27,10 +26,10 @@ class TestZoneAttrActivedbSize(unittest.TestCase):
         self.z.create()
         zoneset = ZoneSet(self.switch, "test_zoneset", self.id)
         zoneset.create()
-        self.z.add_members([{'fcid': '0x123456'}])
+        self.z.add_members([{"fcid": "0x123456"}])
         zoneset.add_members([self.z])
         zoneset.activate(True)
-        if (zoneset.is_active()):
+        if zoneset.is_active():
             self.assertIsNotNone(self.z.activedb_size)
         else:
             self.assertIsNone(self.z.activedb_size)
@@ -41,7 +40,7 @@ class TestZoneAttrActivedbSize(unittest.TestCase):
     def test_activedb_size_write_error(self):
         with self.assertRaises(AttributeError) as e:
             self.z.activedb_size = "asdf"
-        self.assertEqual('can\'t set attribute', str(e.exception))
+        self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:
         self.v.delete()

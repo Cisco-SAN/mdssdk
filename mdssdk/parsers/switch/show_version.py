@@ -7,12 +7,7 @@ PAT_VER = "system:    version\s+(?P<version>\S+).*"
 PAT_KICK = "kickstart image file is:\s+(?P<kickstart_image>.*)"
 PAT_SYS = "system image file is:\s+(?P<system_image>.*)"
 PAT_MODEL = "cisco\s+(?P<model>.*Chassis).*"
-ALL_PATS = [
-    PAT_VER,
-    PAT_KICK,
-    PAT_SYS,
-    PAT_MODEL
-]
+ALL_PATS = [PAT_VER, PAT_KICK, PAT_SYS, PAT_MODEL]
 
 
 class ShowVersion(object):
@@ -34,16 +29,16 @@ class ShowVersion(object):
 
     @property
     def version(self):
-        return self._group_dict.get('version', None)
+        return self._group_dict.get("version", None)
 
     @property
     def kickstart_image(self):
-        return self._group_dict.get('kickstart_image', None)
+        return self._group_dict.get("kickstart_image", None)
 
     @property
     def system_image(self):
-        return self._group_dict.get('system_image', None)
+        return self._group_dict.get("system_image", None)
 
     @property
     def model(self):
-        return self._group_dict.get('model', None)
+        return self._group_dict.get("model", None)

@@ -11,7 +11,16 @@ PAT_FULL_DB = "Full Zoning Database :\s+DB size:\s+(?P<fulldb_size>\d+)\s+bytes\
 PAT_EFF_DB = "Current Total Zone DB Usage:\s+(?P<effectivedb_size>\d+)\s+\/\s+(?P<maxdb_size>\d+)\s+bytes\s+\((?P<effectivedb_size_percentage>\d+)"
 PAT_ACTIVE_DB = "Active Zoning Database :\s+DB Size:\s+(?P<activedb_size>\d+)\s+bytes\s+Name:\s+(?P<activedb_zoneset_name>\S+)\s+Zonesets:\s+(?P<activedb_zoneset_count>\d+)\s+Zones:\s+(?P<activedb_zone_count>\d+)"
 PAT_STATUS = "Status:\s+(?P<status>.*)"
-ALL_PAT = [PAT_LOCK, PAT_MODE, PAT_DEFAULT, PAT_SMART, PAT_FULL_DB, PAT_EFF_DB, PAT_ACTIVE_DB, PAT_STATUS]
+ALL_PAT = [
+    PAT_LOCK,
+    PAT_MODE,
+    PAT_DEFAULT,
+    PAT_SMART,
+    PAT_FULL_DB,
+    PAT_EFF_DB,
+    PAT_ACTIVE_DB,
+    PAT_STATUS,
+]
 
 
 class ShowZoneStatus(object):
@@ -30,60 +39,60 @@ class ShowZoneStatus(object):
 
     @property
     def locked(self):
-        return self._group_dict.get('locked', None)
+        return self._group_dict.get("locked", None)
 
     @property
     def mode(self):
-        return self._group_dict.get('mode', None)
+        return self._group_dict.get("mode", None)
 
     @property
     def default_zone(self):
-        return self._group_dict.get('default_zone', None)
+        return self._group_dict.get("default_zone", None)
 
     @property
     def smart_zone(self):
-        return self._group_dict.get('smart_zone', None)
+        return self._group_dict.get("smart_zone", None)
 
     @property
     def fulldb_size(self):
-        return self._group_dict.get('fulldb_size', None)
+        return self._group_dict.get("fulldb_size", None)
 
     @property
     def fulldb_zone_count(self):
-        return self._group_dict.get('fulldb_zone_count', None)
+        return self._group_dict.get("fulldb_zone_count", None)
 
     @property
     def fulldb_zoneset_count(self):
-        return self._group_dict.get('fulldb_zoneset_count', None)
+        return self._group_dict.get("fulldb_zoneset_count", None)
 
     @property
     def activedb_size(self):
-        return self._group_dict.get('activedb_size', None)
+        return self._group_dict.get("activedb_size", None)
 
     @property
     def activedb_zone_count(self):
-        return self._group_dict.get('activedb_zone_count', None)
+        return self._group_dict.get("activedb_zone_count", None)
 
     @property
     def activedb_zoneset_count(self):
-        return self._group_dict.get('activedb_zoneset_count', None)
+        return self._group_dict.get("activedb_zoneset_count", None)
 
     @property
     def activedb_zoneset_name(self):
-        return self._group_dict.get('activedb_zoneset_name', None)
+        return self._group_dict.get("activedb_zoneset_name", None)
 
     @property
     def maxdb_size(self):
-        return self._group_dict.get('maxdb_size', None)
+        return self._group_dict.get("maxdb_size", None)
 
     @property
     def effectivedb_size(self):
-        return self._group_dict.get('effectivedb_size', None)
+        return self._group_dict.get("effectivedb_size", None)
 
     @property
     def effectivedb_size_percentage(self):
-        return self._group_dict.get('effectivedb_size_percentage', None)
+        return self._group_dict.get("effectivedb_size_percentage", None)
 
     @property
     def status(self):
-        return self._group_dict.get('status', None)
+        return self._group_dict.get("status", None)

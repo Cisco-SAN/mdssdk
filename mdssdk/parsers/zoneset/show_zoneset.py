@@ -28,7 +28,7 @@ class ShowZoneset(object):
 
     @property
     def name(self):
-        return self._name.get('name', None)
+        return self._name.get("name", None)
 
     @property
     def members(self):

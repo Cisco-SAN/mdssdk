@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrStatus(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -17,7 +16,7 @@ class TestFcAttrStatus(unittest.TestCase):
         interfaces = sw.interfaces
         while True:
             k, v = random.choice(list(interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 self.fc = v
                 log.debug(k)
                 break
@@ -29,7 +28,7 @@ class TestFcAttrStatus(unittest.TestCase):
 
     def test_status_write(self):
         self.skipTest("needs to be fixed")
-        if (self.fc.status == "down"):
+        if self.fc.status == "down":
             self.fc.status = "no shutdown"
             self.assertIn(self.fc.status, self.status_values)
             status = "shutdown"
@@ -46,8 +45,14 @@ class TestFcAttrStatus(unittest.TestCase):
         status = "asdf"
         with self.assertRaises(CLIError) as e:
             self.fc.status = status
-        self.assertEqual("The command \" terminal dont-ask ; interface " + self.fc.name + " ; " + str(
-            status) + " ; no terminal dont-ask \" gave the error \" % Invalid command \".", str(e.exception))
+        self.assertEqual(
+            'The command " terminal dont-ask ; interface '
+            + self.fc.name
+            + " ; "
+            + str(status)
+            + ' ; no terminal dont-ask " gave the error " % Invalid command ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
         self.assertEqual(self.old, self.fc.status)

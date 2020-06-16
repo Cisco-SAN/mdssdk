@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class TestVsanAttrName(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -47,7 +46,7 @@ class TestVsanAttrName(unittest.TestCase):
         name = "123456789123456789123456789123456"
         with self.assertRaises(CLIError) as e:
             self.v.name = name
-        self.assertIn('String exceeded max length of (32)', str(e.exception))
+        self.assertIn("String exceeded max length of (32)", str(e.exception))
         self.v.delete()
 
     def test_name_write_repeated(self):
@@ -60,11 +59,13 @@ class TestVsanAttrName(unittest.TestCase):
         v1 = Vsan(switch=self.switch, id=i)
         with self.assertRaises(CLIError) as e:
             v1.name = name
-        self.assertIn('vsan name is already in use', str(e.exception))
+        self.assertIn("vsan name is already in use", str(e.exception))
         self.v.delete()
 
     def test_name_write_nonexistingvsan(self):
-        self.v.name = "vsantest"  ## writing name creates vsan on switch if it doesn't exist
+        self.v.name = (
+            "vsantest"
+        )  ## writing name creates vsan on switch if it doesn't exist
         self.assertEqual(self.id, self.v.id)
         self.v.delete()
 
