@@ -101,13 +101,13 @@ class SwitchUtils:
             for eachele in out:
                 id = int(eachele.get('vsan'))
                 vobj = Vsan(switch=self, id=id)
-                retlist[id] = vobj
+                retlist[int(id)] = vobj
             return retlist
         out = self.show(cmd)['TABLE_vsan']['ROW_vsan']
         for eachele in out:
             id = eachele.get(get_key(vsankeys.VSAN_ID, self._SW_VER))
             vobj = Vsan(switch=self, id=id)
-            retlist[id] = vobj
+            retlist[int(id)] = vobj
         return retlist
 
     @property
@@ -243,7 +243,7 @@ class SwitchUtils:
             for eachrow in out:
                 modnum = eachrow['module']
                 m = Module(self, modnum, eachrow)
-                mret[modnum] = m
+                mret[int(modnum)] = m
         else:
             modinfo = out['TABLE_modinfo']['ROW_modinfo']
             # For 1RU switch modinfo is a dict
@@ -253,7 +253,7 @@ class SwitchUtils:
             for eachmodinfo in modinfo:
                 modnumkey = get_key(modulekeys.MOD_NUM, self._SW_VER)
                 m = Module(self, eachmodinfo[modnumkey], eachmodinfo)
-                mret[m.module_number] = m
+                mret[int(eachmodinfo[modnumkey])] = m
         return mret
 
     @property

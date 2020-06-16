@@ -87,4 +87,4 @@ class TestPortChannelAddMembers(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.pc.delete()
-        self.assertEqual(self.interfaces.keys(), self.switch.interfaces.keys())
+        self.assertCountEqual(self.interfaces.keys(), self.switch.interfaces.keys())

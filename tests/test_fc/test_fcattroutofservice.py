@@ -3,6 +3,7 @@ import time
 import unittest
 
 from mdssdk.fc import Fc
+from mdssdk.connection_manager.errors import CLIError
 from tests.test_fc.vars import *
 
 log = logging.getLogger(__name__)
@@ -37,7 +38,12 @@ class TestFcAttrOutOfService(unittest.TestCase):
             self.fc.out_of_service = True
             self.assertEqual('outOfServc', self.fc.status)
         else:
-            self.fc.out_of_service = True
+            try:
+                self.fc.out_of_service = True
+            except CLIError as c:
+                if "requested config not allowed on bundle member" in c.message:
+                    self.skipTest(
+                        "Port " + self.fc.name + " is part of a PC and hence cannot set to out-of-service, Please rerun the tests")
             self.assertEqual('outOfServc', self.fc.status)
             self.fc.out_of_service = False
             self.fc.status = "no shutdown"
@@ -50,4 +56,7 @@ class TestFcAttrOutOfService(unittest.TestCase):
         self.assertEqual("Only bool value(true/false) supported.", str(e.exception))
 
     def tearDown(self) -> None:
+        self.fc.out_of_service = False
+        self.fc.status = "no shutdown"
+        time.sleep(2)
         self.assertEqual(self.old, self.fc.status)

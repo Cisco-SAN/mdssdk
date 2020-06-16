@@ -9,11 +9,20 @@ log = logging.getLogger(__name__)
 # protocol: scsi
 # metrics: [port, total_read_io_time, total_write_io_time] - - default[] all
 # view: scsi_initiator_it_flow
+# where:[port,vsan]
+# sort: vsan
+# asc: True
+# limit: 10
 
 # Be extra careful while changing the patterns or the keys of the patten
 METRICS = 'metrics'
 PROTOCOL = 'protocol'
 VIEW = 'view'
+WHERE = 'where'
+SORT = 'sort'
+ASC = "asc"
+LIMIT = "limit"
+
 VALID_PROTOCOLS = ['scsi', 'nvme']
 MOD_PAT = "^\|\s+(?P<module>\d+)\s+\|\s+(?P<scsi_npu_load>\d+)\s+(?P<nvme_npu_load>\d+)\s+(?P<total_npu_load>\d+)\s+\|" \
           "\s+(?P<scsi_itls>\d+)\s+(?P<nvme_itns>\d+)\s+(?P<both_itls_itns>\d+)\s+\|" \
@@ -134,6 +143,11 @@ class Analytics():
         proto = profile.get(PROTOCOL, None)
         metrics = profile.get(PROTOCOL, None)
         view = profile.get(PROTOCOL, None)
+        where = profile.get(WHERE, None)
+        sort = profile.get(SORT, None)
+        asc = profile.get(ASC, None)
+        limit = profile.get(LIMIT, None)
+
         if proto is None:
             raise InvalidProfile(
                 "'" + PROTOCOL + "' key is missing from the profile, this is mandatory and it needs to one of " + ",".join(
@@ -145,6 +159,9 @@ class Analytics():
             raise InvalidProfile("'" + VIEW + "' key is missing from the profile, this is mandatory")
         if proto not in VALID_PROTOCOLS:
             raise InvalidProfile("'" + PROTOCOL + "' key needs to one of " + ",".join(VALID_PROTOCOLS))
+        if where is not None:
+            if type(where) is not list:
+                raise InvalidProfile("where ")
 
         return True
 
@@ -153,6 +170,11 @@ class Analytics():
             metrics = None
         else:
             metrics = profile.get(METRICS, None)
+        where = profile.get(WHERE, None)
+        sort = profile.get(SORT, None)
+        asc = profile.get(ASC, None)
+        limit = profile.get(LIMIT, None)
+
         if (metrics is None) or (len(metrics) == 0):
             selq = "select all from fc-" + profile.get(PROTOCOL) + "." + profile.get(VIEW)
         else:

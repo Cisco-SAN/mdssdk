@@ -28,7 +28,12 @@ class TestFcAttrMode(unittest.TestCase):
         self.assertIn(self.fc.mode, self.mode_values + ['TE', 'TF', '--', ' --'])
 
     def test_mode_write(self):
-        self.fc.mode = "auto"
+        try:
+            self.fc.mode = "auto"
+        except CLIError as c:
+            if "requested config not allowed on bundle member" in c.message:
+                self.skipTest(
+                    "Port " + self.fc.name + " is part of a PC and hence cannot set mode to auto, Please rerun the tests")
         self.assertIn(self.fc.mode, self.mode_values + ['TE', 'TF', '--', ' --'])
 
     def test_mode_write_invalid(self):
