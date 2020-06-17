@@ -18,7 +18,7 @@ class ConnectNxapi(object):
     """
 
     def __init__(
-            self, host, username, password, transport=u"https", port=None, verify_ssl=True
+        self, host, username, password, transport=u"https", port=None, verify_ssl=True
     ):
 
         if transport not in ["http", "https"]:

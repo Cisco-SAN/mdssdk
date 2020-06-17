@@ -139,11 +139,9 @@ class DeviceAlias(object):
         if distribute:
             cmd = "device-alias database ; device-alias distribute"
             log.debug("Setting device alias mode to 'Enabled'")
-            log.debug(cmd)
         else:
             cmd = "device-alias database ; no device-alias distribute"
             log.debug("Setting device alias mode to 'Disabled'")
-            log.debug(cmd)
         try:
             out = self.__swobj.config(cmd)
         except CLIError as c:
@@ -354,7 +352,6 @@ class DeviceAlias(object):
     def __locked_user(self, facts_out):
         locker_user = get_key(devicealiaskeys.LOCKED_USER, self._SW_VER)
         if locker_user in facts_out.keys():
-            log.debug(facts_out[locker_user])
             return facts_out[locker_user]
         else:
             return None
@@ -362,7 +359,6 @@ class DeviceAlias(object):
     def __send_commit(self):
         if self.distribute:
             cmd = "terminal dont-ask ; device-alias commit ; no terminal dont-ask "
-            log.debug(cmd)
             msg = None
             try:
                 out = self.__swobj.config(cmd)
@@ -370,8 +366,8 @@ class DeviceAlias(object):
                 msg = c.message
             if msg is not None:
                 if (
-                        "The following device-alias changes are about to be committed"
-                        in msg
+                    "The following device-alias changes are about to be committed"
+                    in msg
                 ):
                     pass
                 elif "There are no pending changes" in msg:

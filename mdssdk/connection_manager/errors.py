@@ -141,7 +141,3 @@ class InvalidDefaultZone(CustomException):
 
 class InvalidZoneMemberType(CustomException):
     pass
-
-
-class ZoneNotPresent(CustomException):
-    pass

@@ -5,8 +5,8 @@ from tests.test_fcns.vars import *
 
 log = logging.getLogger(__name__)
 
-class TestFcnsProxyPort(unittest.TestCase):
 
+class TestFcnsProxyPort(unittest.TestCase):
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -19,11 +19,11 @@ class TestFcnsProxyPort(unittest.TestCase):
         if fcnsdb is not None:
             if type(fcnsdb) is dict:
                 fcnsdb = [fcnsdb]
-            vsan = fcnsdb[0]['vsan_id']
-            fcnsentry = fcnsdb[0]['TABLE_fcns_database']['ROW_fcns_database']
+            vsan = fcnsdb[0]["vsan_id"]
+            fcnsentry = fcnsdb[0]["TABLE_fcns_database"]["ROW_fcns_database"]
             if type(fcnsentry) is dict:
                 fcnsentry = [fcnsentry]
-            pwwn = fcnsentry[0]['pwwn']
+            pwwn = fcnsentry[0]["pwwn"]
             self.fcns_obj.proxy_port(pwwn=pwwn, vsan=vsan)
 
     def tearDown(self) -> None:

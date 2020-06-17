@@ -42,9 +42,9 @@ class Fc(Interface):
         if type(value) is not bool:
             raise TypeError("Only bool value(true/false) supported.")
         cmd = (
-                "terminal dont-ask ; interface "
-                + self.name
-                + " ; out-of-service force ; no terminal dont-ask "
+            "terminal dont-ask ; interface "
+            + self.name
+            + " ; out-of-service force ; no terminal dont-ask "
         )
         if value:
             # First shutdown the port then
@@ -157,8 +157,6 @@ class Fc(Interface):
     def _execute_transceiver_cmd(self):
         result = {}
         cmd = "show interface " + self.name + " transceiver detail"
-        log.debug("Sending the cmd")
-        log.debug(cmd)
         if self.__swobj.is_connection_type_ssh():
             return self.__swobj.show(cmd)
         out = self.__swobj.show(cmd)["TABLE_interface_trans"]["ROW_interface_trans"][
@@ -169,7 +167,6 @@ class Fc(Interface):
                 result.update(d)
         else:
             result = out
-        log.debug(result)
         return result
 
     class Transceiver(object):

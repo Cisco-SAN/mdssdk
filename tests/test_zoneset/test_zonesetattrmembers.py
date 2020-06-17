@@ -35,7 +35,7 @@ class TestZoneSetAttrMembers(unittest.TestCase):
         )
 
     def test_members_read_nonexisting(self):
-        self.assertIsNone(self.zoneset.members)
+        self.assertEqual({}, self.zoneset.members)
 
     def test_members_write_error(self):
         with self.assertRaises(AttributeError) as e:

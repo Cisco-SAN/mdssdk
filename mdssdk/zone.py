@@ -126,6 +126,7 @@ class Zone(object):
 
     def __format_members_ssh(self, out):
         # SSH o/p via textfsm template
+        log.debug("Before __format_members_ssh")
         log.debug(out)
         retout = []
         for eachmem in out:
@@ -139,6 +140,8 @@ class Zone(object):
                     mem_dict[k] = v
             if mem_dict:
                 retout.append(mem_dict)
+        log.debug("After __format_members_ssh")
+        log.debug(retout)
         return retout
 
     @property
@@ -200,11 +203,11 @@ class Zone(object):
     @mode.setter
     def mode(self, value):
         cmd = (
-                "terminal dont-ask ; zone mode "
-                + ENHANCED
-                + " vsan "
-                + str(self._vsan)
-                + " ; no terminal dont-ask"
+            "terminal dont-ask ; zone mode "
+            + ENHANCED
+            + " vsan "
+            + str(self._vsan)
+            + " ; no terminal dont-ask"
         )
         if value.lower() == ENHANCED:
             self._send_zone_cmd(cmd)
@@ -256,11 +259,11 @@ class Zone(object):
     @default_zone.setter
     def default_zone(self, value):
         cmd = (
-                "terminal dont-ask ; zone default-zone "
-                + PERMIT
-                + " vsan "
-                + str(self._vsan)
-                + " ; no terminal dont-ask"
+            "terminal dont-ask ; zone default-zone "
+            + PERMIT
+            + " vsan "
+            + str(self._vsan)
+            + " ; no terminal dont-ask"
         )
         if value.lower() == PERMIT:
             self._send_zone_cmd(cmd)
@@ -595,9 +598,9 @@ class Zone(object):
         """
 
         cmd = (
-                "terminal dont-ask ; clear zone lock vsan  "
-                + str(self._vsan)
-                + " ; no terminal dont-ask"
+            "terminal dont-ask ; clear zone lock vsan  "
+            + str(self._vsan)
+            + " ; no terminal dont-ask"
         )
         out = self.__swobj.config(cmd)
         if out is not None:
@@ -772,11 +775,13 @@ class Zone(object):
         log.debug("Executing the cmd show zone name <> vsan <> ")
         cmd = "show zone name " + self._name + " vsan  " + str(self._vsan)
         out = self.__swobj.show(cmd)
-        log.debug(out)
         if out:
             if self.__swobj.is_connection_type_ssh():
                 if type(out[0]) is str:
-                    if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
+                    if (
+                        "VSAN " + str(self._vsan) + " is not configured"
+                        == out[0].strip()
+                    ):
                         raise CLIError(cmd, out[0])
                     if "Zone not present" == out[0].strip():
                         raise CLIError(cmd, out[0])
@@ -786,14 +791,16 @@ class Zone(object):
         log.debug("Executing the cmd show zone status vsan <> ")
         cmd = "show zone status vsan  " + str(self._vsan)
         out = self.__swobj.show(cmd)
-        log.debug(out)
         if out:
             if self.__swobj.is_connection_type_ssh():
                 if type(out[0]) is str:
-                    if "VSAN " + str(self._vsan) + " is not configured" == out[0].strip():
+                    if (
+                        "VSAN " + str(self._vsan) + " is not configured"
+                        == out[0].strip()
+                    ):
                         raise CLIError(cmd, out[0])
                 return out
-            return out['TABLE_zone_status']['ROW_zone_status']
+            return out["TABLE_zone_status"]["ROW_zone_status"]
         else:
             raise CLIError(cmd, "VSAN " + str(self._vsan) + " is not configured")
 
@@ -808,7 +815,6 @@ class Zone(object):
             )
         try:
             out = self.__swobj.config(cmd)
-            log.debug(out)
         except CLIError as c:
             if "Duplicate member" in c.message:
                 return False, None
@@ -817,7 +823,6 @@ class Zone(object):
         if out is not None:
             if not self.__swobj.is_connection_type_ssh():
                 msg = out["msg"].strip()
-                log.debug("------" + msg)
                 if msg:
                     self._check_msg(msg, cmd)
         self.__commit_config_if_locked()
@@ -861,9 +866,7 @@ class Zone(object):
             log.debug("Sending commit cmd as lock is acquired")
             cmd = "show zone pending-diff vsan " + str(self._vsan)
             out = self.__swobj.show(cmd, raw_text=True)
-            log.debug(out)
             cmd = "zone commit vsan " + str(self._vsan)
-            log.debug("Executing the cmd " + cmd)
             try:
                 o = self.__swobj.config(cmd)
                 if o is not None:

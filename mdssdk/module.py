@@ -175,6 +175,4 @@ class Module(object):
             retout = out[0]
         else:
             retout = out["TABLE_modinfo"]["ROW_modinfo"]
-        log.debug("Output of the cmd " + cmd)
-        log.debug(retout)
         return retout

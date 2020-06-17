@@ -5,8 +5,8 @@ from tests.test_fcns.vars import *
 
 log = logging.getLogger(__name__)
 
-class TestFcnsAttrZoneLookupCache(unittest.TestCase):
 
+class TestFcnsAttrZoneLookupCache(unittest.TestCase):
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -27,8 +27,8 @@ class TestFcnsAttrZoneLookupCache(unittest.TestCase):
         with self.assertRaises(TypeError) as e:
             self.fcns_obj.zone_lookup_cache = "asdf"
         self.assertEqual("Only bool value(true/false) supported.", str(e.exception))
-        
+
     def tearDown(self) -> None:
-        if(self.fcns_obj.zone_lookup_cache != self.old):
+        if self.fcns_obj.zone_lookup_cache != self.old:
             self.fcns_obj.zone_lookup_cache = self.old
             self.assertEqual(self.old, self.fcns_obj.zone_lookup_cache)

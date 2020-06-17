@@ -22,8 +22,8 @@ class TestDeviceAliasDelete(unittest.TestCase):
                 self.name = get_random_string()
                 self.pwwn = get_random_pwwn()
                 if (
-                        self.name not in self.olddb.keys()
-                        and self.pwwn not in self.olddb.values()
+                    self.name not in self.olddb.keys()
+                    and self.pwwn not in self.olddb.values()
                 ):
                     break
         log.debug({self.name: self.pwwn})

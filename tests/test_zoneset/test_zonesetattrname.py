@@ -1,7 +1,7 @@
 import unittest
 
 from mdssdk.vsan import Vsan
-from mdssdk.zoneset import ZoneSet
+from mdssdk.zoneset import ZoneSet, CLIError
 from tests.test_zoneset.vars import *
 
 log = logging.getLogger(__name__)
@@ -26,7 +26,9 @@ class TestZoneSetAttrName(unittest.TestCase):
         self.assertEqual("test_zoneset", self.zoneset.name)
 
     def test_name_read_nonexisting(self):
-        self.assertIsNone(self.zoneset.name)
+        with self.assertRaises(CLIError) as c:
+            self.zoneset.name
+        self.assertIn("Zoneset not present", str(c.exception))
 
     def test_name_write_error(self):
         with self.assertRaises(AttributeError) as e:

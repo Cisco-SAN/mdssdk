@@ -6,8 +6,8 @@ from tests.test_flogi.vars import *
 
 log = logging.getLogger(__name__)
 
-class TestFlogiAttrQuiesce(unittest.TestCase):
 
+class TestFlogiAttrQuiesce(unittest.TestCase):
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -25,9 +25,12 @@ class TestFlogiAttrQuiesce(unittest.TestCase):
     def test_quiesce_write_invalid(self):
         with self.assertRaises(CLIError) as e:
             self.flogi_obj.quiesce = 20001
-        self.assertEqual('The command " flogi quiesce timeout 20001 " gave the error " % Invalid number, range is (0:20000) ".', str(e.exception))
+        self.assertEqual(
+            'The command " flogi quiesce timeout 20001 " gave the error " % Invalid number, range is (0:20000) ".',
+            str(e.exception),
+        )
 
     def tearDown(self) -> None:
-        if(self.flogi_obj.quiesce != self.old):
+        if self.flogi_obj.quiesce != self.old:
             self.flogi_obj.quiesce = self.old
             self.assertEqual(self.flogi_obj.quiesce, self.old)

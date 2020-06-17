@@ -75,14 +75,14 @@ class Switch(SwitchUtils):
     """
 
     def __init__(
-            self,
-            ip_address,
-            username,
-            password,
-            connection_type="https",
-            port=8443,
-            timeout=30,
-            verify_ssl=True,
+        self,
+        ip_address,
+        username,
+        password,
+        connection_type="https",
+        port=8443,
+        timeout=30,
+        verify_ssl=True,
     ):
 
         self.__ip_address = ip_address
@@ -739,7 +739,7 @@ class Switch(SwitchUtils):
                     raise CLIError(cmd, error)
                 # return outlines
                 retdict[cmd] = outlines
-            log.debug("Show commands sent are :")
+            log.debug("Show commands sent over ssh are :")
             log.debug(commands)
             log.debug("Result got via ssh was :")
             log.debug(retdict)
@@ -757,9 +757,9 @@ class Switch(SwitchUtils):
                 if response:
                     return_list.append(response[u"body"])
 
-        log.debug("Show commands sent are :")
+        log.debug("Show commands sent over nxapi are :")
         log.debug(commands)
-        log.debug("Result got was :")
+        log.debug("Result got via nxapi was :")
         log.debug(return_list)
 
         return return_list
@@ -806,7 +806,7 @@ class Switch(SwitchUtils):
                     raise CLIError(cmd, error)
                 # return outlines
                 retdict[cmd] = outlines
-            log.debug("Config commands sent are :")
+            log.debug("Config commands sent via ssh are :")
             log.debug(commands)
             log.debug("Result got via ssh was :")
             log.debug(retdict)
@@ -814,9 +814,9 @@ class Switch(SwitchUtils):
 
         return_list = self._cli_command(commands, rpc=rpc, method=method)
 
-        log.debug("Config commands sent are :")
+        log.debug("Config commands sent via nxapi are :")
         log.debug(commands)
-        log.debug("Result got was :")
+        log.debug("Result got via nxapi was :")
         log.debug(return_list)
 
         return return_list
@@ -931,10 +931,10 @@ class Switch(SwitchUtils):
 
         log.info(self.ipaddr + ": Starting install all cmd for non-disruptive ISSU")
         cmd = (
-                "terminal dont-ask ; install all kickstart "
-                + kickstart
-                + " system "
-                + system
+            "terminal dont-ask ; install all kickstart "
+            + kickstart
+            + " system "
+            + system
         )
         if post_issu_checks:
             status, out = self._verify_basic_stuff(cmd, "install all", timeout)
@@ -953,8 +953,8 @@ class Switch(SwitchUtils):
             )
         except CLIError as e:
             if (
-                    "Installer will perform compatibility check first. Please wait"
-                    not in e.message
+                "Installer will perform compatibility check first. Please wait"
+                not in e.message
             ):
                 raise CLIError
         print_and_log(

@@ -69,14 +69,14 @@ class Fabric(object):
         return self.__sw_obj_dict
 
     def connect_to_switches(
-            self,
-            switch_list,
-            username,
-            password,
-            connection_type="https",
-            port=None,
-            timeout=30,
-            verify_ssl=True,
+        self,
+        switch_list,
+        username,
+        password,
+        connection_type="https",
+        port=None,
+        timeout=30,
+        verify_ssl=True,
     ):
         """
 
@@ -111,15 +111,15 @@ class Fabric(object):
         return self.__sw_obj_dict
 
     def discover_all_switches_in_fabric(
-            self,
-            seed_switch_ip,
-            username,
-            password,
-            connection_type="https",
-            port=8443,
-            timeout=30,
-            verify_ssl=True,
-            discover_npv=True,
+        self,
+        seed_switch_ip,
+        username,
+        password,
+        connection_type="https",
+        port=8443,
+        timeout=30,
+        verify_ssl=True,
+        discover_npv=True,
     ):
         """
         Discover all the switches in the fabric using the seed switch ip
@@ -162,13 +162,13 @@ class Fabric(object):
             discovered_switches[swobj.ipaddr] = swobj
         else:
             msg = (
-                    "ERROR!! Unable to connect to the seed switch : "
-                    + swobj.ipaddr
-                    + " via "
-                    + swobj.connection_type
-                    + " with port "
-                    + str(swobj.port)
-                    + " . Make sure that NXAPI is enabled."
+                "ERROR!! Unable to connect to the seed switch : "
+                + swobj.ipaddr
+                + " via "
+                + swobj.connection_type
+                + " with port "
+                + str(swobj.port)
+                + " . Make sure that NXAPI is enabled."
             )
             log.error(msg)
             return False
@@ -209,13 +209,13 @@ class Fabric(object):
                     peer_switches = peer_switches + peers
                 else:
                     msg = (
-                            "ERROR!! Unable to connect to the switch : "
-                            + swobj.ipaddr
-                            + " via "
-                            + swobj.connection_type
-                            + " with port "
-                            + str(port)
-                            + " . Make sure that NXAPI is enabled."
+                        "ERROR!! Unable to connect to the switch : "
+                        + swobj.ipaddr
+                        + " via "
+                        + swobj.connection_type
+                        + " with port "
+                        + str(port)
+                        + " . Make sure that NXAPI is enabled."
                     )
                     log.debug(msg)
 
@@ -241,13 +241,13 @@ class Fabric(object):
                         discovered_switches[swobj.ipaddr] = swobj
                     else:
                         msg = (
-                                "ERROR!! Unable to connect to the seed switch : "
-                                + swobj.ipaddr
-                                + " via "
-                                + swobj.connection_type
-                                + " with port "
-                                + str(port)
-                                + " . Make sure that NXAPI is enabled."
+                            "ERROR!! Unable to connect to the seed switch : "
+                            + swobj.ipaddr
+                            + " via "
+                            + swobj.connection_type
+                            + " with port "
+                            + str(port)
+                            + " . Make sure that NXAPI is enabled."
                         )
                         log.debug(msg)
 

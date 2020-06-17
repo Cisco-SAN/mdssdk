@@ -10,7 +10,6 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelRemoveMembers(unittest.TestCase):
-
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -23,7 +22,7 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
         self.pc = PortChannel(self.switch, self.pc_id)
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if (type(v) is Fc):
+            if type(v) is Fc:
                 self.fc = v
                 log.debug(k)
                 break
@@ -40,7 +39,7 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
         self.pc.create()
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if (type(v) is Fc and k != self.fc.name):
+            if type(v) is Fc and k != self.fc.name:
                 fc2 = v
                 log.debug(k)
                 break
@@ -48,7 +47,9 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
             self.pc.add_members([self.fc, fc2])
         except CLIError as c:
             if "port not compatible" in c.message:
-                self.skipTest("Skipping test as as port not compatible. Please rerun the test cases")
+                self.skipTest(
+                    "Skipping test as as port not compatible. Please rerun the test cases"
+                )
         self.pc.remove_members([self.fc])
         self.assertNotIn(self.fc.name, self.pc.members)
         self.assertIn(fc2.name, self.pc.members)
@@ -58,7 +59,7 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
         self.pc.create()
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if (type(v) is Fc and k != self.fc.name):
+            if type(v) is Fc and k != self.fc.name:
                 fc2 = v
                 log.debug(k)
                 break
@@ -66,7 +67,9 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
             self.pc.add_members([self.fc, fc2])
         except CLIError as c:
             if "port not compatible" in c.message:
-                self.skipTest("Skipping test as as port not compatible. Please rerun the test cases")
+                self.skipTest(
+                    "Skipping test as as port not compatible. Please rerun the test cases"
+                )
         self.pc.remove_members([self.fc, fc2])
         self.assertIsNone(self.pc.members)
         self.pc.delete()
@@ -74,16 +77,27 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
     def test_remove_members_nonexistingpc(self):
         with self.assertRaises(PortChannelNotPresent) as e:
             self.pc.add_members([self.fc])
-        self.assertEqual("PortChannelNotPresent: Port channel " + str(
-            self.pc_id) + " is not present on the switch, please create the PC first", str(e.exception))
+        self.assertEqual(
+            "PortChannelNotPresent: Port channel "
+            + str(self.pc_id)
+            + " is not present on the switch, please create the PC first",
+            str(e.exception),
+        )
 
     def test_remove_members_nonexisting(self):
         self.pc.create()
         with self.assertRaises(CLIError) as e:
             self.pc.remove_members([self.fc])
-        self.assertEqual("The command \" interface " + str(self.fc.name) + " ; no channel-group " + str(
-            self.pc_id) + " \" gave the error \" " + str(self.fc.name) + ": not part of port-channel \".",
-                         str(e.exception))
+        self.assertEqual(
+            'The command " interface '
+            + str(self.fc.name)
+            + " ; no channel-group "
+            + str(self.pc_id)
+            + ' " gave the error " '
+            + str(self.fc.name)
+            + ': not part of port-channel ".',
+            str(e.exception),
+        )
         self.pc.delete()
 
     def tearDown(self) -> None:

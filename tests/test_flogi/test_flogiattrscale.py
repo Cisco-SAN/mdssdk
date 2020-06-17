@@ -5,8 +5,8 @@ from tests.test_flogi.vars import *
 
 log = logging.getLogger(__name__)
 
-class TestFlogiAttrScale(unittest.TestCase):
 
+class TestFlogiAttrScale(unittest.TestCase):
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -29,6 +29,6 @@ class TestFlogiAttrScale(unittest.TestCase):
         self.assertEqual("Only bool value(true/false) supported.", str(e.exception))
 
     def tearDown(self) -> None:
-        if(self.flogi_obj.scale != self.old):
+        if self.flogi_obj.scale != self.old:
             self.flogi_obj.scale = self.old
             self.assertEqual(self.flogi_obj.scale, self.old)

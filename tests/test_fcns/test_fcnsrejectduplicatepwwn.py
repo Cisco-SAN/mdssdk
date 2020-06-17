@@ -7,8 +7,8 @@ from tests.test_fcns.vars import *
 
 log = logging.getLogger(__name__)
 
-class TestFcnsRejectDuplicatePwwn(unittest.TestCase):
 
+class TestFcnsRejectDuplicatePwwn(unittest.TestCase):
     def setUp(self) -> None:
         self.switch = sw
         log.debug(sw.version)
@@ -21,22 +21,27 @@ class TestFcnsRejectDuplicatePwwn(unittest.TestCase):
         if fcnsdb is not None:
             if type(fcnsdb) is dict:
                 fcnsdb = [fcnsdb]
-            vsan = fcnsdb[0]['vsan_id']
-            self.fcns_obj.reject_duplicate_pwwn(vsan = vsan)
-        
+            vsan = fcnsdb[0]["vsan_id"]
+            self.fcns_obj.reject_duplicate_pwwn(vsan=vsan)
+
     def test_reject_duplicate_pwwn_nonexistingentry(self):
         fcnsdb = self.fcns_obj.database()
         if fcnsdb is not None:
             if type(fcnsdb) is dict:
                 fcnsdb = [fcnsdb]
-            vsan_list = [f['vsan_id'] for f in fcnsdb]
+            vsan_list = [f["vsan_id"] for f in fcnsdb]
             while True:
                 vsan = random.randint(2, 400)
                 if vsan not in vsan_list:
                     break
             with self.assertRaises(CLIError) as e:
-                self.fcns_obj.reject_duplicate_pwwn(vsan = vsan)  
-            self.assertEqual('The command \" fcns reject-duplicate-pwwn vsan '+str(vsan)+' \" gave the error \" vsan not present \".', str(e.exception))
+                self.fcns_obj.reject_duplicate_pwwn(vsan=vsan)
+            self.assertEqual(
+                'The command " fcns reject-duplicate-pwwn vsan '
+                + str(vsan)
+                + ' " gave the error " vsan not present ".',
+                str(e.exception),
+            )
 
     def tearDown(self) -> None:
         pass

@@ -1,7 +1,7 @@
 import logging
 import time
 
-from .connection_manager.errors import CLIError, ZoneNotPresent
+from .connection_manager.errors import CLIError
 from .nxapikeys import zonekeys
 from .parsers.zoneset import ShowZoneset, ShowZonesetActive
 from .utility.utils import get_key
@@ -170,7 +170,7 @@ class ZoneSet(object):
         :param members: list of Zone members that need to be added to zoneset
         :type members: list(Zone)
         :return: None
-        :raises ZoneNotPresent: If zone is not present in the switch
+        :raises CLIError: If zone is not present in the switch
 
         :example:
             >>>
@@ -192,7 +192,7 @@ class ZoneSet(object):
         :param members: list of Zone members that need to be removed from the zoneset
         :type members: list(Zone)
         :return: None
-        :raises ZoneNotPresent: If zone is not present in the switch
+        :raises CLIError: If zone is not present in the switch
 
         :example:
             >>>
@@ -221,19 +221,19 @@ class ZoneSet(object):
         if self.name is not None:
             if action:
                 cmd = (
-                        "terminal dont-ask ; zoneset activate name "
-                        + self._name
-                        + " vsan "
-                        + str(self._vsan)
-                        + " ; no terminal dont-ask"
+                    "terminal dont-ask ; zoneset activate name "
+                    + self._name
+                    + " vsan "
+                    + str(self._vsan)
+                    + " ; no terminal dont-ask"
                 )
             else:
                 cmd = (
-                        "terminal dont-ask ; no zoneset activate name "
-                        + self._name
-                        + " vsan "
-                        + str(self._vsan)
-                        + " ; no terminal dont-ask"
+                    "terminal dont-ask ; no zoneset activate name "
+                    + self._name
+                    + " vsan "
+                    + str(self._vsan)
+                    + " ; no terminal dont-ask"
                 )
             try:
                 self.__zoneObj._send_zone_cmd(cmd)
@@ -265,8 +265,11 @@ class ZoneSet(object):
             if shzoneset.active == self._name:
                 return True
             return False
-        out = self.__swobj.show(cmd)
-        log.debug(out)
+        try:
+            out = self.__swobj.show(cmd)
+        except CLIError as c:
+            if "Zoneset not present" in c.message:
+                return False
         if out:
             azsdetails = out["TABLE_zoneset"]["ROW_zoneset"]
             azs = azsdetails[get_key(zonekeys.NAME, self._SW_VER)]
@@ -279,19 +282,11 @@ class ZoneSet(object):
         cmdlist.append("zoneset name " + self._name + " vsan " + str(self._vsan))
         for eachmem in members:
             name_of_zone = eachmem.name
-            if name_of_zone is None:
-                self.__zoneObj._clear_lock_if_enhanced()
-                raise ZoneNotPresent(
-                    "The given zoneset member '"
-                    + eachmem._name
-                    + "' is not present in the switch."
-                )
+            if remove:
+                cmd = "no member " + name_of_zone
             else:
-                if remove:
-                    cmd = "no member " + name_of_zone
-                else:
-                    cmd = "member " + name_of_zone
-                cmdlist.append(cmd)
+                cmd = "member " + name_of_zone
+            cmdlist.append(cmd)
         cmds_to_send = " ; ".join(cmdlist)
         out = self.__zoneObj._send_zone_cmd(cmds_to_send)
 
@@ -299,22 +294,18 @@ class ZoneSet(object):
         log.debug("Executing the cmd show zone name <> vsan <> ")
         cmd = "show zoneset name " + self._name + " vsan  " + str(self._vsan)
         out = self.__swobj.show(cmd)
-        log.debug(out)
         if out:
             if self.__swobj.is_connection_type_ssh():
                 if type(out[0]) is str:
                     if (
-                            "VSAN " + str(self._vsan) + " is not configured"
-                            == out[0].strip()
+                        "VSAN " + str(self._vsan) + " is not configured"
+                        == out[0].strip()
                     ):
                         raise CLIError(cmd, out[0])
                     if "Zoneset not present" == out[0].strip():
-                        return None
-                        # raise CLIError(cmd, out[0])
-            # print(out)
-            return out
-        else:
-            return None
+                        raise CLIError(cmd, out[0])
+        return out
+
 
 # TODO active members from 8.4.2 to 8.4.2a
 # TODO in zone module to add active members

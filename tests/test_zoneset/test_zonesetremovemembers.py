@@ -27,7 +27,7 @@ class TestZoneSetRemoveMembers(unittest.TestCase):
         self.zoneset.create()
 
     def test_remove_members_nonexisting(self):
-        self.assertIsNone(self.zoneset.members)
+        self.assertEqual({}, self.zoneset.members)
         with self.assertRaises(CLIError) as e:
             self.zoneset.remove_members([self.zone])
         self.assertEqual(
@@ -44,7 +44,7 @@ class TestZoneSetRemoveMembers(unittest.TestCase):
         self.zoneset.add_members([zone1, zone2])
         self.assertIsNotNone(self.zoneset.members)
         self.zoneset.remove_members([zone1, zone2])
-        self.assertIsNone(self.zoneset.members)
+        self.assertEqual({}, self.zoneset.members)
 
     def tearDown(self) -> None:
         self.v.delete()

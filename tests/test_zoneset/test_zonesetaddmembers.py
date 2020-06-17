@@ -2,7 +2,7 @@ import unittest
 
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
-from mdssdk.zoneset import ZoneSet, ZoneNotPresent
+from mdssdk.zoneset import ZoneSet, CLIError
 from tests.test_zoneset.vars import *
 
 log = logging.getLogger(__name__)
@@ -25,12 +25,9 @@ class TestZoneSetAddMembers(unittest.TestCase):
 
     def test_add_members_nonexisting(self):
         zone = Zone(self.switch, "test_zone", self.id)
-        with self.assertRaises(ZoneNotPresent) as e:
+        with self.assertRaises(CLIError) as e:
             self.zoneset.add_members([zone])
-        self.assertEqual(
-            "ZoneNotPresent: The given zoneset member 'test_zone' is not present in the switch.",
-            str(e.exception),
-        )
+        self.assertIn("Zone not present", str(e.exception))
 
     def test_add_members(self):
         zone1 = Zone(self.switch, "test_zone1", self.id)

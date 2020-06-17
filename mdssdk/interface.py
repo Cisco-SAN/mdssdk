@@ -106,9 +106,7 @@ class Interface(object):
             cmd = "interface " + self._name + " ; no switchport description"
         else:
             cmd = "interface " + self._name + " ; switchport description " + value
-        log.info("Sending the cmd: " + cmd)
         out = self.__swobj.config(cmd)
-        log.debug(out)
 
     @property
     def mode(self):
@@ -145,9 +143,7 @@ class Interface(object):
     @mode.setter
     def mode(self, value):
         cmd = "interface " + self._name + " ; switchport mode  " + value
-        log.debug("Sending the cmd: " + cmd)
         out = self.__swobj.config(cmd)
-        log.debug(out)
 
     @property
     def speed(self):
@@ -184,7 +180,6 @@ class Interface(object):
     @speed.setter
     def speed(self, value):
         cmd = "interface " + self._name + " ; switchport speed  " + str(value)
-        log.debug("Sending the cmd: " + cmd)
         out = self.__swobj.config(cmd)
 
     @property
@@ -222,7 +217,6 @@ class Interface(object):
     @trunk.setter
     def trunk(self, value):
         cmd = "interface " + self._name + " ; switchport trunk mode  " + value
-        log.debug("Sending the cmd: " + cmd)
         out = self.__swobj.config(cmd)
 
     @property
@@ -261,13 +255,12 @@ class Interface(object):
     @status.setter
     def status(self, value):
         cmd = (
-                "terminal dont-ask ; interface "
-                + self._name
-                + " ; "
-                + value
-                + " ; no terminal dont-ask "
+            "terminal dont-ask ; interface "
+            + self._name
+            + " ; "
+            + value
+            + " ; no terminal dont-ask "
         )
-        log.debug("Sending the cmd: " + cmd)
         out = self.__swobj.config(cmd)
 
     @property
@@ -284,18 +277,15 @@ class Interface(object):
         return self.Counters(self)
 
     def __parse_show_int_brief(self):
-        log.debug("Getting sh int brief output")
         out = self.__swobj.show("show interface brief")
-        log.debug(out)
-        # print(out)
         fcmatch = re.match(PAT_FC, self._name)
         pcmatch = re.match(PAT_PC, self._name)
         if fcmatch:
             out = out["TABLE_interface_brief_fc"]["ROW_interface_brief_fc"]
             for eachout in out:
                 if (
-                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
-                        == self._name
+                    eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                    == self._name
                 ):
                     return eachout
         elif pcmatch:
@@ -310,16 +300,14 @@ class Interface(object):
                 outlist = out
             for eachout in outlist:
                 if (
-                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
-                        == self._name
+                    eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                    == self._name
                 ):
                     return eachout
         return None
 
     def _execute_counters_detailed_cmd(self):
         cmd = "show interface " + self._name + " counters detailed"
-        log.debug("Sending the cmd")
-        log.debug(cmd)
         if self.__swobj.is_connection_type_ssh():
             out = self.__swobj.show(cmd)
             return out
@@ -328,8 +316,6 @@ class Interface(object):
 
     def _execute_counters_brief_cmd(self):
         cmd = "show interface " + self._name + " counters brief"
-        log.debug("Sending the cmd")
-        log.debug(cmd)
         if self.__swobj.is_connection_type_ssh():
             out = self.__swobj.show(cmd)
             return out
@@ -338,8 +324,6 @@ class Interface(object):
 
     def _execute_clear_counters_cmd(self):
         cmd = "clear counters interface " + self._name
-        log.debug("Sending the cmd")
-        log.debug(cmd)
         out = self.__swobj.config(cmd)
 
     class Counters(object):

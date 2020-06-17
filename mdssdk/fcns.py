@@ -5,34 +5,34 @@ from .connection_manager.errors import CLIError
 
 log = logging.getLogger(__name__)
 
+
 class Fcns(object):
-    
     def __init__(self, switch):
         self.__swobj = switch
 
-    def database(self, vsan = None, fcid = None, detail = False):
+    def database(self, vsan=None, fcid=None, detail=False):
         cmd = "show fcns database"
         if fcid is not None:
-            cmd += " fcid "+str(fcid)
+            cmd += " fcid " + str(fcid)
         if detail:
             cmd += " detail"
         if vsan is not None:
-            cmd += " vsan "+str(vsan)
+            cmd += " vsan " + str(vsan)
         out = self.__swobj.show(cmd)
         if out:
-            return out['TABLE_fcns_vsan']['ROW_fcns_vsan']
+            return out["TABLE_fcns_vsan"]["ROW_fcns_vsan"]
         else:
             return None
 
-    def statistics(self, vsan = None, detail = False):
+    def statistics(self, vsan=None, detail=False):
         cmd = "show fcns statistics"
         if detail:
             cmd += " detail"
         if vsan is not None:
-            cmd += " vsan "+str(vsan)
+            cmd += " vsan " + str(vsan)
         out = self.__swobj.show(cmd)
         if out:
-            return out['TABLE_fcns_vsan']['ROW_fcns_vsan']
+            return out["TABLE_fcns_vsan"]["ROW_fcns_vsan"]
         else:
             return None
 
@@ -43,9 +43,9 @@ class Fcns(object):
         pat = "fcns no-bulk-notify"
         match = re.search(pat, "".join(out))
         if match:
-            return True  
-        else: 
-            return False 
+            return True
+        else:
+            return False
 
     @no_bulk_notify.setter
     def no_bulk_notify(self, value):
@@ -58,7 +58,7 @@ class Fcns(object):
         try:
             out = self.__swobj.config(cmd)
         except CLIError as c:
-            if("FCNS bulk notification optimization is necessary" in c.message):
+            if "FCNS bulk notification optimization is necessary" in c.message:
                 log.debug(c.message)
             else:
                 raise CLIError(cmd, c.message)
@@ -71,41 +71,41 @@ class Fcns(object):
         pat = "fcns zone-lookup-cache"
         match = re.search(pat, "".join(out))
         if match:
-            return True  
-        else: 
-            return False 
-    
+            return True
+        else:
+            return False
+
     @zone_lookup_cache.setter
-    def zone_lookup_cache(self,value):
+    def zone_lookup_cache(self, value):
         if type(value) is not bool:
             raise TypeError("Only bool value(true/false) supported.")
         cmd = "fcns zone-lookup-cache"
         if not value:
-            cmd = "no "+cmd
+            cmd = "no " + cmd
         out = self.__swobj.config(cmd)
         if out is not None:
-            raise CLIError(cmd, out['msg'])
-    
+            raise CLIError(cmd, out["msg"])
+
     def proxy_port(self, pwwn, vsan):
-        cmd = "fcns proxy-port "+str(pwwn)+" vsan "+str(vsan)
+        cmd = "fcns proxy-port " + str(pwwn) + " vsan " + str(vsan)
         out = self.__swobj.config(cmd)
         if out is not None:
-            raise CLIError(cmd, out['msg'])
-            
-    def no_auto_poll(self, vsan = None, pwwn = None):
+            raise CLIError(cmd, out["msg"])
+
+    def no_auto_poll(self, vsan=None, pwwn=None):
         cmd = "fcns no-auto-poll"
         if vsan is not None:
-            cmd += " vsan "+str(vsan)
+            cmd += " vsan " + str(vsan)
         elif pwwn is not None:
-            cmd += " wwn "+str(pwwn)
+            cmd += " wwn " + str(pwwn)
         out = self.__swobj.config(cmd)
         if out is not None:
-            raise CLIError(cmd, out['msg'])
-         
-    def reject_duplicate_pwwn(self, vsan):
-        cmd = "fcns reject-duplicate-pwwn vsan "+str(vsan)
-        out = self.__swobj.config(cmd)
-        if out is not None:
-            raise CLIError(cmd, out['msg'])
+            raise CLIError(cmd, out["msg"])
 
-    # TODO 
+    def reject_duplicate_pwwn(self, vsan):
+        cmd = "fcns reject-duplicate-pwwn vsan " + str(vsan)
+        out = self.__swobj.config(cmd)
+        if out is not None:
+            raise CLIError(cmd, out["msg"])
+
+    # TODO
