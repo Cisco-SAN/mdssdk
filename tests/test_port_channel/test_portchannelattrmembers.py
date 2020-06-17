@@ -1,6 +1,7 @@
 import unittest
 import random
 
+from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
 from mdssdk.portchannel import PortChannel
 from tests.test_port_channel.vars import *
@@ -31,7 +32,13 @@ class TestPortChannelAttrMembers(unittest.TestCase):
                 fc = v
                 log.debug(k)
                 break
-        self.pc.add_members([fc])
+        try:
+            self.pc.add_members([fc])
+        except CLIError as c:
+            if "port not compatible" in c.message:
+                self.skipTest(
+                    "Skipping test as as port not compatible. Please rerun the test cases"
+                )
         self.assertIn(fc.name, self.pc.members)
         self.pc.delete()
 
