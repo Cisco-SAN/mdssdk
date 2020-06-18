@@ -48,7 +48,8 @@ class TestFcAttrOutOfService(unittest.TestCase):
                     )
             self.assertEqual("outOfServc", self.fc.status)
             self.fc.out_of_service = False
-            self.fc.status = "no shutdown"
+            if self.old != "down":
+                self.fc.status = "no shutdown"
             time.sleep(2)
             self.assertEqual(self.old, self.fc.status)
 

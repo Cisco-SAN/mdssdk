@@ -124,20 +124,75 @@ class Zone(object):
                     retout = [retout]
         return retout
 
-    def __format_members_ssh(self, out):
-        # SSH o/p via textfsm template
-        log.debug("Before __format_members_ssh")
+    @property
+    def active_members(self):
+        """
+        Get active members of the zone i.e zone members part of active zoneset
+
+        :return: members: active members of the zone i.e zone members part of active zoneset
+        :rtype: list
+        :raises CLIError: if vsan is not present on the switch
+        :example:
+            >>>
+            >>> print(zoneObj.active_members)
+            [{'interface': 'fc1/2'}, {'interface': 'fc1/3'}, {'device-alias': 'somename'}, {'pwwn': '11:22:33:44:55:66:77:88'}]
+            >>>
+
+        """
+        retout = []
+        out = self.__show_zone_name_active()
+        if out:
+            if self.__swobj.is_connection_type_ssh():
+                retout = self.__format_members_ssh(out,active=True)
+            else:
+                try:
+                    out = out["TABLE_zone_member"]["ROW_zone_member"]
+                    retout = self.__format_members_nxapi(out)
+                except KeyError:
+                    return retout
+                if type(retout) is dict:
+                    # means there is only one member for the zone, so convert to list and return
+                    # return self.__format_members([retout])
+                    retout = [retout]
+        return retout
+
+    def __format_members_nxapi(self, out):
+        log.debug("Before __format_members_nxapi")
         log.debug(out)
         retout = []
         for eachmem in out:
             mem_dict = {}
             for k, v in eachmem.items():
-                if k == "type" and v == "":
+                if k == "online_fcid" and v == "":
                     break
-                elif k == "vsan" or k == "zone_name" or v == "":
-                    continue
                 else:
                     mem_dict[k] = v
+            if mem_dict:
+                retout.append(mem_dict)
+        log.debug("After __format_members_nxapi")
+        log.debug(retout)
+        return retout
+
+    def __format_members_ssh(self, out,active=False):
+        # SSH o/p via textfsm template
+        log.debug("Before __format_members_ssh" + str(active))
+        log.debug(out)
+        retout = []
+        for eachmem in out:
+            mem_dict = {}
+            for k, v in eachmem.items():
+                if active:
+                    if k == "vsan" or k == "zone_name" or v == "":
+                        continue
+                    else:
+                        mem_dict[k] = v
+                else:
+                    if k == "type" and v == "":
+                        break
+                    elif k == "vsan" or k == "zone_name" or v == "":
+                        continue
+                    else:
+                        mem_dict[k] = v
             if mem_dict:
                 retout.append(mem_dict)
         log.debug("After __format_members_ssh")
@@ -346,10 +401,10 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]["fulldb_dbsize"]
         else:
-            retout = out.get(get_key(zonekeys.FULLDB_SIZE, self._SW_VER), "")
-        if retout:
-            return int(retout)
-        return None
+            retout = out.get(get_key(zonekeys.FULLDB_SIZE, self._SW_VER), None)
+        if retout is None:
+            return None
+        return int(retout)
 
     @property
     def fulldb_zone_count(self):
@@ -369,10 +424,10 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]["fulldb_zone_count"]
         else:
-            retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), "")
-        if retout:
-            return int(retout)
-        return None
+            retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), None)
+        if retout is None:
+            return None
+        return int(retout)
 
     @property
     def fulldb_zoneset_count(self):
@@ -392,10 +447,10 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]["fulldb_zoneset_count"]
         else:
-            retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), "")
-        if retout:
-            return int(retout)
-        return None
+            retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), None)
+        if retout is None:
+            return None
+        return int(retout)
 
     @property
     def activedb_size(self):
@@ -415,10 +470,10 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]["activedb_dbsize"]
         else:
-            retout = out.get(get_key(zonekeys.ACTIVEDB_SIZE, self._SW_VER), "")
-        if retout:
-            return int(retout)
-        return None
+            retout = out.get(get_key(zonekeys.ACTIVEDB_SIZE, self._SW_VER), None)
+        if retout is None:
+            return None
+        return int(retout)
 
     @property
     def activedb_zone_count(self):
@@ -439,10 +494,10 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]["activedb_zone_count"]
         else:
-            retout = out.get(get_key(zonekeys.ACTIVEDB_ZC, self._SW_VER), "")
-        if retout:
-            return int(retout)
-        return None
+            retout = out.get(get_key(zonekeys.ACTIVEDB_ZC, self._SW_VER), None)
+        if retout is None:
+            return None
+        return int(retout)
 
     @property
     def activedb_zoneset_count(self):
@@ -463,10 +518,10 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]["activedb_zoneset_count"]
         else:
-            retout = out.get(get_key(zonekeys.ACTIVEDB_ZSC, self._SW_VER), "")
-        if retout:
-            return int(retout)
-        return None
+            retout = out.get(get_key(zonekeys.ACTIVEDB_ZSC, self._SW_VER), None)
+        if retout is None:
+            return None
+        return int(retout)
 
     @property
     def activedb_zoneset_name(self):
@@ -511,10 +566,10 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]["maxdb_dbsize"]
         else:
-            retout = out.get(get_key(zonekeys.MAXDB_SIZE, self._SW_VER), "")
-        if retout:
-            return int(retout)
-        return None
+            retout = out.get(get_key(zonekeys.MAXDB_SIZE, self._SW_VER), None)
+        if retout is None:
+            return None
+        return int(retout)
 
     @property
     def effectivedb_size(self):
@@ -535,10 +590,10 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]["effectivedb_dbsize"]
         else:
-            retout = out.get(get_key(zonekeys.EFFDB_SIZE, self._SW_VER), "")
-        if retout:
-            return int(retout)
-        return None
+            retout = out.get(get_key(zonekeys.EFFDB_SIZE, self._SW_VER), None)
+        if retout is None:
+            return None
+        return int(retout)
 
     @property
     def effectivedb_size_percentage(self):
@@ -559,10 +614,10 @@ class Zone(object):
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]["percent_effectivedbsize"]
         else:
-            retout = out.get(get_key(zonekeys.EFFDB_PER, self._SW_VER), "")
-        if retout:
-            return str(retout) + "%"
-        return None
+            retout = out.get(get_key(zonekeys.EFFDB_PER, self._SW_VER), None)
+        if retout is None:
+            return None
+        return str(retout) + "%"
 
     @property
     def status(self):
@@ -772,7 +827,6 @@ class Zone(object):
             )
 
     def __show_zone_name(self):
-        log.debug("Executing the cmd show zone name <> vsan <> ")
         cmd = "show zone name " + self._name + " vsan  " + str(self._vsan)
         out = self.__swobj.show(cmd)
         if out:
@@ -787,8 +841,22 @@ class Zone(object):
                         raise CLIError(cmd, out[0])
         return out
 
+    def __show_zone_name_active(self):
+        cmd = "show zone name " + self._name + " active vsan  " + str(self._vsan)
+        out = self.__swobj.show(cmd)
+        if out:
+            if self.__swobj.is_connection_type_ssh():
+                if type(out[0]) is str:
+                    if (
+                        "VSAN " + str(self._vsan) + " is not configured"
+                        == out[0].strip()
+                    ):
+                        raise CLIError(cmd, out[0])
+                    if "Zone not present" == out[0].strip():
+                        raise CLIError(cmd, out[0])
+        return out
+
     def __show_zone_status(self):
-        log.debug("Executing the cmd show zone status vsan <> ")
         cmd = "show zone status vsan  " + str(self._vsan)
         out = self.__swobj.show(cmd)
         if out:

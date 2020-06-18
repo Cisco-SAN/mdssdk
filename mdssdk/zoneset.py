@@ -54,13 +54,10 @@ class ZoneSet(object):
             zoneset_fab_A
             >>>
         """
-        out = self.__show_zoneset_name()
+        out = self.__show_zoneset_name_brief()
         if out:
             if self.__swobj.is_connection_type_ssh():
-                cmd = "show zoneset name " + self._name + " vsan " + str(self._vsan)
-                outlines = self.__swobj.show(cmd)
-                shzoneset = ShowZoneset(outlines)
-                return shzoneset.name
+                return out[0]['zonesetname']
             else:
                 out = out.get("TABLE_zoneset").get("ROW_zoneset")
                 return out[get_key(zonekeys.NAME, self._SW_VER)]
@@ -102,20 +99,13 @@ class ZoneSet(object):
 
         """
         retlist = {}
-        out = self.__show_zoneset_name()
+        out = self.__show_zoneset_name_brief()
         if out:
-            active = self.is_active()
             if self.__swobj.is_connection_type_ssh():
-                cmd = "show zoneset name " + self._name + " vsan " + str(self._vsan)
-                outlines = self.__swobj.show(cmd)
-                shzoneset = ShowZoneset(outlines)
-                out = shzoneset.members
-                if out is not None:
-                    for eachzdb in out:
-                        zname = eachzdb["name"]
-                        zobj = Zone(self.__swobj, zname, self._vsan)
-                        zobj._set_part_of_active(active)
-                        retlist[zname] = zobj
+                members = out[0]['zonename']
+                for eachzmem in members:
+                    zobj = Zone(self.__swobj, eachzmem, self._vsan)
+                    retlist[eachzmem] = zobj
             else:
                 zonesetdata = out.get("TABLE_zoneset", None).get("ROW_zoneset", None)
                 if zonesetdata is not None:
@@ -125,13 +115,51 @@ class ZoneSet(object):
                         if type(zdb) is dict:
                             zname = zdb[get_key(zonekeys.NAME, self._SW_VER)]
                             zobj = Zone(self.__swobj, zname, self._vsan)
-                            zobj._set_part_of_active(active)
                             retlist[zname] = zobj
                         else:
                             for eachzdb in zdb:
                                 zname = eachzdb[get_key(zonekeys.NAME, self._SW_VER)]
                                 zobj = Zone(self.__swobj, zname, self._vsan)
-                                zobj._set_part_of_active(active)
+                                retlist[zname] = zobj
+        return retlist
+
+    @property
+    def active_members(self):
+        """
+        Get members of the active zoneset if any
+
+        :return: members: members active zoneset if any
+        :rtype: dict(zone_name: Zone)
+        :raises CLIError: if vsan is not present on the switch
+        :example:
+            >>>
+            >>> print(zonesetObj.active_members)
+            {'zonetemp': <mdslib.zone.Zone object at 0x10dfc3e50>, 'zonetemp_int': <mdslib.zone.Zone object at 0x10dfc3ed0>}
+            >>>
+
+        """
+        retlist = {}
+        out = self.__show_zoneset_name_brief(active=True)
+        if out:
+            if self.__swobj.is_connection_type_ssh():
+                members = out[0]['zonename']
+                for eachzmem in members:
+                    zobj = Zone(self.__swobj, eachzmem, self._vsan)
+                    retlist[eachzmem] = zobj
+            else:
+                zonesetdata = out.get("TABLE_zoneset", None).get("ROW_zoneset", None)
+                if zonesetdata is not None:
+                    zonedata = zonesetdata.get("TABLE_zone", None)
+                    if zonedata is not None:
+                        zdb = zonedata.get("ROW_zone", None)
+                        if type(zdb) is dict:
+                            zname = zdb[get_key(zonekeys.NAME, self._SW_VER)]
+                            zobj = Zone(self.__swobj, zname, self._vsan)
+                            retlist[zname] = zobj
+                        else:
+                            for eachzdb in zdb:
+                                zname = eachzdb[get_key(zonekeys.NAME, self._SW_VER)]
+                                zobj = Zone(self.__swobj, zname, self._vsan)
                                 retlist[zname] = zobj
         return retlist
 
@@ -290,9 +318,11 @@ class ZoneSet(object):
         cmds_to_send = " ; ".join(cmdlist)
         out = self.__zoneObj._send_zone_cmd(cmds_to_send)
 
-    def __show_zoneset_name(self):
-        log.debug("Executing the cmd show zone name <> vsan <> ")
-        cmd = "show zoneset name " + self._name + " vsan  " + str(self._vsan)
+    def __show_zoneset_name_brief(self,active=False):
+        if active:
+            cmd = "show zoneset name " + self._name + " brief active vsan " + str(self._vsan)
+        else:
+            cmd = "show zoneset name " + self._name + " brief vsan " + str(self._vsan)
         out = self.__swobj.show(cmd)
         if out:
             if self.__swobj.is_connection_type_ssh():
@@ -307,5 +337,5 @@ class ZoneSet(object):
         return out
 
 
-# TODO active members from 8.4.2 to 8.4.2a
+# TODO active members and members when zs is not present
 # TODO in zone module to add active members

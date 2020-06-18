@@ -1,0 +1,8 @@
+Value VSAN (\d+)
+Value ZONESETNAME (\S+)
+Value List ZONENAME (\S+)
+
+Start
+  ^zoneset name\s+${ZONESETNAME}\s+vsan\s+${VSAN}
+  ^\s+zone\s+${ZONENAME}
+  ^\s*$$ -> Record Start

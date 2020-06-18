@@ -1,0 +1,43 @@
+Value Filldown VSAN (\d+)
+Value Filldown ZONE_NAME (\S+)
+Value TYPE (pwwn|fcid|fcalias|symbolic-nodename|fwwn|ip-address|interface|device-alias)
+Value WWN (([a-f0-9][a-f0-9]:){7}([a-f0-9][a-f0-9]))
+Value DEV_ALIAS (\S+)
+Value DEV_TYPE (init|target|both)
+Value FCID (0x[0-9a-f]+)
+Value ONLINE_FCID (0x[0-9a-f]+)
+Value FCALIAS (\S+)
+Value SYMNODENAME (\S+)
+Value IPADDR (.*)
+Value INTF_FC (fc[0-9]+/[0-9]+)
+Value INTF_PORT_CH ([0-9]+)
+Value DOMAIN_ID (\d+)
+
+Start
+  ^zone\s+name\s+${ZONE_NAME}\s+vsan\s+${VSAN} -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[${TYPE}.*\].* -> Continue
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[pwwn\s+${WWN}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[pwwn\s+${WWN}\]\s+\[${DEV_ALIAS}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[pwwn\s+${WWN}\]\s+\[${DEV_ALIAS}\]\s+${DEV_TYPE}\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[pwwn\s+${WWN}\]\s+${DEV_TYPE}\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[fcid\s+${FCID}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[fcid\s+${FCID}\]\s*${DEV_TYPE}\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[symbolic-nodename\s+${SYMNODENAME}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[fwwn\s+${WWN}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[ip-address\s+${IPADDR}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[interface\s+${INTF_FC}\s+domain-id\s+${DOMAIN_ID}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[interface\s+${INTF_FC}\s+domain-id\s+${DOMAIN_ID}\]\s+\[${DEV_ALIAS}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[interface\s+${INTF_FC}\s+swwn\s+${WWN}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[interface\s+${INTF_FC}\s+swwn\s+${WWN}\]\s+\[${DEV_ALIAS}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[interface\s+port-channel\s+${INTF_PORT_CH}\s+domain-id\s+${DOMAIN_ID}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[interface\s+port-channel\s+${INTF_PORT_CH}\s+domain-id\s+${DOMAIN_ID}\]\s+\[${DEV_ALIAS}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[interface\s+port-channel\s+${INTF_PORT_CH}\s+swwn\s+${WWN}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[interface\s+port-channel\s+${INTF_PORT_CH}\s+swwn\s+${WWN}\]\s+\[${DEV_ALIAS}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[device-alias\s+${DEV_ALIAS}\]\s*$$ -> Record
+  ^\*\s+fcid\s+${ONLINE_FCID}\s+\[device-alias\s+${DEV_ALIAS}\]\s*${DEV_TYPE}\s*$$ -> Record
+  ^\s*\*\s+fcid\s+${ONLINE_FCID}\s*$$ -> Record
+  ^\s*\*\s+fcid\s+${ONLINE_FCID}\s+\[${DEV_ALIAS}\]\s*$$ -> Record
+  ^\s*\*\s+fcid\s+${ONLINE_FCID}\s*${DEV_TYPE}\s*$$ -> Record
+  ^\s*\*\s+fcid\s+${ONLINE_FCID}\s*${DEV_TYPE}\s+\[${DEV_ALIAS}\]\s*$$ -> Record
+
+EOF
