@@ -24,11 +24,15 @@ class TestFcAttrTrunk(unittest.TestCase):
         self.old = self.fc.trunk
 
     def test_trunk_read(self):
-        self.assertIn(self.fc.trunk, self.trunk_values)
+        self.assertIn(self.fc.trunk, self.trunk_values + ["--"])
 
     def test_trunk_write(self):
         for trunk in self.trunk_values:
-            self.fc.trunk = trunk
+            try:
+                self.fc.trunk = trunk
+            except CLIError as c:
+                if "port already in a port-channel, no config allowed" in c.message:
+                    self.skipTest("Skipping test as port already in a port-channel, no config allowed")
             self.assertEqual(trunk, self.fc.trunk)
         self.fc.trunk = self.old
         self.assertEqual(self.old, self.fc.trunk)
@@ -47,5 +51,6 @@ class TestFcAttrTrunk(unittest.TestCase):
         )
 
     def tearDown(self) -> None:
-        self.fc.trunk = self.old
-        self.assertEqual(self.old, self.fc.trunk)
+        if self.fc.trunk != self.old:
+            self.fc.trunk = self.old
+            self.assertEqual(self.old, self.fc.trunk)

@@ -21,11 +21,12 @@ class TestFcAttrTransceiver(unittest.TestCase):
                 break
 
     def test_transceiver_read(self):
+        self.assertIsNotNone(self.fc.transceiver, "fc.transceiver did not get transceiver objects")
         dir_trans = [x for x in dir(self.fc.transceiver) if not x.startswith("_")]
         log.debug(str(self.fc.name) + " transceiver : ")
         for t in dir_trans:
             log.debug(str(t) + " : " + str(self.fc.transceiver.__getattribute__(t)))
-        self.skipTest("needs to be fixed")
+        # self.skipTest("needs to be fixed")
 
     def test_transceiver_write_error(self):
         with self.assertRaises(AttributeError) as e:

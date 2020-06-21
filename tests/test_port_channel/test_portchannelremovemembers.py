@@ -76,7 +76,7 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
 
     def test_remove_members_nonexistingpc(self):
         with self.assertRaises(PortChannelNotPresent) as e:
-            self.pc.add_members([self.fc])
+            self.pc.remove_members([self.fc])
         self.assertEqual(
             "PortChannelNotPresent: Port channel "
             + str(self.pc_id)

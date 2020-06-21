@@ -28,11 +28,16 @@ class TestPortChannelAttrCounters(unittest.TestCase):
 
     def test_counters_read(self):
         self.pc.create()
+        self.assertIsNotNone(self.pc.counters, "pc.counters did not get counter objects")
         dir_counters = [x for x in dir(self.pc.counters) if not x.startswith("_")]
         for t in dir_counters:
-            log.debug(str(t) + " " + str(self.pc.counters.__getattribute__(t)))
+            val = self.pc.counters.__getattribute__(t)
+            log.debug(str(t) + " " + str(val))
+            if t is not "other_stats":
+                self.assertIsNotNone(val)
+            else:
+                self.assertIsNone(val)
         self.pc.delete()
-        self.skipTest("Needs to be fixed")
 
     def test_counters_write_error(self):
         with self.assertRaises(AttributeError) as e:
