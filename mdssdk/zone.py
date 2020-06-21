@@ -143,7 +143,7 @@ class Zone(object):
         out = self.__show_zone_name_active()
         if out:
             if self.__swobj.is_connection_type_ssh():
-                retout = self.__format_members_ssh(out,active=True)
+                retout = self.__format_members_ssh_active(out)
             else:
                 try:
                     out = out["TABLE_zone_member"]["ROW_zone_member"]
@@ -173,29 +173,67 @@ class Zone(object):
         log.debug(retout)
         return retout
 
-    def __format_members_ssh(self, out,active=False):
+    def __format_members_ssh(self, out):
         # SSH o/p via textfsm template
-        log.debug("Before __format_members_ssh" + str(active))
+        log.debug("Before __format_members_ssh")
         log.debug(out)
         retout = []
         for eachmem in out:
             mem_dict = {}
             for k, v in eachmem.items():
-                if active:
-                    if k == "vsan" or k == "zone_name" or v == "":
-                        continue
-                    else:
-                        mem_dict[k] = v
+                if k == "type" and v == "":
+                    break
+                elif k == "vsan" or k == "zone_name" or v == "":
+                    continue
+                elif k == "fcalias" and v != "":
+                    fcaliasinfo = self.__get_fcalias_info_ssh(v)
+                    if fcaliasinfo:
+                        a = {}
+                        a['ROW_fcalias_member'] = fcaliasinfo
+                        mem_dict["TABLE_fcalias_member"] = a
+                    mem_dict["fcalias_name"] = v  # get from fcaliaskeys
+                    mem_dict["fcalias_vsan_id"] = int(self._vsan)  # get from fcaliaskeys
                 else:
-                    if k == "type" and v == "":
-                        break
-                    elif k == "vsan" or k == "zone_name" or v == "":
-                        continue
-                    else:
-                        mem_dict[k] = v
+                    mem_dict[k] = v
             if mem_dict:
                 retout.append(mem_dict)
         log.debug("After __format_members_ssh")
+        log.debug(retout)
+        return retout
+
+    def __get_fcalias_info_ssh(self, fcaliasname):
+        cmd = "show fcalias name " + fcaliasname + " vsan " + str(self._vsan)
+        out = self.__swobj.show(cmd)
+        retout = []
+        for eachmem in out:
+            mem_dict = {}
+            if eachmem['fcalias_name'] == fcaliasname:
+                for k, v in eachmem.items():
+                    if k == "fcalias_member_type" and v == "":  # if type is empty then exit from loop
+                        break
+                    elif k == "fcalias_name" or k == "fcalias_vsan_id" or v == "":  # Dont req name/vsan or any value with null
+                        continue
+                    else:
+                        mem_dict[k] = v
+                if mem_dict:
+                    retout.append(mem_dict)
+        return retout
+
+    def __format_members_ssh_active(self, out):
+        # SSH o/p via textfsm template
+        log.debug("Before __format_members_ssh_active")
+        log.debug(out)
+        retout = []
+        for eachmem in out:
+            mem_dict = {}
+            for k, v in eachmem.items():
+                if k == "vsan" or k == "zone_name" or v == "":
+                    continue
+                else:
+                    mem_dict[k] = v
+            if mem_dict:
+                retout.append(mem_dict)
+        log.debug("After __format_members_ssh_active")
         log.debug(retout)
         return retout
 

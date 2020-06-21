@@ -14,22 +14,22 @@ Value DOMAIN_ID (\d+)
 
 Start
   ^zone\s+name\s+${ZONE_NAME}\s+vsan\s+${VSAN} -> Record
-  ^\s+${TYPE}\s+.* -> Continue
-  ^\s+pwwn\s+${WWN}\s*$$ -> Record
-  ^\s+pwwn\s+${WWN}\s+\[${DEV_ALIAS}\]\s*$$ -> Record
-  ^\s+pwwn\s+${WWN}\s+\[${DEV_ALIAS}\]\s+${DEV_TYPE}\s*$$ -> Record
-  ^\s+pwwn\s+${WWN}\s+${DEV_TYPE}\s*$$ -> Record
-  ^\s+fcid\s+${FCID}\s*$$ -> Record
-  ^\s+fcid\s+${FCID}\s*${DEV_TYPE}\s*$$ -> Record
-  ^\s+fcalias\s+name\s+${FCALIAS}\s+vsan\s+\d+\s*$$ -> Record
-  ^\s+symbolic-nodename\s+${SYMNODENAME}\s*$$ -> Record
-  ^\s+fwwn\s+${WWN}\s*$$ -> Record
-  ^\s+ip-address\s+${IPADDR}\s*$$ -> Record
-  ^\s+interface\s+${INTF_FC}\s+domain-id\s+${DOMAIN_ID}\s*$$ -> Record
-  ^\s+interface\s+${INTF_FC}\s+swwn\s+${WWN}\s*$$ -> Record
-  ^\s+interface\s+port-channel\s+${INTF_PORT_CH}\s+domain-id\s+${DOMAIN_ID}\s*$$ -> Record
-  ^\s+interface\s+port-channel\s+${INTF_PORT_CH}\s+swwn\s+${WWN}\s*$$ -> Record
-  ^\s+device-alias\s+${DEV_ALIAS}\s*$$ -> Record
-  ^\s+device-alias\s+${DEV_ALIAS}\s*${DEV_TYPE}\s*$$ -> Record
+  ^\s\s${TYPE}\s+.* -> Continue
+  ^\s\spwwn\s+${WWN}\s*$$ -> Record
+  ^\s\spwwn\s+${WWN}\s+\[${DEV_ALIAS}\]\s*$$ -> Record
+  ^\s\spwwn\s+${WWN}\s+\[${DEV_ALIAS}\]\s+${DEV_TYPE}\s*$$ -> Record
+  ^\s\spwwn\s+${WWN}\s+${DEV_TYPE}\s*$$ -> Record
+  ^\s\sfcid\s+${FCID}\s*$$ -> Record
+  ^\s\sfcid\s+${FCID}\s*${DEV_TYPE}\s*$$ -> Record
+  ^\s\sfcalias\s+name\s+${FCALIAS}\s+vsan\s+\d+\s*$$ -> Record
+  ^\s\ssymbolic-nodename\s+${SYMNODENAME}\s*$$ -> Record
+  ^\s\sfwwn\s+${WWN}\s*$$ -> Record
+  ^\s\sip-address\s+${IPADDR}\s*$$ -> Record
+  ^\s\sinterface\s+${INTF_FC}\s+domain-id\s+${DOMAIN_ID}\s*$$ -> Record
+  ^\s\sinterface\s+${INTF_FC}\s+swwn\s+${WWN}\s*$$ -> Record
+  ^\s\sinterface\s+port-channel\s+${INTF_PORT_CH}\s+domain-id\s+${DOMAIN_ID}\s*$$ -> Record
+  ^\s\sinterface\s+port-channel\s+${INTF_PORT_CH}\s+swwn\s+${WWN}\s*$$ -> Record
+  ^\s\sdevice-alias\s+${DEV_ALIAS}\s*$$ -> Record
+  ^\s\sdevice-alias\s+${DEV_ALIAS}\s*${DEV_TYPE}\s*$$ -> Record
 
 EOF
