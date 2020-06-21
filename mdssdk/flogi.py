@@ -44,7 +44,7 @@ class Flogi(object):
         cmd = "flogi quiesce timeout " + str(value)
         out = self.__swobj.config(cmd)
         if out is not None:
-            raise CLIError(cmd, out["msg"])
+            raise CLIError(cmd, out[0]["msg"])
 
     @property
     def scale(self):
@@ -67,6 +67,6 @@ class Flogi(object):
             cmd = "no " + cmd
         out = self.__swobj.config(cmd)
         if out is not None:
-            raise CLIError(cmd, out["msg"])
+            raise CLIError(cmd, out[0]["msg"])
 
     # TODO npv
