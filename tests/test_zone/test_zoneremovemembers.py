@@ -1,5 +1,6 @@
 import unittest
 
+from mdssdk.connection_manager.errors import CLIError
 from mdssdk.devicealias import DeviceAlias
 from mdssdk.fc import Fc
 from mdssdk.portchannel import PortChannel
@@ -23,6 +24,7 @@ class TestZoneRemoveMembers(unittest.TestCase):
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
         self.z = Zone(self.switch, "test_zone", self.id)
+        self.z.create()
 
     def test_remove_members_dict(self):
         fc_name = ""
@@ -83,6 +85,21 @@ class TestZoneRemoveMembers(unittest.TestCase):
         self.z.remove_members(members)
         self.assertEqual([], self.z.members)
         self.z.delete()
+
+    def test_remove_members_notpresent(self):
+        members = ["10:99:88:90:76:88:99:ef"]
+        self.assertEqual([], self.z.members)
+        with self.assertRaises(CLIError) as e:
+            self.z.remove_members(members)
+        self.assertIn("Member not present", str(e.exception))
+        self.z.delete()
+
+    def test_remove_members_zone_notpresent(self):
+        self.z.delete()
+        members = ["10:99:88:90:76:88:99:ef"]
+        with self.assertRaises(CLIError) as e:
+            self.z.remove_members(members)
+        self.assertIn("Zone not present", str(e.exception))
 
     def tearDown(self) -> None:
         self.v.delete()

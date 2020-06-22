@@ -84,13 +84,13 @@ class Fcns(object):
             cmd = "no " + cmd
         out = self.__swobj.config(cmd)
         if out is not None:
-            raise CLIError(cmd, out["msg"])
+            raise CLIError(cmd, out[0]["msg"])
 
     def proxy_port(self, pwwn, vsan):
         cmd = "fcns proxy-port " + str(pwwn) + " vsan " + str(vsan)
         out = self.__swobj.config(cmd)
         if out is not None:
-            raise CLIError(cmd, out["msg"])
+            raise CLIError(cmd, out[0]["msg"])
 
     def no_auto_poll(self, vsan=None, pwwn=None):
         cmd = "fcns no-auto-poll"
@@ -100,12 +100,12 @@ class Fcns(object):
             cmd += " wwn " + str(pwwn)
         out = self.__swobj.config(cmd)
         if out is not None:
-            raise CLIError(cmd, out["msg"])
+            raise CLIError(cmd, out[0]["msg"])
 
     def reject_duplicate_pwwn(self, vsan):
         cmd = "fcns reject-duplicate-pwwn vsan " + str(vsan)
         out = self.__swobj.config(cmd)
         if out is not None:
-            raise CLIError(cmd, out["msg"])
+            raise CLIError(cmd, out[0]["msg"])
 
     # TODO
