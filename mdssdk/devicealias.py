@@ -299,7 +299,6 @@ class DeviceAlias(object):
 
         """
 
-        log.debug("Sending the cmd clear device-alias session")
         cmd = "terminal dont-ask ; device-alias database ; clear device-alias session ; no terminal dont-ask "
         self.__swobj.config(cmd)
 
@@ -319,7 +318,6 @@ class DeviceAlias(object):
 
         """
 
-        log.debug("Sending the cmd clear device-alias database")
         cmd = "terminal dont-ask ; device-alias database ; clear device-alias database ; no terminal dont-ask "
         try:
             out = self.__swobj.config(cmd)

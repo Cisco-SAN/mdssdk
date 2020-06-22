@@ -1,0 +1,35 @@
+Value Filldown VSAN (\d+)
+Value Filldown ZONE_NAME (\S+)
+Value TYPE (pwwn|fcid|fcalias|symbolic-nodename|fwwn|ip-address|interface|device-alias)
+Value WWN (([a-f0-9][a-f0-9]:){7}([a-f0-9][a-f0-9]))
+Value DEV_ALIAS (\S+)
+Value DEV_TYPE (init|target|both)
+Value FCID (0x[0-9a-f]+)
+Value FCALIAS (\S+)
+Value SYMNODENAME (\S+)
+Value IPADDR (.*)
+Value INTF_FC (fc[0-9]+/[0-9]+)
+Value INTF_PORT_CH ([0-9]+)
+Value DOMAIN_ID (\d+)
+
+Start
+  ^zone\s+name\s+${ZONE_NAME}\s+vsan\s+${VSAN} -> Record
+  ^\s\s${TYPE}\s+.* -> Continue
+  ^\s\spwwn\s+${WWN}\s*$$ -> Record
+  ^\s\spwwn\s+${WWN}\s+\[${DEV_ALIAS}\]\s*$$ -> Record
+  ^\s\spwwn\s+${WWN}\s+\[${DEV_ALIAS}\]\s+${DEV_TYPE}\s*$$ -> Record
+  ^\s\spwwn\s+${WWN}\s+${DEV_TYPE}\s*$$ -> Record
+  ^\s\sfcid\s+${FCID}\s*$$ -> Record
+  ^\s\sfcid\s+${FCID}\s*${DEV_TYPE}\s*$$ -> Record
+  ^\s\sfcalias\s+name\s+${FCALIAS}\s+vsan\s+\d+\s*$$ -> Record
+  ^\s\ssymbolic-nodename\s+${SYMNODENAME}\s*$$ -> Record
+  ^\s\sfwwn\s+${WWN}\s*$$ -> Record
+  ^\s\sip-address\s+${IPADDR}\s*$$ -> Record
+  ^\s\sinterface\s+${INTF_FC}\s+domain-id\s+${DOMAIN_ID}\s*$$ -> Record
+  ^\s\sinterface\s+${INTF_FC}\s+swwn\s+${WWN}\s*$$ -> Record
+  ^\s\sinterface\s+port-channel\s+${INTF_PORT_CH}\s+domain-id\s+${DOMAIN_ID}\s*$$ -> Record
+  ^\s\sinterface\s+port-channel\s+${INTF_PORT_CH}\s+swwn\s+${WWN}\s*$$ -> Record
+  ^\s\sdevice-alias\s+${DEV_ALIAS}\s*$$ -> Record
+  ^\s\sdevice-alias\s+${DEV_ALIAS}\s*${DEV_TYPE}\s*$$ -> Record
+
+EOF

@@ -11,16 +11,19 @@
 #
 Template, Hostname, Platform, Command
 
-
+cisco_nxos_show_zoneset_brief.textfsm, .*, cisco_nxos, sh[[ow]] zones[[et]] (n[[ame]] (\S+) )?b[[rief]]\s*.*
 cisco_nxos_show_incompat_all_system.textfsm, .*, cisco_nxos, sh[[ow]] incompatibility-[[all]] [[system]] (\S+)
+cisco_nxos_show_zone_name_active.textfsm, .*, cisco_nxos, sh[[ow]] zo[[ne]] n[[ame]] (\S+) a[[ctive]] *
 cisco_nxos_show_install_all_impact.textfsm, .*, cisco_nxos, sh[[ow]] in[[stall]] al[[l]] im[[pact]] *
 cisco_nxos_show_flogi_database.textfsm, .*, cisco_nxos, sh[[ow]] fl[[ogi]] d[[atabase]]
 cisco_nxos_show_zone_status.textfsm, .*, cisco_nxos, sh[[ow]] zo[[ne]] sta[[tus]] *
+cisco_nxos_show_zone_name.textfsm, .*, cisco_nxos, sh[[ow]] zo[[ne]] n[[ame]] (\S+) (v[[san]] (\d+))?
+cisco_nxos_show_fcalias_name.textfsm, .*, cisco_nxos, sh[[ow]] fcal[[ias]] n[[ame]] (\S+) (v[[san]] (\d+))?
 cisco_nxos_show_feature.textfsm, .*, cisco_nxos, sh[[ow]] fe[[ature]]
 cisco_nxos_show_module.textfsm, .*, cisco_nxos, sh[[ow]] mod[[ule]] *
 cisco_nxos_show_version.textfsm, .*, cisco_nxos, sh[[ow]] ve[[rsion]]
 cisco_nxos_show_cores.textfsm, .*, cisco_nxos, sh[[ow]] cor[[es]]
-cisco_nxos_show_zone.textfsm, .*, cisco_nxos, sh[[ow]] zo[[ne]] n[[ame]] *
+
 
 
 

@@ -84,7 +84,7 @@ class Switch(SwitchUtils):
         timeout=30,
         verify_ssl=True,
     ):
-
+        log.info("Switch init method " + ip_address)
         self.__ip_address = ip_address
         self.__username = username
         self.__password = password
@@ -103,7 +103,6 @@ class Switch(SwitchUtils):
                 port=port,
                 verify_ssl=verify_ssl,
             )
-
         # Connect to ssh
         self.connect_to_ssh()
         self.can_connect = False
@@ -120,6 +119,7 @@ class Switch(SwitchUtils):
         )
 
     def _set_connection_type_based_on_version(self):
+        log.info("Checking version on the switch with ip " + self.__ip_address)
         try:
             ver = self.version
             if ver is None:
@@ -142,14 +142,14 @@ class Switch(SwitchUtils):
                 minor = int(result_dict["minor"])
                 patch = result_dict["patch"]
                 if majorplus > 8 and major > 4 and minor > 2:
-                    log.debug(
+                    log.info(
                         "Switch version is "
                         + ver
                         + ". This is a supported switch version for using NXAPI"
                     )
                 elif majorplus == 8 and major == 4 and minor == 2:
                     if patch == "a":
-                        log.debug(
+                        log.info(
                             "Switch version is "
                             + ver
                             + ". This is a supported switch version for using NXAPI"
@@ -165,12 +165,12 @@ class Switch(SwitchUtils):
                     )
                     self.connection_type = "ssh"
             except Exception:
-                log.debug(
+                log.error(
                     "Got execption while getting the switch version, setting connection type to ssh"
                 )
                 self.connection_type = "ssh"
         else:
-            log.debug(
+            log.error(
                 "Could not get the pattern match for version, setting connection type to ssh"
             )
             self.connection_type = "ssh"

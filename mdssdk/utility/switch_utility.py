@@ -9,6 +9,7 @@ from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys
 from ..parsers.interface import ShowInterfaceBrief
 from ..parsers.vsan import ShowVsan
 from ..portchannel import PortChannel
+from ..zoneset import ZoneSet
 from ..vsan import Vsan
 
 log = logging.getLogger(__name__)
@@ -34,8 +35,6 @@ class SwitchUtils:
         retlist = {}
         cmd = "show interface brief"
         out = self.show(cmd)
-        log.debug(out)
-
         if self.is_connection_type_ssh():
             allfc, allpc = ShowInterfaceBrief(out).interfaces
             for fcname in allfc:
@@ -113,8 +112,62 @@ class SwitchUtils:
     def zonesets(self):
         if self.npv:
             return None
-        # TODO
-        raise NotImplementedError
+        return self._get_zs()
+
+    @property
+    def active_zonesets(self):
+        """
+        Returns all the vsans present on the switch in dictionary format(vsan-id:vsan object)
+
+        :return: Returns all the vsans present on the switch in dictionary format(vsan-id:vsan object)
+        :rtype: dict(vsan-id : Vsan)
+        :example:
+            >>> allvsans = switch_obj.vsans
+            >>> print(allvsans)
+            {'1': <mdslib.vsan.Vsan object at 0x10d88a290>, '10': <mdslib.vsan.Vsan object at 0x10d88a1d0>,
+             '11': <mdslib.vsan.Vsan object at 0x10d88a150>,  .....
+             '499': <mdslib.vsan.Vsan object at 0x10bdee650>, '4079': <mdslib.vsan.Vsan object at 0x10bdee0d0>,
+             '4094': <mdslib.vsan.Vsan object at 0x10bdee150>}
+            >>>
+        """
+        if self.npv:
+            return None
+        return self._get_zs(active=True)
+
+    def _get_zs(self,active=False):
+        retdict = {}
+        if active:
+            cmd = "show zoneset brief active"
+        else:
+            cmd = "show zoneset brief"
+        out = self.show(cmd)
+        if self.is_connection_type_ssh():
+            for eachrow in out:
+                v = int(eachrow['vsan'])
+                zsname = eachrow['zonesetname']
+                zsobj = ZoneSet(self, zsname, v)
+                values = retdict.get(v,None)
+                if values is None:
+                    retdict[v] = [zsobj]
+                else:
+                    values.append(zsobj)
+                    retdict[v] = values
+        else:
+            try:
+                newout = out['TABLE_zoneset']['ROW_zoneset']
+            except KeyError:
+                return retdict
+            for eachrow in newout:
+                v = int(eachrow.get(get_key(zonekeys.VSAN_ID, self._SW_VER)))
+                zsname = eachrow.get(get_key(zonekeys.NAME, self._SW_VER))
+                zsobj = ZoneSet(self, zsname, v)
+                values = retdict.get(v, None)
+                if values is None:
+                    retdict[v] = [zsobj]
+                else:
+                    values.append(zsobj)
+                    retdict[v] = values
+        return retdict
 
     def _return_zone_obj_nxapi(self, eachzone):
         vsanid = eachzone.get(get_key(zonekeys.VSAN_ID, self._SW_VER))
