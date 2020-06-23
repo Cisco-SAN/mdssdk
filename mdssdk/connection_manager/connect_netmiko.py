@@ -53,8 +53,8 @@ class SSHSession(object):
     def _connect(self):
         log.debug("Inside Connect")
         self._connection = ConnectHandler(**self._cisco_device)
-        self.prompt = self._connection.find_prompt()
-        log.debug("Prompt is " + self.prompt)
+        # self.prompt = self._connection.find_prompt()
+        # log.debug("Prompt is " + self.prompt)
 
     def _check_error(self, output):
         for eachline in output.strip().splitlines():

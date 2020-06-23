@@ -84,7 +84,7 @@ class Switch(SwitchUtils):
         timeout=30,
         verify_ssl=True,
     ):
-        log.info("Switch init method " + ip_address)
+        log.info("Switch init method " + ip_address + " connection_type: " + connection_type)
         self.__ip_address = ip_address
         self.__username = username
         self.__password = password
@@ -103,10 +103,12 @@ class Switch(SwitchUtils):
                 port=port,
                 verify_ssl=verify_ssl,
             )
+            self._set_connection_type_based_on_version()
+            log.info("Along with NXAPI opening up a parallel ssh connection for switch with ip " + self.__ip_address)
+
         # Connect to ssh
         self.connect_to_ssh()
         self.can_connect = False
-        self._set_connection_type_based_on_version()
         log.info("is_connection_type_ssh " + str(self.is_connection_type_ssh()))
 
     def connect_to_ssh(self):
@@ -117,6 +119,7 @@ class Switch(SwitchUtils):
             password=self.__password,
             timeout=self.timeout,
         )
+        log.info("Finished up a ssh connection for switch with ip " + self.__ip_address)
 
     def _set_connection_type_based_on_version(self):
         log.info("Checking version on the switch with ip " + self.__ip_address)

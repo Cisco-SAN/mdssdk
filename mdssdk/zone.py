@@ -815,37 +815,38 @@ class Zone(object):
     def __add_remove_members(self, members, remove=False):
 
         cmdlist = []
-        cmdlist.append("zone name " + self._name + " vsan " + str(self._vsan))
-        for eachmem in members:
-            if (type(eachmem) is Fc) or (type(eachmem) is PortChannel):
-                name = eachmem.name
-                cmd = "member interface " + name
-                if remove:
-                    cmd = "no " + cmd
-                cmdlist.append(cmd)
-            elif type(eachmem) is str:
-                m = re.match(PAT_WWN, eachmem)
-                if m:
-                    # zone member type is pwwn
-                    cmd = "member pwwn " + eachmem
+        if self.__show_zone_name() is not None:
+            cmdlist.append("zone name " + self._name + " vsan " + str(self._vsan))
+            for eachmem in members:
+                if (type(eachmem) is Fc) or (type(eachmem) is PortChannel):
+                    name = eachmem.name
+                    cmd = "member interface " + name
                     if remove:
                         cmd = "no " + cmd
+                    cmdlist.append(cmd)
+                elif type(eachmem) is str:
+                    m = re.match(PAT_WWN, eachmem)
+                    if m:
+                        # zone member type is pwwn
+                        cmd = "member pwwn " + eachmem
+                        if remove:
+                            cmd = "no " + cmd
+                        cmdlist.append(cmd)
+                    else:
+                        # zone member type is of device-alias
+                        cmd = "member device-alias " + eachmem
+                        if remove:
+                            cmd = "no " + cmd
+                        cmdlist.append(cmd)
+                elif type(eachmem) is dict:
+                    cmd = self.__get_cmd_list(eachmem, remove)
                     cmdlist.append(cmd)
                 else:
-                    # zone member type is of device-alias
-                    cmd = "member device-alias " + eachmem
-                    if remove:
-                        cmd = "no " + cmd
-                    cmdlist.append(cmd)
-            elif type(eachmem) is dict:
-                cmd = self.__get_cmd_list(eachmem, remove)
-                cmdlist.append(cmd)
-            else:
-                raise InvalidZoneMemberType(
-                    "Invalid zone member type, currently we support member of type pwwn or device-alias or interface only"
-                )
-        cmds_to_send = " ; ".join(cmdlist)
-        self._send_zone_cmd(cmds_to_send)
+                    raise InvalidZoneMemberType(
+                        "Invalid zone member type, currently we support member of type pwwn or device-alias or interface only"
+                    )
+            cmds_to_send = " ; ".join(cmdlist)
+            self._send_zone_cmd(cmds_to_send)
 
     def __get_cmd_list(self, mem, removeflag):
         key = list(mem.keys())[0]

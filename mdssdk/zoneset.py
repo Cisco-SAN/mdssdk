@@ -306,17 +306,18 @@ class ZoneSet(object):
         return False
 
     def __add_remove_members(self, members, remove=False):
-        cmdlist = []
-        cmdlist.append("zoneset name " + self._name + " vsan " + str(self._vsan))
-        for eachmem in members:
-            name_of_zone = eachmem.name
-            if remove:
-                cmd = "no member " + name_of_zone
-            else:
-                cmd = "member " + name_of_zone
-            cmdlist.append(cmd)
-        cmds_to_send = " ; ".join(cmdlist)
-        out = self.__zoneObj._send_zone_cmd(cmds_to_send)
+        if self.__show_zoneset_name_brief is not None:
+            cmdlist = []
+            cmdlist.append("zoneset name " + self._name + " vsan " + str(self._vsan))
+            for eachmem in members:
+                name_of_zone = eachmem.name
+                if remove:
+                    cmd = "no member " + name_of_zone
+                else:
+                    cmd = "member " + name_of_zone
+                cmdlist.append(cmd)
+            cmds_to_send = " ; ".join(cmdlist)
+            out = self.__zoneObj._send_zone_cmd(cmds_to_send)
 
     def __show_zoneset_name_brief(self,active=False):
         if active:

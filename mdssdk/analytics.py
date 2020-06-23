@@ -179,7 +179,7 @@ class Analytics:
 
         return True
 
-    def _get_select_query_string(self, profile, ignore_metrics=True):
+    def _get_select_query_string(self, profile, ignore_metrics=False):
         if ignore_metrics:
             metrics = None
         else:
