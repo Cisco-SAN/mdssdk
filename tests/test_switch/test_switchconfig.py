@@ -7,10 +7,13 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchConfig(unittest.TestCase):
-    def setUp(self) -> None:
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
         self.commands = "vsan database ; vsan 2 ; terminal dont-ask ; no vsan 2 ; no terminal dont-ask"
         self.commands_clierror = "terminal dont-ask ; vsan database ; no vsan 2 "
 

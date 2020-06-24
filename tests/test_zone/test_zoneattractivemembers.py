@@ -1,13 +1,15 @@
 import unittest
 
+from mdssdk.connection_manager.errors import CLIError
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
+from mdssdk.zoneset import ZoneSet
 from tests.test_zone.vars import *
 
 log = logging.getLogger(__name__)
 
 
-class TestZoneAttrMaxdbSize(unittest.TestCase):
+class TestZoneAttrActiveMembers(unittest.TestCase):
     def __init__(self, testName, sw):
         super().__init__(testName) 
         self.switch = sw
@@ -23,17 +25,27 @@ class TestZoneAttrMaxdbSize(unittest.TestCase):
         self.v = Vsan(switch=self.switch, id=self.id)
         self.v.create()
         self.z = Zone(self.switch, "test_zone", self.id)
-
-    def test_maxdb_size_read(self):
         self.z.create()
-        log.debug("Max DB Size : " + str(self.z.maxdb_size))
 
-    def test_maxdb_size_read_nonexisting(self):
-        log.debug("Max DB Size(nonexisting) : " + str(self.z.maxdb_size))
+    def test_active_members_read(self):
+        zoneset = ZoneSet(self.switch, "test_zoneset", self.id)
+        zoneset.create()
+        members = [{"fcid": "0x123456"}]
+        self.z.add_members(members)
+        zoneset.add_members([self.z])
+        zoneset.activate(True)
+        if zoneset.is_active():
+            self.assertEqual(members, self.z.active_members)
 
-    def test_maxdb_size_write_error(self):
+    def test_active_members_read_nonexisting(self):
+        self.skipTest("need to fix")
+        with self.assertRaises(CLIError) as e:
+            self.z.active_members
+        self.assertIn("Zone not present", str(e.exception))
+
+    def test_active_members_write_error(self):
         with self.assertRaises(AttributeError) as e:
-            self.z.maxdb_size = "asdf"
+            self.z.active_members = "asdf"
         self.assertEqual("can't set attribute", str(e.exception))
 
     def tearDown(self) -> None:

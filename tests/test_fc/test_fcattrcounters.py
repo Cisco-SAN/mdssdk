@@ -8,11 +8,14 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrCounters(unittest.TestCase):
-    def setUp(self) -> None:
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
-        interfaces = sw.interfaces
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
+        interfaces = self.switch.interfaces
         while True:
             k, v = random.choice(list(interfaces.items()))
             if type(v) is Fc:

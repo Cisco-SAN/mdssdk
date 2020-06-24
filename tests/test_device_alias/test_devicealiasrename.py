@@ -6,12 +6,15 @@ from tests.test_device_alias.vars import *
 
 log = logging.getLogger(__name__)
 
-
 class TestDeviceAliasRename(unittest.TestCase):
-    def setUp(self) -> None:
+
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
         self.d = DeviceAlias(self.switch)
         self.olddb = self.d.database
         if self.olddb is None:

@@ -8,11 +8,14 @@ log = logging.getLogger(__name__)
 
 
 class TestPortChannelAttrName(unittest.TestCase):
-    def setUp(self) -> None:
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
-        self.interfaces = sw.interfaces
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
+        self.interfaces = self.switch.interfaces
         while True:
             self.pc_id = random.randint(1, 256)
             if "port-channel" + str(self.pc_id) not in self.interfaces.keys():

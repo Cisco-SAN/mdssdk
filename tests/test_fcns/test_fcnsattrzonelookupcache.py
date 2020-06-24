@@ -1,16 +1,19 @@
 import unittest
 
 from mdssdk.fcns import Fcns
-from tests.test_fcns.vars import *
+import logging
 
 log = logging.getLogger(__name__)
 
 
 class TestFcnsAttrZoneLookupCache(unittest.TestCase):
-    def setUp(self) -> None:
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
         self.fcns_obj = Fcns(switch=self.switch)
         self.old = self.fcns_obj.zone_lookup_cache
 

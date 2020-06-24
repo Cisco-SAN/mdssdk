@@ -3,16 +3,19 @@ import random
 
 from mdssdk.fcns import Fcns
 from mdssdk.connection_manager.errors import CLIError
-from tests.test_fcns.vars import *
+import logging
 
 log = logging.getLogger(__name__)
 
 
 class TestFcnsRejectDuplicatePwwn(unittest.TestCase):
-    def setUp(self) -> None:
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
         self.fcns_obj = Fcns(switch=self.switch)
 
     def test_reject_duplicate_pwwn(self):

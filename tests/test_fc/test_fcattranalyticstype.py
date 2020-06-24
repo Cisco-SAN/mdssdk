@@ -9,18 +9,22 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrAnalyticsType(unittest.TestCase):
-    def setUp(self) -> None:
+
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
         self.ana_before = self.switch.feature("analytics")
         if not self.ana_before:
             self.switch.feature("analytics", True)
         self.anaenabled = self.switch.feature("analytics")
         if not self.anaenabled:
             self.skipTest("Ana feature not enabled or supported")
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
         self.values = analytics_values
-        interfaces = sw.interfaces
+        interfaces = self.switch.interfaces
         while True:
             k, v = random.choice(list(interfaces.items()))
             if type(v) is Fc:

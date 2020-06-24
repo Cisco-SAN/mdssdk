@@ -6,10 +6,13 @@ log = logging.getLogger(__name__)
 
 
 class TestSwitchAttrImageString(unittest.TestCase):
-    def setUp(self) -> None:
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
 
     def test_image_string_read(self):
         imgstr = self.switch.image_string
