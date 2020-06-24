@@ -2,16 +2,19 @@ import unittest
 import random
 
 from mdssdk.flogi import Flogi
-from tests.test_flogi.vars import *
+import logging
 
 log = logging.getLogger(__name__)
 
 
 class TestFlogiDatabase(unittest.TestCase):
-    def setUp(self) -> None:
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
         self.flogi_obj = Flogi(switch=self.switch)
 
     def test_database(self):

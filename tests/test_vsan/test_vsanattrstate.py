@@ -7,11 +7,14 @@ log = logging.getLogger(__name__)
 
 
 class TestVsanAttrState(unittest.TestCase):
-    def setUp(self) -> None:
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
-        self.vsandb = sw.vsans
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
+        self.vsandb = self.switch.vsans
         while True:
             self.id = get_random_id()
             if self.id not in self.vsandb.keys():
@@ -34,4 +37,4 @@ class TestVsanAttrState(unittest.TestCase):
     def tearDown(self) -> None:
         if self.v.id is not None:
             self.v.delete()
-        self.assertEqual(self.vsandb.keys(), sw.vsans.keys())
+        self.assertEqual(self.vsandb.keys(), self.switch.vsans.keys())

@@ -1,30 +1,10 @@
-import json
 import logging
 import random
 
-from mdssdk.switch import Switch
-
 log = logging.getLogger(__name__)
-
-with open("switch_details.json", "r") as j:
-    data = json.load(j)
-
-log.info("Creating switch object")
-
-sw = Switch(
-    ip_address=data["ip_address"],
-    username=data["username"],
-    password=data["password"],
-    connection_type=data["connection_type"],
-    port=data["port"],
-    timeout=data["timeout"],
-    verify_ssl=False,
-)
-
 
 def get_random_id(start=2, end=400):
     return random.randint(start, end)
-
 
 def get_random_pwwn():
     choicelist = [
@@ -52,7 +32,6 @@ def get_random_pwwn():
         if i % 2 == 1:
             entry = entry + ":"
     return entry.rstrip(":")
-
 
 members_dict = [
     {"pwwn": get_random_pwwn()},

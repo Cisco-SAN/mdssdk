@@ -64,17 +64,18 @@ Tx F8 type LIP sequence errors:\s+(?P<tx_f8_lip_seq_err>\d+)\s+ \
 Rx Non F8 type LIP sequence errors:\s+(?P<rx_non_f8_lip_seq_err>\d+)\s+ \
 Tx Non F8 type LIP sequence errors:\s+(?P<tx_non_f8_lip_seq_err>\d+)"
 
-PAT_CS = "Congestion Stats:\s+Tx Timeout discards:\s+(?P<timeout_discards>\d+)\s+ \
-Tx Credit loss:\s+(?P<credit_loss>\d+)\s+ \
-BB_SCs credit resend actions:\s+(?P<bb_scs_resend>\d+)\s+ \
-BB_SCr Tx credit increment actions:\s+(?P<bb_scr_incr>\d+)\s+ \
-TxWait 2.5us due to lack of transmit credits:\s+(?P<txwait>\d+)\s+ \
-Percentage TxWait not available for last 1s\/1m\/1h\/72h:\s+(?P<tx_wait_unavbl_1s>\d+)%\/(?P<tx_wait_unavbl_1m>\d+)%\/(?P<tx_wait_unavbl_1hr>\d+)%\/(?P<tx_wait_unavbl_72hr>\d+)%\s+ \
-(Rx B2B credit remaining:\s+(?P<rx_b2b_credit_remain>\d+)\s+)?\
-(Tx B2B credit remaining:\s+(?P<tx_b2b_credit_remain>\d+)\s+)?\
-(Tx Low Priority B2B credit remaining:\s+(?P<tx_b2b_low_pri_cre>\d+)\s+)?\
-Rx B2B credit transitions to zero:\s+(?P<rx_b2b_credits>\d+)\s+ \
-Tx B2B credit transitions to zero:\s+(?P<tx_b2b_credits>\d+)"
+PAT_CS = "Congestion Stats:\s+Tx Timeout discards:\s+(?P<timeout_discards>\d+)\s+\
+Tx Credit loss:\s+(?P<credit_loss>\d+)\s+\
+BB_SCs credit resend actions:\s+(?P<bb_scs_resend>\d+)\s+\
+BB_SCr Tx credit increment actions:\s+(?P<bb_scr_incr>\d+)\s+\
+(TxWait 2.5us due to lack of transmit credits:\s+(?P<txwait>\d+)\s+)?\
+Percentage TxWait not available for last 1s\/1m\/1h\/72h:\s+(?P<tx_wait_unavbl_1s>\d+)%\/\
+(?P<tx_wait_unavbl_1m>\d+)%\/(?P<tx_wait_unavbl_1hr>\d+)%\/(?P<tx_wait_unavbl_72hr>\d+)%\s*\
+(Rx B2B credit remaining:\s+(?P<rx_b2b_credit_remain>\d+)\s*)?\
+(Tx B2B credit remaining:\s+(?P<tx_b2b_credit_remain>\d+)\s*)?\
+(Tx Low Priority B2B credit remaining:\s+(?P<tx_b2b_low_pri_cre>\d+)\s*)?\
+(Rx B2B credit transitions to zero:\s+(?P<rx_b2b_credits>\d+)\s*)?\
+(Tx B2B credit transitions to zero:\s+(?P<tx_b2b_credits>\d+)\s*)?"
 
 PAT_OS = "Other Stats:\s+Zone drops:\s+(?P<pg_acl_drops>\d+)\s+ \
 FIB drops for ports\s+(?P<pg_fib_start>\d+)-(?P<pg_fib_end>\d+):\s+(?P<pg_fib_drops>\d+)\s+ \

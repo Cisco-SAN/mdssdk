@@ -4,12 +4,14 @@ from tests.test_switch.vars import *
 
 log = logging.getLogger(__name__)
 
-
 class TestSwitchShow(unittest.TestCase):
-    def setUp(self) -> None:
+    def __init__(self, testName, sw):
+        super().__init__(testName) 
         self.switch = sw
-        log.debug(sw.version)
-        log.debug(sw.ipaddr)
+
+    def setUp(self) -> None:
+        log.debug(self.switch.version)
+        log.debug(self.switch.ipaddr)
         self.commands = "show vsan usage"
 
     def test_show(self):
