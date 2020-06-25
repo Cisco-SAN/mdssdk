@@ -11,6 +11,23 @@ class Fcns(object):
         self.__swobj = switch
 
     def database(self, vsan=None, fcid=None, detail=False):
+        """
+        Get fcns database
+        
+        :param vsan: id of vsan (optional parameter, defaults to None)
+        :type vsan: int or None
+        :param fcid: fcid (optional parameter, defaults to None)
+        :type fcid: str or None
+        :param detail: detail (optional parameter, defaults to False)
+        :type detail: bool
+        :return: fcns database
+        :rtype: list
+        :example:
+            >>> fcns_obj = Fcns(switch_obj)
+            >>> print(fcns_obj.database())
+            >>>
+
+        """
         cmd = "show fcns database"
         if fcid is not None:
             cmd += " fcid " + str(fcid)
@@ -20,11 +37,32 @@ class Fcns(object):
             cmd += " vsan " + str(vsan)
         out = self.__swobj.show(cmd)
         if out:
-            return out["TABLE_fcns_vsan"]["ROW_fcns_vsan"]
+            if not self.__swobj.is_connection_type_ssh():
+                return out["TABLE_fcns_vsan"]["ROW_fcns_vsan"]
+            else:
+                if type(out[0]) is str:
+                    if ("vsan not present"== out[0].strip()):
+                        return {}
+            return out
         else:
-            return None
+            return {}
 
     def statistics(self, vsan=None, detail=False):
+        """
+        Get fcns statistics
+        
+        :param vsan: id of vsan (optional parameter, defaults to None)
+        :type vsan: int or None
+        :param detail: detail (optional parameter, defaults to False)
+        :type detail: bool
+        :return: fcns statistics
+        :rtype: list
+        :example:
+            >>> fcns_obj = Fcns(switch_obj)
+            >>> print(fcns_obj.statistics())
+            >>>
+
+        """
         cmd = "show fcns statistics"
         if detail:
             cmd += " detail"
@@ -32,12 +70,40 @@ class Fcns(object):
             cmd += " vsan " + str(vsan)
         out = self.__swobj.show(cmd)
         if out:
-            return out["TABLE_fcns_vsan"]["ROW_fcns_vsan"]
+            if not self.__swobj.is_connection_type_ssh():
+                return out["TABLE_fcns_vsan"]["ROW_fcns_vsan"]
+            else:
+                if type(out[0]) is str:
+                    if ("vsan not present"== out[0].strip()):
+                        return {}
+            return out
         else:
-            return None
+            return {}
 
     @property
     def no_bulk_notify(self):
+        """
+        get no_bulk_notify or
+        set no_bulk_notify
+
+        :getter:
+        :return: returns True if bulk notification for db changes is disabled, otherwise returns False 
+        :rtype: bool
+
+        :example:
+            >>> print(fcns_obj.no_bulk_notify)
+            True
+            >>>
+
+        :setter:
+        :param value: True/False to disable/enable bulk notification for db changes
+        :type value: bool
+
+        :example:
+            >>> fcns_obj.no_bulk_notify = False
+            >>>
+
+        """
         cmd = "show running section fcns"
         out = self.__swobj.show(cmd, raw_text=True)
         pat = "fcns no-bulk-notify"
@@ -66,6 +132,28 @@ class Fcns(object):
 
     @property
     def zone_lookup_cache(self):
+        """
+        get zone_lookup_cache or
+        set zone_lookup_cache
+
+        :getter:
+        :return: returns True if db uses Zone Lookup cache for NS queries, otherwise returns False 
+        :rtype: bool
+
+        :example:
+            >>> print(fcns_obj.zone_lookup_cache)
+            True
+            >>>
+
+        :setter:
+        :param value: True/False to enable/disable use of Zone Lookup cache for NS queries
+        :type value: bool
+
+        :example:
+            >>> fcns_obj.zone_lookup_cache = False
+            >>>
+
+        """
         cmd = "show running section fcns"
         out = self.__swobj.show(cmd, raw_text=True)
         pat = "fcns zone-lookup-cache"
@@ -87,12 +175,40 @@ class Fcns(object):
             raise CLIError(cmd, out[0]["msg"])
 
     def proxy_port(self, pwwn, vsan):
+        """
+        Configure proxy port
+        
+        :param pwwn: pwwn 
+        :type pwwn: str
+        :param name: id of vsan 
+        :type name: int 
+        :return: None
+        :example:
+            >>> fcns_obj = Fcns(switch_obj)
+            >>> print(fcns_obj.proxy_port(vsan = 1, pwwn = "10:00:00:de:fb:b1:86:a1"))
+            >>>
+
+        """
         cmd = "fcns proxy-port " + str(pwwn) + " vsan " + str(vsan)
         out = self.__swobj.config(cmd)
         if out:
             raise CLIError(cmd, out[0]["msg"])
 
     def no_auto_poll(self, vsan=None, pwwn=None):
+        """
+        Disable auto polling
+        
+        :param name: id of vsan (optional parameter, defaults to None)
+        :type name: int or None
+        :param pwwn: pwwn (optional parameter, defaults to None)
+        :type pwwn: str or None
+        :return: None
+        :example:
+            >>> fcns_obj = Fcns(switch_obj)
+            >>> print(fcns_obj.no_auto_poll())
+            >>>
+
+        """
         cmd = "fcns no-auto-poll"
         if vsan is not None:
             cmd += " vsan " + str(vsan)
@@ -103,9 +219,21 @@ class Fcns(object):
             raise CLIError(cmd, out[0]["msg"])
 
     def reject_duplicate_pwwn(self, vsan):
+        """
+        Reject logging of ports with duplicate pwwn
+        
+        :param vsan: id of vsan 
+        :type vsan: int
+        :return: None
+        :example:
+            >>> fcns_obj = Fcns(switch_obj)
+            >>> print(fcns_obj.reject_duplicate_pwwn(vsan = 1))
+            >>>
+
+        """
         cmd = "fcns reject-duplicate-pwwn vsan " + str(vsan)
         out = self.__swobj.config(cmd)
         if out:
             raise CLIError(cmd, out[0]["msg"])
 
-    # TODO
+    # TODO: ssh and https outputs for database and statistics vary slightly in nested TABLE tags
