@@ -36,7 +36,7 @@ class TimeLoggingTestResult(unittest.TextTestResult):
 
     def addSuccess(self, test):
         elapsed = time.time() - self._started_at
-        writer.writerow([self.getDescription(test), "pass", elapsed])
+        writer.writerow([self.getDescription(test), "pass", "{:.03}s ".format(elapsed)])
         self.stream.write("{:.03}s ".format(elapsed))
         super().addSuccess(test)
 

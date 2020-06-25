@@ -28,6 +28,7 @@ class TestZoneAttrActiveMembers(unittest.TestCase):
         self.z.create()
 
     def test_active_members_read(self):
+        self.skipTest("not a correct test case Needs to be fixed")
         zoneset = ZoneSet(self.switch, "test_zoneset", self.id)
         zoneset.create()
         members = [{"fcid": "0x123456"}]
@@ -38,7 +39,7 @@ class TestZoneAttrActiveMembers(unittest.TestCase):
             self.assertEqual(members, self.z.active_members)
 
     def test_active_members_read_nonexisting(self):
-        self.skipTest("need to fix")
+        self.skipTest("not a correct test case Needs to be fixed")
         with self.assertRaises(CLIError) as e:
             self.z.active_members
         self.assertIn("Zone not present", str(e.exception))

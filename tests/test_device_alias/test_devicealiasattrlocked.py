@@ -8,8 +8,8 @@ log = logging.getLogger(__name__)
 
 
 class TestDeviceAliasAttrLocked(unittest.TestCase):
-   def __init__(self, testName, sw):
-        super().__init__(testName) 
+    def __init__(self, testName, sw):
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:

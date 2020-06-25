@@ -26,7 +26,7 @@ class TestFcnsStatistics(unittest.TestCase):
 
             if type(fcnsdb) is dict:
                 fcnsdb = [fcnsdb]
-            vsan = fcnsdb[0]["id"]
+            vsan = fcnsdb[0]["vsan_id"]
 
             res = self.fcns_obj.statistics(vsan=vsan)
             log.debug(res)
@@ -41,7 +41,7 @@ class TestFcnsStatistics(unittest.TestCase):
         if fcnsdb is not None:
             if type(fcnsdb) is dict:
                 fcnsdb = [fcnsdb]
-            vsan_list = [f["id"] for f in fcnsdb]
+            vsan_list = [f["vsan_id"] for f in fcnsdb]
             while True:
                 vsan = random.randint(2, 400)
                 if vsan not in vsan_list:

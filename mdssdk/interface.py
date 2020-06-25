@@ -136,7 +136,7 @@ class Interface(object):
             shintbr = ShowInterfaceBrief(outlines, self._name)
             return shintbr.mode
         out = self.__parse_show_int_brief()
-        if out is not None:
+        if out:
             return out[get_key(interfacekeys.INT_OPER_MODE, self._SW_VER)]
         return None
 
@@ -173,7 +173,7 @@ class Interface(object):
             shintbr = ShowInterfaceBrief(outlines, self._name)
             return shintbr.speed
         out = self.__parse_show_int_brief()
-        if out is not None:
+        if out:
             return out[get_key(interfacekeys.INT_OPER_SPEED, self._SW_VER)]
         return None
 
@@ -210,7 +210,7 @@ class Interface(object):
             shintbr = ShowInterfaceBrief(outlines, self._name)
             return shintbr.trunk
         out = self.__parse_show_int_brief()
-        if out is not None:
+        if out:
             return out[get_key(interfacekeys.INT_ADMIN_TRUNK_MODE, self._SW_VER)]
         return None
 
@@ -248,7 +248,7 @@ class Interface(object):
             shintbr = ShowInterfaceBrief(outlines, self._name)
             return shintbr.status
         out = self.__parse_show_int_brief()
-        if out is not None:
+        if out:
             return out[get_key(interfacekeys.INT_STATUS, self._SW_VER)]
         return None
 

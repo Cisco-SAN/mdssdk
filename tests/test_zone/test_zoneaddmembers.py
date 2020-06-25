@@ -47,7 +47,7 @@ class TestZoneAddMembers(unittest.TestCase):
             if "port-channel" + str(pc_id) not in self.switch.interfaces.keys():
                 break
         pc = PortChannel(self.switch, pc_id)
-        d = DeviceAlias(sw)
+        d = DeviceAlias(self.switch)
         olddb = d.database
         if olddb is None:
             da_name = get_random_string()

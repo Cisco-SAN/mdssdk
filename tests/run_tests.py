@@ -15,9 +15,9 @@ logFormatter = logging.Formatter(
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 console.setFormatter(logFormatter)
-# logging.getLogger().addHandler(console)
+logging.getLogger().addHandler(console)
 
-# Add file rotating handler, with level DEBUG
+# Add file handler, with level DEBUG
 fileHandler = logging.FileHandler("test.log")
 fileHandler.setLevel(logging.DEBUG)
 fileHandler.setFormatter(logFormatter)
@@ -59,6 +59,7 @@ for conntype in ["ssh", "https"]:
         port=data["port"],
         timeout=data["timeout"],
         verify_ssl=False)
+        log.info("Connection type for switch object is " + sw.connection_type)
         comboSuite = unittest.TestSuite(get_suite_list(sw))
         unittest.TextTestRunner(verbosity=2, failfast=True, resultclass=TimeLoggingTestResult).run(comboSuite)
         time.sleep(0.01)

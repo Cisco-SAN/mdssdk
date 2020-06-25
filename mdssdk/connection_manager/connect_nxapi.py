@@ -108,7 +108,7 @@ class ConnectNxapi(object):
         )
         log.debug("req response")
         log.debug(response)
-        response_list = json.loads(response.text)
+        response_list = response.json()
 
         if isinstance(response_list, dict):
             response_list = [response_list]

@@ -147,13 +147,12 @@ class Zone(object):
             else:
                 try:
                     out = out["TABLE_zone_member"]["ROW_zone_member"]
+                    if type(out) is dict:
+                        # means there is only one member for the zone, so convert to list
+                        out = [out]
                     retout = self.__format_members_nxapi(out)
                 except KeyError:
                     return retout
-                if type(retout) is dict:
-                    # means there is only one member for the zone, so convert to list and return
-                    # return self.__format_members([retout])
-                    retout = [retout]
         return retout
 
     def __format_members_nxapi(self, out):
@@ -440,9 +439,10 @@ class Zone(object):
             retout = out[0]["fulldb_dbsize"]
         else:
             retout = out.get(get_key(zonekeys.FULLDB_SIZE, self._SW_VER), None)
-        if retout is None:
+        if retout:
+            return int(retout)
+        else:
             return None
-        return int(retout)
 
     @property
     def fulldb_zone_count(self):
@@ -463,9 +463,10 @@ class Zone(object):
             retout = out[0]["fulldb_zone_count"]
         else:
             retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), None)
-        if retout is None:
+        if retout:
+            return int(retout)
+        else:
             return None
-        return int(retout)
 
     @property
     def fulldb_zoneset_count(self):
@@ -486,9 +487,10 @@ class Zone(object):
             retout = out[0]["fulldb_zoneset_count"]
         else:
             retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), None)
-        if retout is None:
+        if retout:
+            return int(retout)
+        else:
             return None
-        return int(retout)
 
     @property
     def activedb_size(self):
@@ -509,9 +511,11 @@ class Zone(object):
             retout = out[0]["activedb_dbsize"]
         else:
             retout = out.get(get_key(zonekeys.ACTIVEDB_SIZE, self._SW_VER), None)
-        if retout is None:
+        if retout:
+            return int(retout)
+        else:
             return None
-        return int(retout)
+
 
     @property
     def activedb_zone_count(self):
@@ -533,9 +537,10 @@ class Zone(object):
             retout = out[0]["activedb_zone_count"]
         else:
             retout = out.get(get_key(zonekeys.ACTIVEDB_ZC, self._SW_VER), None)
-        if retout is None:
+        if retout:
+            return int(retout)
+        else:
             return None
-        return int(retout)
 
     @property
     def activedb_zoneset_count(self):
@@ -557,9 +562,10 @@ class Zone(object):
             retout = out[0]["activedb_zoneset_count"]
         else:
             retout = out.get(get_key(zonekeys.ACTIVEDB_ZSC, self._SW_VER), None)
-        if retout is None:
+        if retout:
+            return int(retout)
+        else:
             return None
-        return int(retout)
 
     @property
     def activedb_zoneset_name(self):
@@ -605,10 +611,10 @@ class Zone(object):
             retout = out[0]["maxdb_dbsize"]
         else:
             retout = out.get(get_key(zonekeys.MAXDB_SIZE, self._SW_VER), None)
-        if retout is None:
+        if retout:
+            return int(retout)
+        else:
             return None
-        return int(retout)
-
     @property
     def effectivedb_size(self):
         """
@@ -629,9 +635,10 @@ class Zone(object):
             retout = out[0]["effectivedb_dbsize"]
         else:
             retout = out.get(get_key(zonekeys.EFFDB_SIZE, self._SW_VER), None)
-        if retout is None:
+        if retout:
+            return int(retout)
+        else:
             return None
-        return int(retout)
 
     @property
     def effectivedb_size_percentage(self):
@@ -696,7 +703,7 @@ class Zone(object):
             + " ; no terminal dont-ask"
         )
         out = self.__swobj.config(cmd)
-        if out is not None:
+        if out:
             if self.__swobj.is_connection_type_ssh():
                 msg = out
             else:
@@ -709,7 +716,7 @@ class Zone(object):
                 elif "Command will clear lock from the entire fabric" in msg:
                     log.debug(msg)
                 else:
-                    log.error(msg)
+                    log.debug(msg)
                     raise CLIError(cmd, msg)
 
     def create(self):
@@ -927,7 +934,7 @@ class Zone(object):
                 return False, None
             self._check_msg(c.message, cmd)
 
-        if out is not None:
+        if out:
             if not self.__swobj.is_connection_type_ssh():
                 msg = out["msg"].strip()
                 if msg:
@@ -958,7 +965,7 @@ class Zone(object):
         elif "Zoneset deactivation initiated" in msg:
             log.debug(msg)
         else:
-            log.error(msg)
+            log.debug(msg)
             self._clear_lock_if_enhanced()
             raise CLIError(cmd, msg)
 
@@ -982,7 +989,7 @@ class Zone(object):
                         if "Commit operation initiated. Check zone status" in msg:
                             return
                         else:
-                            log.error(msg)
+                            log.debug(msg)
                             raise CLIError(cmd, msg)
             except CLIError as c:
                 msg = c.message
