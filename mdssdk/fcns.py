@@ -25,6 +25,13 @@ class Fcns(object):
         :example:
             >>> fcns_obj = Fcns(switch_obj)
             >>> print(fcns_obj.database())
+            [{'vsan_id': '1', 'fcid': '0x2c0000', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:dc:25', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '}, 
+            {'vsan_id': '1', 'fcid': '0x2c0001', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:dc:35', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '}, 
+            {'vsan_id': '1', 'fcid': '0x2c0020', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:2c:25', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '}, 
+            {'vsan_id': '1', 'fcid': '0x2c0021', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:2d:25', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '}, 
+            {'vsan_id': '1', 'fcid': '0x2c0040', 'type': 'N', 'pwwn': '10:00:00:de:fb:b1:86:a1', 'vendor': 'Cisco', 'fc4_type_feature': 'ipfc '}, 
+            {'vsan_id': '13', 'fcid': '0x220000', 'type': 'N', 'pwwn': '10:00:00:de:fb:b1:86:a1', 'vendor': 'Cisco', 'fc4_type_feature': 'ipfc '}, 
+            {'vsan_id': '14', 'fcid': '0x200000', 'type': 'N', 'pwwn': '10:00:00:de:fb:b1:86:a1', 'vendor': 'Cisco', 'fc4_type_feature': 'ipfc '}]
             >>>
 
         """
@@ -60,6 +67,11 @@ class Fcns(object):
         :example:
             >>> fcns_obj = Fcns(switch_obj)
             >>> print(fcns_obj.statistics())
+            [{'vsan_id': '1', 'registration_requests_received': '20', 'deregistration_requests_received': '0', 'queries_received': '0', 'queries_sent': '0', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '4'}, 
+            {'vsan_id': '9', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '0', 'queries_sent': '0', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '0'}, 
+            {'vsan_id': '13', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '1', 'queries_sent': '2', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '1'}, 
+            {'vsan_id': '14', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '1', 'queries_sent': '2', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '1'}, 
+            {'vsan_id': '4055', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '0', 'queries_sent': '0', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '0'}]
             >>>
 
         """
@@ -185,7 +197,7 @@ class Fcns(object):
         :return: None
         :example:
             >>> fcns_obj = Fcns(switch_obj)
-            >>> print(fcns_obj.proxy_port(vsan = 1, pwwn = "10:00:00:de:fb:b1:86:a1"))
+            >>> fcns_obj.proxy_port(vsan = 1, pwwn = "10:00:00:de:fb:b1:86:a1"))
             >>>
 
         """
@@ -205,7 +217,7 @@ class Fcns(object):
         :return: None
         :example:
             >>> fcns_obj = Fcns(switch_obj)
-            >>> print(fcns_obj.no_auto_poll())
+            >>> fcns_obj.no_auto_poll())
             >>>
 
         """
@@ -227,7 +239,7 @@ class Fcns(object):
         :return: None
         :example:
             >>> fcns_obj = Fcns(switch_obj)
-            >>> print(fcns_obj.reject_duplicate_pwwn(vsan = 1))
+            >>> fcns_obj.reject_duplicate_pwwn(vsan = 1))
             >>>
 
         """
