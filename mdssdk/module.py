@@ -14,9 +14,9 @@ class Module(object):
             >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password )
             >>> mod_handler = switch_obj.modules
             >>> print(mod_handler)
-            [<mdslib.module.Module object at 0x10ad710d0>, <mdslib.module.Module object at 0x10ad71190>,
-            <mdslib.module.Module object at 0x10ad711d0>, <mdslib.module.Module object at 0x10ad71050>,
-            <mdslib.module.Module object at 0x10abdf190>]
+            [{1: <mdslib.module.Module object at 0x10ad710d0>}, {2: <mdslib.module.Module object at 0x10ad71190>},
+            {3: <mdslib.module.Module object at 0x10ad711d0>}, {4: <mdslib.module.Module object at 0x10ad71050>},
+            {5: <mdslib.module.Module object at 0x10abdf190>}]
 
         """
 
@@ -54,7 +54,7 @@ class Module(object):
         :rtype: int
         :example:
             >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password )
-            >>> mod_handler = switch_obj.modules
+            >>> mod_handler = list(switch_obj.modules.values())
             >>> first_mod_handler = mod_handler[0]
             >>> print(first_mod_handler.module_number)
             2
@@ -77,7 +77,7 @@ class Module(object):
         :rtype: int
         :example:
             >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password )
-            >>> mod_handler = switch_obj.modules
+            >>> mod_handler = list(switch_obj.modules.values())
             >>> first_mod_handler = mod_handler[0]
             >>> print(first_mod_handler.ports)
             48
@@ -103,7 +103,7 @@ class Module(object):
         :rtype: str
         :example:
             >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password )
-            >>> mod_handler = switch_obj.modules
+            >>> mod_handler = list(switch_obj.modules.values())
             >>> first_mod_handler = mod_handler[0]
             >>> print(first_mod_handler.type)
             2/4/8/10/16 Gbps Advanced FC Module
@@ -128,7 +128,7 @@ class Module(object):
         :rtype: str
         :example:
             >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password )
-            >>> mod_handler = switch_obj.modules
+            >>> mod_handler = list(switch_obj.modules.values())
             >>> first_mod_handler = mod_handler[0]
             >>> print(first_mod_handler.model)
             DS-X9448-768K9
@@ -153,7 +153,7 @@ class Module(object):
         :rtype: str
         :example:
             >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password )
-            >>> mod_handler = switch_obj.modules
+            >>> mod_handler = list(switch_obj.modules.values())
             >>> first_mod_handler = mod_handler[0]
             >>> print(first_mod_handler.status)
             ok

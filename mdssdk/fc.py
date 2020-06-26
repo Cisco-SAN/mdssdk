@@ -64,7 +64,7 @@ class Fc(Interface):
     :type value: bool
     :example:
             >>> fcobj = Fc(switch = switch_obj, name = "fc1/1")
-            >>> fcobj.out-of-service = True
+            >>> fcobj.out_of_service = True
             >>>
     """
 
