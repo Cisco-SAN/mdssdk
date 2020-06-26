@@ -153,6 +153,8 @@ class SwitchUtils:
                 newout = out['TABLE_zoneset']['ROW_zoneset']
             except KeyError:
                 return retdict
+            if type(newout) is dict:
+                newout = [newout]
             for eachrow in newout:
                 v = int(eachrow.get(get_key(zonekeys.VSAN_ID, self._SW_VER)))
                 zsname = eachrow.get(get_key(zonekeys.NAME, self._SW_VER))
