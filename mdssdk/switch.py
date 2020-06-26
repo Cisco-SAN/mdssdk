@@ -103,12 +103,11 @@ class Switch(SwitchUtils):
                 port=port,
                 verify_ssl=verify_ssl,
             )
-            self._set_connection_type_based_on_version()
             log.info("Along with NXAPI opening up a parallel ssh connection for switch with ip " + self.__ip_address)
 
         # Connect to ssh
         self.connect_to_ssh()
-        self.can_connect = False
+        self._set_connection_type_based_on_version()
         log.info("is_connection_type_ssh " + str(self.is_connection_type_ssh()))
 
     def connect_to_ssh(self):
@@ -126,17 +125,15 @@ class Switch(SwitchUtils):
         try:
             ver = self.version
             if ver is None:
-                raise VersionNotFound(
-                    "Unable to get the switch version, please check the log file"
-                )
+                raise VersionNotFound("Unable to get the switch version, please check the log file")
         except KeyError:
-            log.debug(
-                "Got keyerror while getting version, setting connection type to ssh"
-            )
+            log.error("Got keyerror while getting version, setting connection type to ssh")
             self.connection_type = "ssh"
         PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>.*)\)"
         RE_COMP = re.compile(PAT_VER)
         result_ver = RE_COMP.match(ver)
+        supported = "Switch version is " + ver + ",it is 8.4(2a) or above. This is a supported version for using NXAPI"
+        not_supported = "Switch version is " + ver + ",it is below 8.4(2a). This is NOT a supported version for using NXAPI, hence setting connection type to ssh"
         if result_ver:
             try:
                 result_dict = result_ver.groupdict()
@@ -144,83 +141,80 @@ class Switch(SwitchUtils):
                 major = int(result_dict["major"])
                 minor = int(result_dict["minor"])
                 patch = result_dict["patch"]
-                if majorplus > 8 and major > 4 and minor > 2:
-                    log.info(
-                        "Switch version is "
-                        + ver
-                        + ". This is a supported switch version for using NXAPI"
-                    )
-                elif majorplus == 8 and major == 4 and minor == 2:
-                    if patch == "a":
-                        log.info(
-                            "Switch version is "
-                            + ver
-                            + ". This is a supported switch version for using NXAPI"
-                        )
-                    else:
-                        log.info(
-                            "Switch version is not 8.4(2a), setting connection type to ssh"
-                        )
-                        self.connection_type = "ssh"
-                else:
-                    log.info(
-                        "Switch version is not 8.4(2a), setting connection type to ssh"
-                    )
+                if majorplus > 8:
+                    log.info(supported)
+                elif majorplus < 8:
+                    log.warning(not_supported)
                     self.connection_type = "ssh"
+                else:
+                    if major > 4:
+                        log.info(supported)
+                    elif major < 4:
+                        log.warning(not_supported)
+                        self.connection_type = "ssh"
+                    else:
+                        if minor > 2:
+                            log.info(supported)
+                        elif minor < 2:
+                            log.warning(not_supported)
+                            self.connection_type = "ssh"
+                        else:
+                            if not patch:
+                                log.warning(not_supported)
+                                self.connection_type = "ssh"
+                            else:
+                                # it is 842a,842b etc..
+                                log.info(supported)
             except Exception:
-                log.error(
-                    "Got execption while getting the switch version, setting connection type to ssh"
-                )
+                log.error("Got execption while getting the switch version, setting connection type to ssh")
                 self.connection_type = "ssh"
         else:
-            log.error(
-                "Could not get the pattern match for version, setting connection type to ssh"
-            )
+            log.error("Could not get the pattern match for version, setting connection type to ssh")
             self.connection_type = "ssh"
 
-    def _verify_supported_version(self):
-        # Verify that version is 8.4(2) and above
-        ver = self.version
-        PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>.*)\)"
-        RE_COMP = re.compile(PAT_VER)
-        result_ver = RE_COMP.match(ver)
-        if result_ver:
-            try:
-                result_dict = result_ver.groupdict()
-                majorplus = int(result_dict["major_plus"])
-                major = int(result_dict["major"])
-                minor = int(result_dict["minor"])
-                patch = result_dict["patch"]
-                if majorplus >= 8 and major >= 4 and minor >= 2:
-                    log.debug(
-                        "Switch version is "
-                        + ver
-                        + ". This is a supported switch version for SDK"
-                    )
-                else:
-                    raise UnsupportedVersion(
-                        "Switch version: "
-                        + ver
-                        + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
-                    )
-            except KeyError:
-                raise UnsupportedVersion(
-                    "Switch version: "
-                    + ver
-                    + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
-                )
-            except ValueError:
-                raise UnsupportedVersion(
-                    "Switch version: "
-                    + ver
-                    + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
-                )
-        else:
-            raise UnsupportedVersion(
-                "Switch version: "
-                + ver
-                + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
-            )
+    # def _verify_supported_version(self):
+    #     # Verify that version is 8.4(2) and above
+    #     ver = self.version
+    #     PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>.*)\)"
+    #     RE_COMP = re.compile(PAT_VER)
+    #     result_ver = RE_COMP.match(ver)
+    #     if result_ver:
+    #         try:
+    #             result_dict = result_ver.groupdict()
+    #             majorplus = int(result_dict["major_plus"])
+    #             major = int(result_dict["major"])
+    #             minor = int(result_dict["minor"])
+    #             patch = result_dict["patch"]
+    #             if majorplus >= 8 and major >= 4 and minor >= 2:
+    #                 log.debug(
+    #                     "Switch version is "
+    #                     + ver
+    #                     + ". This is a supported switch version for SDK"
+    #                 )
+    #             else:
+    #                 raise UnsupportedVersion(
+    #                     "Switch version: "
+    #                     + ver
+    #                     + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
+    #                 )
+    #         except KeyError:
+    #             raise UnsupportedVersion(
+    #                 "Switch version: "
+    #                 + ver
+    #                 + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
+    #             )
+    #         except ValueError:
+    #             raise UnsupportedVersion(
+    #                 "Switch version: "
+    #                 + ver
+    #                 + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
+    #             )
+    #     else:
+    #         raise UnsupportedVersion(
+    #             "Switch version: "
+    #             + ver
+    #             + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
+    #         )
 
     def is_connection_type_ssh(self):
         return self.connection_type == "ssh"
