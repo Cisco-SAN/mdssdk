@@ -9,7 +9,6 @@ from .connection_manager.connect_netmiko import SSHSession
 from .connection_manager.connect_nxapi import ConnectNxapi
 from .connection_manager.errors import (
     CLIError,
-    UnsupportedVersion,
     VersionNotFound,
     UnsupportedFeature,
     UnsupportedConfig,
@@ -129,11 +128,11 @@ class Switch(SwitchUtils):
         except KeyError:
             log.error("Got keyerror while getting version, setting connection type to ssh")
             self.connection_type = "ssh"
-        PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>.*)\)"
+        PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>[a-z+])?\)(?P<other>.*)"
         RE_COMP = re.compile(PAT_VER)
         result_ver = RE_COMP.match(ver)
-        supported = "Switch version is " + ver + ",it is 8.4(2a) or above. This is a supported version for using NXAPI"
-        not_supported = "Switch version is " + ver + ",it is below 8.4(2a). This is NOT a supported version for using NXAPI, hence setting connection type to ssh"
+        supported = "Switch version is " + ver + ", it is 8.4(2a) or above. This is a supported version for using NXAPI"
+        not_supported = "Switch version is " + ver + ", it is below 8.4(2a). This is NOT a supported version for using NXAPI, hence setting connection type to ssh"
         if result_ver:
             try:
                 result_dict = result_ver.groupdict()
@@ -141,6 +140,7 @@ class Switch(SwitchUtils):
                 major = int(result_dict["major"])
                 minor = int(result_dict["minor"])
                 patch = result_dict["patch"]
+                other = result_dict["other"]
                 if majorplus > 8:
                     log.info(supported)
                 elif majorplus < 8:

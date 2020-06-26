@@ -18,8 +18,8 @@ This library will be useful for automating day to day tasks or developing new to
        
 3) Next download the zip file from the github 
 
-       wget https://github.com/srbharadwaj/mdssdk/archive/master.zip
-
+       wget https://github.com/Cisco-SAN/mdssdk/archive/master.zip
+       
 4) Unzip the file
 
        unzip master.zip 
