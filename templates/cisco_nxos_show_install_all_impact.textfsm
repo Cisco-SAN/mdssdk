@@ -1,0 +1,11 @@
+Value MODULE (\d+)
+Value BOOTABLE (\S+)
+Value IMPACT (disruptive|non-disruptive)
+Value INSTALL_TYPE (\S+)
+Value REASON (.*)
+
+Start
+  ^\s+${MODULE}\s+${BOOTABLE}\s+${IMPACT}\s+${INSTALL_TYPE}${REASON} -> Record
+
+
+

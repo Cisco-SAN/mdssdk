@@ -1,0 +1,33 @@
+Value Filldown FCALIAS_VSAN_ID (\d+)
+Value Filldown FCALIAS_NAME (\S+)
+Value FCALIAS_MEMBER_TYPE (pwwn|fcid|fcalias|symbolic-nodename|fwwn|ip-address|interface|device-alias)
+Value FCALIAS_WWN (([a-f0-9][a-f0-9]:){7}([a-f0-9][a-f0-9]))
+Value FCALIAS_DEV_ALIAS (\S+)
+Value FCALIAS_DEV_TYPE (init|target|both)
+Value FCALIAS_FCID (0x[0-9a-f]+)
+Value FCALIAS_SYMNODENAME (\S+)
+Value FCALIAS_IPADDR (.*)
+Value FCALIAS_INTF_FC (fc[0-9]+/[0-9]+)
+Value FCALIAS_INTF_PORT_CH ([0-9]+)
+Value FCALIAS_DOMAIN_ID (\d+)
+
+Start
+  ^fcalias\s+name\s+${FCALIAS_NAME}\s+vsan\s+${FCALIAS_VSAN_ID} -> Record
+  ^\s\s${FCALIAS_MEMBER_TYPE}\s+.* -> Continue
+  ^\s\spwwn\s+${FCALIAS_WWN}\s*$$ -> Record
+  ^\s\spwwn\s+${FCALIAS_WWN}\s+\[${FCALIAS_DEV_ALIAS}\]\s*$$ -> Record
+  ^\s\spwwn\s+${FCALIAS_WWN}\s+\[${FCALIAS_DEV_ALIAS}\]\s+${FCALIAS_DEV_TYPE}\s*$$ -> Record
+  ^\s\spwwn\s+${FCALIAS_WWN}\s+${FCALIAS_DEV_TYPE}\s*$$ -> Record
+  ^\s\sfcid\s+${FCALIAS_FCID}\s*$$ -> Record
+  ^\s\sfcid\s+${FCALIAS_FCID}\s*${FCALIAS_DEV_TYPE}\s*$$ -> Record
+  ^\s\ssymbolic-nodename\s+${FCALIAS_SYMNODENAME}\s*$$ -> Record
+  ^\s\sfwwn\s+${FCALIAS_WWN}\s*$$ -> Record
+  ^\s\sip-address\s+${FCALIAS_IPADDR}\s*$$ -> Record
+  ^\s\sinterface\s+${FCALIAS_INTF_FC}\s+domain-id\s+${FCALIAS_DOMAIN_ID}\s*$$ -> Record
+  ^\s\sinterface\s+${FCALIAS_INTF_FC}\s+swwn\s+${FCALIAS_WWN}\s*$$ -> Record
+  ^\s\sinterface\s+port-channel\s+${FCALIAS_INTF_PORT_CH}\s+domain-id\s+${FCALIAS_DOMAIN_ID}\s*$$ -> Record
+  ^\s\sinterface\s+port-channel\s+${FCALIAS_INTF_PORT_CH}\s+swwn\s+${FCALIAS_WWN}\s*$$ -> Record
+  ^\s\sdevice-alias\s+${FCALIAS_DEV_ALIAS}\s*$$ -> Record
+  ^\s\sdevice-alias\s+${FCALIAS_DEV_ALIAS}\s*${FCALIAS_DEV_TYPE}\s*$$ -> Record
+
+EOF

@@ -1,0 +1,7 @@
+Value FEATURE (\S+)
+Value INSTANCE (\d+)
+Value STATE (enabled|disabled)
+
+
+Start
+  ^${FEATURE}\s+${INSTANCE}\s+${STATE}.* -> Record

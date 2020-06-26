@@ -1,0 +1,8 @@
+Value MODULE (\d+)
+Value INSTANCE (\d+)
+Value PROCESS (\S+)
+Value PID (\d+)
+Value DATE (.*)
+
+Start
+  ^${MODULE}\s+${INSTANCE}\s+${PROCESS}\s+${PID}\s+${DATE} -> Record
