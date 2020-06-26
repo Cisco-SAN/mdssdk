@@ -117,17 +117,13 @@ class SwitchUtils:
     @property
     def active_zonesets(self):
         """
-        Returns all the vsans present on the switch in dictionary format(vsan-id:vsan object)
+        Returns all the active zonesets present on the switch in dictionary format(vsan-id:zoneset object)
 
-        :return: Returns all the vsans present on the switch in dictionary format(vsan-id:vsan object)
-        :rtype: dict(vsan-id : Vsan)
+        :return: Returns all the active zonesets present on the switch in dictionary format(vsan-id:zoneset object)
+        :rtype: dict(vsan-id : ZoneSet)
         :example:
-            >>> allvsans = switch_obj.vsans
-            >>> print(allvsans)
-            {'1': <mdslib.vsan.Vsan object at 0x10d88a290>, '10': <mdslib.vsan.Vsan object at 0x10d88a1d0>,
-             '11': <mdslib.vsan.Vsan object at 0x10d88a150>,  .....
-             '499': <mdslib.vsan.Vsan object at 0x10bdee650>, '4079': <mdslib.vsan.Vsan object at 0x10bdee0d0>,
-             '4094': <mdslib.vsan.Vsan object at 0x10bdee150>}
+            >>> print(switch_obj.active_zonesets)
+            {2: [<mdssdk.zoneset.ZoneSet object at 0x7f0c6f8b0c50>]}
             >>>
         """
         if self.npv:
