@@ -2,6 +2,7 @@ import unittest
 
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
+from mdssdk.zoneset import ZoneSet
 from tests.test_zone.vars import *
 
 log = logging.getLogger(__name__)
@@ -25,15 +26,16 @@ class TestZoneAttrFulldbZonesetCount(unittest.TestCase):
         self.z = Zone(self.switch, "test_zone", self.id)
 
     def test_fulldb_zoneset_count_read(self):
-        self.z.create()
+        zs = ZoneSet(self.switch, "test_zone", self.id)
+        zs.create()
         log.debug("Full DB Zoneset Count : " + str(self.z.fulldb_zoneset_count))
-        self.assertIsNotNone(self.z.fulldb_zoneset_count)
+        self.assertEqual(1, self.z.fulldb_zoneset_count)
 
     def test_fulldb_zoneset_count_read_nonexisting(self):
         log.debug(
             "Full DB Zoneset Count(nonexisting) : " + str(self.z.fulldb_zoneset_count)
         )
-        self.assertIsNotNone(self.z.fulldb_zoneset_count)
+        self.assertEqual(0, self.z.fulldb_zoneset_count)
 
     def test_fulldb_zoneset_count_write_error(self):
         with self.assertRaises(AttributeError) as e:

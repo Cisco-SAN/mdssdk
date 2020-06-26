@@ -463,6 +463,8 @@ class Zone(object):
             retout = out[0]["fulldb_zone_count"]
         else:
             retout = out.get(get_key(zonekeys.FULLDB_ZC, self._SW_VER), None)
+        if type(retout) is int:
+            return retout
         if retout:
             return int(retout)
         else:
@@ -487,6 +489,8 @@ class Zone(object):
             retout = out[0]["fulldb_zoneset_count"]
         else:
             retout = out.get(get_key(zonekeys.FULLDB_ZSC, self._SW_VER), None)
+        if type(retout) is int:
+            return retout
         if retout:
             return int(retout)
         else:
