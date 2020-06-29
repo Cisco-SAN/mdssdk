@@ -27,11 +27,11 @@ class TestZoneAttrFulldbZoneCount(unittest.TestCase):
     def test_fulldb_zone_count_read(self):
         self.z.create()
         log.debug("Full DB Zone Count : " + str(self.z.fulldb_zone_count))
-        self.assertIsNotNone(self.z.fulldb_zone_count)
+        self.assertEqual(1, self.z.fulldb_zone_count)
 
     def test_fulldb_zone_count_read_nonexisting(self):
         log.debug("Full DB Zone Count(nonexisting) : " + str(self.z.fulldb_zone_count))
-        self.assertIsNotNone(self.z.fulldb_zone_count)
+        self.assertEqual(0, self.z.fulldb_zone_count)
 
     def test_fulldb_zone_count_write_error(self):
         with self.assertRaises(AttributeError) as e:

@@ -42,6 +42,13 @@ This library will be useful for automating day to day tasks or developing new to
         .
         
         
+## Uninstallation Steps
+
+To uninstall mdssdk,
+
+       pip uninstall mdssdk
+       
+
 ## Documentation
 
 * http://mdssdk.readthedocs.io
