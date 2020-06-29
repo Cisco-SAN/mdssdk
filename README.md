@@ -3,6 +3,7 @@
 This library will be useful for automating day to day tasks or developing new tools which involve Cisco MDS switches
 
 * Python version: 3.6 and above
+* Supports both NXAPI and SSH 
 * Apache License, Version 2.0 (the "License")
 
 
