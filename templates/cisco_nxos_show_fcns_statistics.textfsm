@@ -1,0 +1,20 @@
+Value VSAN_ID (\d+)
+Value REGISTRATION_REQUESTS_RECEIVED (\d+) 
+Value DEREGISTRATION_REQUESTS_RECEIVED (\d+) 
+Value QUERIES_RECEIVED (\d+) 
+Value QUERIES_SENT (\d+) 
+Value REJECT_RESPONSES_SENT (\d+) 
+Value RSCNS_RECEIVED (\d+) 
+Value RSCNS_SENT (\d+)
+
+Start
+  ^Name server statistics for vsan ${VSAN_ID}   
+  ^registration requests received = ${REGISTRATION_REQUESTS_RECEIVED}
+  ^deregistration requests received = ${DEREGISTRATION_REQUESTS_RECEIVED}
+  ^queries received = ${QUERIES_RECEIVED}
+  ^queries sent= ${QUERIES_SENT}
+  ^reject responses sent = ${REJECT_RESPONSES_SENT}
+  ^RSCNs received = ${RSCNS_RECEIVED}
+  ^RSCNs sent = ${RSCNS_SENT} -> Record
+
+  

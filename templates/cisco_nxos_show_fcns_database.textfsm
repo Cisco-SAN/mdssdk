@@ -1,0 +1,12 @@
+Value Filldown VSAN_ID (\d+)
+Value Required FCID (\w+)
+Value TYPE (N)
+Value PWWN ([a-fA-F0-9]{2}:[a-fA-F0-9]{2}:[a-fA-F0-9]{2}:[a-fA-F0-9]{2}:[a-fA-F0-9]{2}:[a-fA-F0-9]{2}:[a-fA-F0-9]{2}:[a-fA-F0-9]{2})
+Value VENDOR (\w+)
+Value FC4_TYPE_FEATURE ((([\w\-]+)(:(\w+))?\s?)+)
+
+Start
+  ^VSAN\s${VSAN_ID}  
+  ^${FCID}\s+${TYPE}\s+${PWWN}\s+\(?${VENDOR}?\)?\s+${FC4_TYPE_FEATURE} -> Record
+
+  
