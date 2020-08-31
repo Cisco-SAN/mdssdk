@@ -3,8 +3,11 @@ __author__ = "Suhas Bharadwaj (subharad)"
 import logging
 import re
 import time
+import os
+import sys
 
 from .analytics import Analytics
+from .fcns import Fcns
 from .connection_manager.connect_netmiko import SSHSession
 from .connection_manager.connect_nxapi import ConnectNxapi
 from .connection_manager.errors import (
@@ -17,6 +20,7 @@ from .constants import DEFAULT
 from .nxapikeys import versionkeys, featurekeys
 from .parsers.switch import ShowTopology
 from .utility.switch_utility import SwitchUtils
+from .utility import utils
 from .utility.utils import get_key
 
 log = logging.getLogger(__name__)
@@ -74,16 +78,22 @@ class Switch(SwitchUtils):
     """
 
     def __init__(
-        self,
-        ip_address,
-        username,
-        password,
-        connection_type="https",
-        port=8443,
-        timeout=30,
-        verify_ssl=True,
+            self,
+            ip_address,
+            username,
+            password,
+            connection_type="https",
+            port=8443,
+            timeout=30,
+            verify_ssl=True,
     ):
-        log.info("Switch init method " + ip_address + " connection_type: " + connection_type)
+        log.debug("Switch init method " + ip_address + " connection_type: " + connection_type)
+        # Check if "NET_TEXTFSM" is set
+        if "NET_TEXTFSM" not in os.environ:
+            msg = "ERROR!! SDK is not installed correctly (NET_TEXTFSM is not set), please uninstall and follow the correct instructions from https://mdssdk.readthedocs.io/en/latest/readme.html#installation-steps"
+            log.error(msg)
+            sys.exit(msg)
+
         self.__ip_address = ip_address
         self.__username = username
         self.__password = password
@@ -103,21 +113,22 @@ class Switch(SwitchUtils):
                 verify_ssl=verify_ssl,
             )
             log.info("Along with NXAPI opening up a parallel ssh connection for switch with ip " + self.__ip_address)
+            self._set_connection_type_based_on_version()
 
         # Connect to ssh
         self.connect_to_ssh()
-        self._set_connection_type_based_on_version()
-        log.info("is_connection_type_ssh " + str(self.is_connection_type_ssh()))
+
+        log.debug("is_connection_type_ssh " + str(self.is_connection_type_ssh()))
 
     def connect_to_ssh(self):
-        log.info("Opening up a ssh connection for switch with ip " + self.__ip_address)
+        log.debug("Opening up a ssh connection for switch with ip " + self.__ip_address)
         self._ssh_handle = SSHSession(
             host=self.__ip_address,
             username=self.__username,
             password=self.__password,
             timeout=self.timeout,
         )
-        log.info("Finished up a ssh connection for switch with ip " + self.__ip_address)
+        log.debug("Finished up a ssh connection for switch with ip " + self.__ip_address)
 
     def _set_connection_type_based_on_version(self):
         log.info("Checking version on the switch with ip " + self.__ip_address)
@@ -131,8 +142,8 @@ class Switch(SwitchUtils):
         PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>[a-z+])?\)(?P<other>.*)"
         RE_COMP = re.compile(PAT_VER)
         result_ver = RE_COMP.match(ver)
-        supported = "Switch version is " + ver + ", it is 8.4(2a) or above. This is a supported version for using NXAPI"
-        not_supported = "Switch version is " + ver + ", it is below 8.4(2a). This is NOT a supported version for using NXAPI, hence setting connection type to ssh"
+        supported = "Ip: " + self.__ip_address + " Version: " + ver + ", it is 8.4(2a) or above. This is a supported version for using NXAPI"
+        not_supported = "Ip: " + self.__ip_address + " Version: " + ver + ", it is below 8.4(2a). This is NOT a supported version for using NXAPI, hence setting connection type to ssh"
         if result_ver:
             try:
                 result_dict = result_ver.groupdict()
@@ -172,49 +183,6 @@ class Switch(SwitchUtils):
             log.error("Could not get the pattern match for version, setting connection type to ssh")
             self.connection_type = "ssh"
 
-    # def _verify_supported_version(self):
-    #     # Verify that version is 8.4(2) and above
-    #     ver = self.version
-    #     PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>.*)\)"
-    #     RE_COMP = re.compile(PAT_VER)
-    #     result_ver = RE_COMP.match(ver)
-    #     if result_ver:
-    #         try:
-    #             result_dict = result_ver.groupdict()
-    #             majorplus = int(result_dict["major_plus"])
-    #             major = int(result_dict["major"])
-    #             minor = int(result_dict["minor"])
-    #             patch = result_dict["patch"]
-    #             if majorplus >= 8 and major >= 4 and minor >= 2:
-    #                 log.debug(
-    #                     "Switch version is "
-    #                     + ver
-    #                     + ". This is a supported switch version for SDK"
-    #                 )
-    #             else:
-    #                 raise UnsupportedVersion(
-    #                     "Switch version: "
-    #                     + ver
-    #                     + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
-    #                 )
-    #         except KeyError:
-    #             raise UnsupportedVersion(
-    #                 "Switch version: "
-    #                 + ver
-    #                 + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
-    #             )
-    #         except ValueError:
-    #             raise UnsupportedVersion(
-    #                 "Switch version: "
-    #                 + ver
-    #                 + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
-    #             )
-    #     else:
-    #         raise UnsupportedVersion(
-    #             "Switch version: "
-    #             + ver
-    #             + "\n SDK does not support this switch version. Supported version are 8.4(2) and above"
-    #         )
 
     def is_connection_type_ssh(self):
         return self.connection_type == "ssh"
@@ -293,8 +261,10 @@ class Switch(SwitchUtils):
             False
             >>>
         """
-        return self.feature("npv")
-        # return self.__is_npv_switch()
+        # print("Getting npv")
+        out = self.feature("npv")
+        # print(out)
+        return out
 
     @property
     def version(self):
@@ -438,7 +408,7 @@ class Switch(SwitchUtils):
 
         """
 
-        ff = self.form_factor
+        ff = self.form_factor.lower()
         if ff in ["9706", "9710", "9718"]:
             mods = self.modules
             for modnum, eachmod in mods.items():
@@ -447,20 +417,22 @@ class Switch(SwitchUtils):
                 elif "Supervisor Module-4" in eachmod.type:
                     return "m9700-sf4ek9"
             return None
-        elif "9132T" in ff:
+        elif "9132T".lower() in ff:
             return "m9100-s6ek9"
-        elif "9148S" in ff:
+        elif "9148S".lower() in ff:
             return "m9100-s5ek9"
-        elif "9148T" in ff:
+        elif "9148T".lower() in ff:
             return "m9148-s6ek9"
-        elif "9250i" in ff:
+        elif "9250i".lower() in ff:
             return "m9250-s5ek9"
-        elif "9396S" in ff:
+        elif "9396S".lower() in ff:
             return "m9300-s1ek9"
-        elif "9396T" in ff:
+        elif "9396T".lower() in ff:
             return "m9300-s2ek9"
-        elif "9148" in ff:
+        elif "9148".lower() in ff:
             return "m9100-s3ek9"
+        elif "9220i".lower() in ff:
+            return "m9220-s7ek9"
         else:
             return None
 
@@ -575,9 +547,14 @@ class Switch(SwitchUtils):
         if enable is None:
             log.debug("Get the status of the feature " + name)
             cmd = "show feature"
+            # print("Get the status of the feature " + name)
+            # print(self.is_connection_type_ssh())
             out = self.show(cmd)
+            # print(out)
+
             # Bug doesnt work on npv, NXOS needs to fix
             if self.is_connection_type_ssh():
+                # print("--Get the status of the feature " + name)
                 for eachrow in out:
                     if eachrow["feature"] == name:
                         if eachrow["state"] == "enabled":
@@ -701,19 +678,26 @@ class Switch(SwitchUtils):
         """
         log.debug("Show cmd to be sent is " + " -- " + command)
         if self.is_connection_type_ssh() or use_ssh:
-            outlines, error = self._ssh_handle.show(command, timeout)
+            if raw_text:
+                textfsm = False
+            else:
+                textfsm = True
+            outlines, error = self._ssh_handle.show(command, timeout, use_textfsm=textfsm)
+            # print("IN show")
+            # print(error)
+            # print(outlines)
             if error is not None:
                 raise CLIError(command, error)
             if raw_text:
                 return "\n".join(outlines)
             return outlines
-
-        commands = [command]
-        list_result = self._show_list(commands, raw_text)
-        if list_result:
-            return list_result[0]
         else:
-            return {}
+            commands = [command]
+            list_result = self._show_list(commands, raw_text)
+            if list_result:
+                return list_result[0]
+            else:
+                return {}
 
     def _show_list(self, commands, raw_text=False, use_ssh=False):
         """
@@ -1083,37 +1067,19 @@ class Switch(SwitchUtils):
         log.info(self.ipaddr + ": Basic info is correct after " + action_string)
         return ("SUCCESS", None)
 
-    def get_peer_switches(self):
-        peer_sw_list = []
-        shtopoout = self.show("show topology", raw_text=True)
-        sh = ShowTopology(shtopoout.splitlines())
-        for vsan, interfacelist in sh.parse_data.items():
-            for eachinterface in interfacelist:
-                peer_sw_ip = eachinterface["peer_ip"]
-                peer_sw_list.append(peer_sw_ip)
-        peerlist = list(dict.fromkeys(peer_sw_list))
-        log.debug("Peer NPIV list of switch : " + self.ipaddr + " are: ")
-        log.debug(peerlist)
-        return peerlist
-
-    def get_peer_npv_switches(self):
-        retout = []
-        try:
-            fcnsout = self.show("show fcns database detail")["TABLE_fcns_vsan"][
-                "ROW_fcns_vsan"
-            ]
-        except KeyError:
+    def discover_peer_npv_switches(self):
+        if self.npv:
+            log.error("This is an NPV switch, cannot discover peer switches using NPV switch")
             return None
-        if type(fcnsout) is dict:
-            fcnsout = [fcnsout]
-        for eachline in fcnsout:
-            temp = eachline["TABLE_fcns_database"]["ROW_fcns_database"]
-            # print(temp)
-            if type(temp["fc4_types_fc4_features"]) is str:
-                if temp["fc4_types_fc4_features"].strip() == "npv":
-                    ip = temp["node_ip_addr"]
-                    retout.append(ip)
-        peerlist = list(dict.fromkeys(retout))
-        log.debug("Peer NPV list of switch : " + self.ipaddr + " are: ")
-        log.debug(peerlist)
-        return peerlist
+        peer_ip_list = utils._run_show_fcns_for_npv(self)
+        return list(set(peer_ip_list))
+
+    def discover_peer_switches(self):
+        """
+        :return: list of switch ips discovered
+        """
+        if self.npv:
+            log.error("This is an NPV switch, cannot discover peer switches using NPV switch")
+            return None
+        peer_ip_list = utils._run_show_topo_for_npiv(self)
+        return list(set(peer_ip_list))

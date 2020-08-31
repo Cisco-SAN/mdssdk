@@ -25,6 +25,7 @@ class SSHSession(object):
             "password": password,
             "timeout": 60,
         }
+        self.anyerror = False
         self._connect()
 
     def __repr__(self):
@@ -42,16 +43,17 @@ class SSHSession(object):
             pass
 
     def _reconnect(self):
-        log.debug("Inside reconnect")
+        log.debug("Inside reconnect " + self._host)
         self._disconnect()
         self._connect()
 
     def _disconnect(self):
-        log.debug("Inside disconnect")
-        self._connection.disconnect()
+        if not self.anyerror:
+            log.debug("Inside disconnect " + self._host)
+            self._connection.disconnect()
 
     def _connect(self):
-        log.debug("Inside Connect")
+        log.debug("Inside Connect " + self._host)
         self._connection = ConnectHandler(**self._cisco_device)
         self.prompt = self._connection.find_prompt()
         log.debug("Prompt is " + self.prompt)
@@ -67,13 +69,13 @@ class SSHSession(object):
                 return True
         return False
 
-    def show(self, cmd, timeout=100, expect_string=None):
+    def show(self, cmd, timeout=100, expect_string=None, use_textfsm=True):
         df = int(timeout / 100)
         output = self._connection.send_command(
             cmd,
             delay_factor=df,
             expect_string=expect_string,
-            use_textfsm=True,
+            use_textfsm=use_textfsm,
             strip_prompt=True,
         )
         if type(output) == str:

@@ -1,0 +1,11 @@
+{
+  "checks_default": [
+    "cfs",
+    "module",
+    "interface"
+  ],
+  "checks_user": [
+    "flogi",
+    "fcns"
+  ]
+}

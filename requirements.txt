@@ -3,3 +3,5 @@ paramiko
 m2r
 sphinx== 2.4.2
 netmiko==3.1.0
+prettytable
+pyinputplus
