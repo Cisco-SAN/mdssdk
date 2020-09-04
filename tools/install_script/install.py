@@ -69,7 +69,7 @@ log.debug("npv req: " + str(npv_req))
 log.debug("upgver: " + upgver)
 log.info("Discovering fabric.. Please wait..")
 try:
-    s = Switch(swip, uname, pw, connection_type='ssh')
+    s = Switch(swip, uname, pw, connection_type='ssh', timeout=600)
 except Exception as e:
     print("ERROR!! Could not connect to the seed switch via ssh. Please check the connection.")
     log.exception(e)
@@ -81,7 +81,7 @@ if s.npv:
     log.debug(msg)
     exit()
 
-f1 = Fabric(swip, uname, pw, connection_type='ssh')
+f1 = Fabric(swip, uname, pw, connection_type='ssh', timeout=600)
 f1.all_switches_in_fabric(discover_npv=npv_req)
 
 allsws = f1.switches
@@ -119,8 +119,8 @@ while True:
 x.clear_rows()
 # Start upgrade checks threads
 for sw in swdetail_list:
-    sw.set_thread_get_upg_img_status(upgver)
-    sw.t.start()
+    # sw.set_thread_get_upg_img_status(upgver)
+    # sw.t.start()
     x.add_row([sw.name, sw.ip, sw.ver, sw.npv, sw.retstr])
 # Update table, if thread is complete then exit
 while True:
@@ -138,10 +138,31 @@ while True:
         utils.print_table_in_same_place(len(swdetail_list), x)
         break
 
-swdetail_upgrade.append(sw)
 if pc:
     print("Doing checks")
-    # dc_obj = Do_Checks(swdetail_upgrade)
+    dc_obj = Do_Checks(swdetail_upgrade)
+
+# Now start the upgrade
+# Clear rows in table
+x.clear_rows()
+# Start upgrade checks threads
+for sw in swdetail_upgrade:
+    sw.set_thread_to_start_upgrade()
+    sw.t.start()
+    x.add_row([sw.name, sw.ip, sw.ver, sw.npv, sw.retstr])
+
+while True:
+    exit = True
+    utils.print_table_in_same_place(len(swdetail_upgrade), x)
+    x.clear_rows()
+    for sw in swdetail_upgrade:
+        if sw.t.is_alive():
+            exit = False
+        x.add_row([sw.name, sw.ip, sw.ver, sw.npv, sw.retstr])
+        time.sleep(0.25)
+    if exit:
+        utils.print_table_in_same_place(len(swdetail_upgrade), x)
+        break
 
 log.info("Done with the script..")
 END = time.perf_counter()

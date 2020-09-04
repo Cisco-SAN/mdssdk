@@ -18,12 +18,13 @@ class SSHSession(object):
         password which can be used to run commands.
         """
         self._host = host
+        self.timeout = timeout
         self._cisco_device = {
             "device_type": "cisco_nxos",
             "host": self._host,
             "username": username,
             "password": password,
-            "timeout": 60,
+            "timeout": self.timeout,
         }
         self.anyerror = False
         self._connect()
@@ -69,8 +70,13 @@ class SSHSession(object):
                 return True
         return False
 
-    def show(self, cmd, timeout=100, expect_string=None, use_textfsm=True):
-        df = int(timeout / 100)
+    def show(self, cmd, timeout=None, expect_string=None, use_textfsm=True):
+        if timeout is None:
+            df = 1
+        elif timeout <= self.timeout:
+            df = 1
+        else:
+            df = int(self.timeout / timeout)
         output = self._connection.send_command(
             cmd,
             delay_factor=df,

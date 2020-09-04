@@ -26,6 +26,17 @@ class SwitchDetails(object):
         self.t = threading.Thread(target=self.get_upg_img_status, args=(upgver,))
         return self.t
 
+    def set_thread_to_start_upgrade(self):
+        self.t = threading.Thread(target=self.start_install, args=())
+
+    def start_install(self):
+        self.retstr = "Starting install..Please Wait.."
+        cmd = "terminal dont-ask"
+        self.swobj.show(cmd)
+        install_cmd = "install all kickstart " + self.kickupgimg + " system " + self.sysupgimg
+        self.swobj.show(install_cmd, expect_string="Performing configuration copy.")
+        self.retstr = "Upgrade complete!!!!"
+
     def collect_basic_info(self):
         self.ver = self.swobj.version
         self.npv = self.swobj.npv

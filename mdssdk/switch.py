@@ -65,7 +65,7 @@ class Switch(SwitchUtils):
     :type password: str
     :param connection_type: connection type 'http' or 'https'(optional, default: 'https')
     :type connection_type: str
-    :param port: port number (optional, default: 8443)
+    :param port: port number (optional, default: 8443 for https and 8080 for http)
     :type port: int
     :param timeout: timeout period in seconds (optional, default: 30)
     :type timeout: int
@@ -83,7 +83,7 @@ class Switch(SwitchUtils):
             username,
             password,
             connection_type="https",
-            port=8443,
+            port=None,
             timeout=30,
             verify_ssl=True,
     ):
@@ -98,19 +98,25 @@ class Switch(SwitchUtils):
         self.__username = username
         self.__password = password
         self.connection_type = connection_type
-        self.port = port
+        if port is None:
+            if connection_type == 'https':
+                self.port == 8443
+            elif connection_type == 'http':
+                self.port == 8080
+        else:
+            self.port = port
         self.timeout = timeout
         self.__verify_ssl = verify_ssl
 
         if self.connection_type != "ssh":
-            log.info("Opening up a nxapi connection for switch with ip " + ip_address)
+            log.info("Opening up a nxapi connection for switch with ip " + self.__ip_address)
             self.__connection = ConnectNxapi(
-                ip_address,
-                username,
-                password,
+                host=self.__ip_address,
+                username=self.__username,
+                password=self.__password,
                 transport=connection_type,
-                port=port,
-                verify_ssl=verify_ssl,
+                port=self.port,
+                verify_ssl=self.__verify_ssl,
             )
             log.info("Along with NXAPI opening up a parallel ssh connection for switch with ip " + self.__ip_address)
             self._set_connection_type_based_on_version()
@@ -230,7 +236,7 @@ class Switch(SwitchUtils):
 
         """
 
-        return self.show("show switchname", raw_text=True).strip()
+        return self.show(command="show switchname", raw_text=True).strip()
 
     @name.setter
     def name(self, swname):
@@ -284,11 +290,11 @@ class Switch(SwitchUtils):
         cmd = "show version"
         log.debug("Running version API")
         if self.is_connection_type_ssh():
-            outlines = self.show(cmd)
+            outlines = self.show(command=cmd)
             ver = outlines[0]["version"]
             log.debug("ssh: " + ver)
         else:
-            out = self.show(cmd)
+            out = self.show(command=cmd)
             if not out:
                 raise CLIError(
                     cmd,
@@ -325,12 +331,12 @@ class Switch(SwitchUtils):
         """
         cmd = "show version"
         if self.is_connection_type_ssh():
-            outlines = self.show(cmd)
+            outlines = self.show(command=cmd)
             return outlines[0]["model"]
             # shver = ShowVersion(outlines)
             # return shver.model
         else:
-            out = self.show(cmd)
+            out = self.show(command=cmd)
             if not out:
                 return None
             return out[get_key(versionkeys.CHASSIS_ID, self._SW_VER)]
@@ -455,12 +461,12 @@ class Switch(SwitchUtils):
 
         cmd = "show version"
         if self.is_connection_type_ssh():
-            outlines = self.show(cmd)
+            outlines = self.show(command=cmd)
             return outlines[0]["kickstart_image"]
             # shver = ShowVersion(outlines)
             # return shver.kickstart_image
 
-        out = self.show(cmd)
+        out = self.show(command=cmd)
         if not out:
             return None
         return out[get_key(versionkeys.KICK_FILE, self._SW_VER)]
@@ -483,12 +489,12 @@ class Switch(SwitchUtils):
         """
         cmd = "show version"
         if self.is_connection_type_ssh():
-            outlines = self.show(cmd)
+            outlines = self.show(command=cmd)
             return outlines[0]["system_image"]
             # shver = ShowVersion(outlines)
             # return shver.system_image
 
-        out = self.show(cmd)
+        out = self.show(command=cmd)
         if not out:
             return None
         return out[get_key(versionkeys.ISAN_FILE, self._SW_VER)]
@@ -549,7 +555,7 @@ class Switch(SwitchUtils):
             cmd = "show feature"
             # print("Get the status of the feature " + name)
             # print(self.is_connection_type_ssh())
-            out = self.show(cmd)
+            out = self.show(command=cmd)
             # print(out)
 
             # Bug doesnt work on npv, NXOS needs to fix
@@ -607,7 +613,7 @@ class Switch(SwitchUtils):
 
         """
 
-        out = self.show("show cores", use_ssh=True)
+        out = self.show(command="show cores", use_ssh=True)
         log.debug(out)
         if type(out[0]) == str:
             return None
@@ -658,13 +664,13 @@ class Switch(SwitchUtils):
         return text_response_list
 
     def _show_ssh(self, command, timeout, expect_string):
-        log.debug("_show_ssh : Show cmd to be sent is " + " -- " + command)
+        log.debug(self.__ip_address + ":_show_ssh : Show cmd to be sent is " + " -- " + command)
         outlines, error = self._ssh_handle.show(command, timeout, expect_string)
         if error is not None:
             raise CLIError(command, error)
         return outlines
 
-    def show(self, command, raw_text=False, use_ssh=False, timeout=60):
+    def show(self, command, raw_text=False, use_ssh=False, expect_string=None, timeout=60):
         """
         Send a show command to the switch
 
@@ -676,13 +682,13 @@ class Switch(SwitchUtils):
         :return: The output of the show command, which could be raw text(str) or structured data(dict).
         :rtype: dict
         """
-        log.debug("Show cmd to be sent is " + " -- " + command)
+        log.debug(self.__ip_address + ":Show cmd to be sent is " + " -- " + command)
         if self.is_connection_type_ssh() or use_ssh:
             if raw_text:
                 textfsm = False
             else:
                 textfsm = True
-            outlines, error = self._ssh_handle.show(command, timeout, use_textfsm=textfsm)
+            outlines, error = self._ssh_handle.show(command, timeout, expect_string=expect_string, use_textfsm=textfsm)
             # print("IN show")
             # print(error)
             # print(outlines)
@@ -711,7 +717,7 @@ class Switch(SwitchUtils):
         :return: The output of the show command, which could be raw text(str) or structured data(dict).
         :rtype: list
         """
-        log.debug("Show cmds to be sent are " + " -- ".join(commands))
+        log.debug(self.__ip_address + ":Show cmds to be sent are " + " -- ".join(commands))
         if self.is_connection_type_ssh() or use_ssh:
             retdict = {}
             for cmd in commands:
@@ -755,7 +761,7 @@ class Switch(SwitchUtils):
         :return: command output
 
         """
-        log.debug("Config cmd to be sent is " + " -- " + command)
+        log.debug(self.__ip_address + ":Config cmd to be sent is " + " -- " + command)
         if self.is_connection_type_ssh() or use_ssh:
             outlines, error = self._ssh_handle.config(command)
             if error is not None:
@@ -778,7 +784,7 @@ class Switch(SwitchUtils):
         :return: command output
 
         """
-        log.debug("Config cmds to be sent are " + " -- ".join(commands))
+        log.debug(self.__ip_address + ":Config cmds to be sent are " + " -- ".join(commands))
         if self.is_connection_type_ssh() or use_ssh:
             retdict = {}
             for cmd in commands:
@@ -795,9 +801,9 @@ class Switch(SwitchUtils):
 
         return_list = self._cli_command(commands, rpc=rpc, method=method)
 
-        log.debug("Config commands sent via nxapi are :")
+        log.debug(self.__ip_address + ":Config commands sent via nxapi are :")
         log.debug(commands)
-        log.debug("Result got via nxapi was :")
+        log.debug(self.__ip_address + ":Result got via nxapi was :")
         log.debug(return_list)
 
         return return_list
@@ -820,7 +826,7 @@ class Switch(SwitchUtils):
             action_string = "reload switch"
             if copyrs:
                 log.info("Reloading switch after copy running-config startup-config")
-                crs = self.show("copy running-config startup-config", raw_text=True)
+                crs = self.show(command="copy running-config startup-config", raw_text=True)
                 if "Copy complete" in crs:
                     log.info("copy running-config startup-config is successful")
                 else:
@@ -841,7 +847,7 @@ class Switch(SwitchUtils):
                     + mod
                     + " after copy running-config startup-config"
                 )
-                crs = self.show("copy running-config startup-config", raw_text=True)
+                crs = self.show(command="copy running-config startup-config", raw_text=True)
                 if "Copy complete" in crs:
                     log.info("copy running-config startup-config is successful")
                 else:
@@ -858,71 +864,80 @@ class Switch(SwitchUtils):
         out = self._verify_basic_stuff(cmd, action_string, timeout)
         return out
 
-    def issu(self, kickstart, system, timeout=1800, post_issu_checks=True):
-        self.issu_status = None
-        # Set the switch timeout
-        if timeout < 1800:
-            log.info(
-                self.ipaddr + ": Timeout for ISSU cannot be less than 10 mins (600 sec)"
-            )
-            timeout = 1800
-
-        # Check if any compatibilty issues
-        # show incompatibility-all system bootflash:/m9700-sf4ek9-mz.8.4.1.bin
-        cmd = "show incompatibility-all system " + system
-        out = self.show(cmd, raw_text=True)
-        alllines = out.splitlines()
-        noincompat = 0
-        for eachline in alllines:
-            if "No incompatible configurations" in eachline:
-                noincompat += 1
-        if noincompat != 2:
-            log.error(
-                self.ipaddr
-                + ": Incompatibilty check failed, please fix the incompatibilities. Skipping upgrade"
-            )
-            log.error(out)
-            return ("FAILED", out)
-        print_and_log(
-            self.ipaddr
-            + ": No incompatible configurations, so continuing with ISSU checks"
-        )
-
-        # Check impact status to determine if its disruptive or non-disruptive
-        # show install all impact kickstart m9700-sf4ek9-kickstart-mz.8.4.1.bin system m9700-sf4ek9-mz.8.4.1.bin
-        cmd = "show install all impact kickstart " + kickstart + " system " + system
-        out = self.show(cmd, raw_text=True)
-        alllines = out.splitlines()
-        nondisruptive = False
-        for eachline in alllines:
-            if "non-disruptive" in eachline:
-                nondisruptive = True
-                log.debug(
-                    self.ipaddr
-                    + ": 'show install all impact' was success, continuing with non-disruptive ISSU "
-                )
-                break
-        if not nondisruptive:
-            log.error(
-                self.ipaddr
-                + ": ERROR!!! Cannot do non-disruptive upgrade. Skipping upgrade"
-            )
-            log.error(out)
-            return ("FAILED", out)
-
-        log.info(self.ipaddr + ": Starting install all cmd for non-disruptive ISSU")
+    def issu(self, kickstart, system, timeout=1800, expect_string=r"Performing configuration copy."):
         cmd = (
-            "terminal dont-ask ; install all kickstart "
-            + kickstart
-            + " system "
-            + system
+                "terminal dont-ask ; install all kickstart "
+                + kickstart
+                + " system "
+                + system
         )
-        if post_issu_checks:
-            status, out = self._verify_basic_stuff(cmd, "install all", timeout)
-        else:
-            status, out = self._execute_install_all(cmd, timeout)
-        self.issu_status = status
-        return status, out
+        self.show(command=cmd, expect_string=expect_string, timeout=timeout)
+
+    # def issu(self, kickstart, system, timeout=1800, post_issu_checks=True):
+    #     self.issu_status = None
+    #     # Set the switch timeout
+    #     if timeout < 1800:
+    #         log.info(
+    #             self.ipaddr + ": Timeout for ISSU cannot be less than 10 mins (600 sec)"
+    #         )
+    #         timeout = 1800
+    #
+    #     # Check if any compatibilty issues
+    #     # show incompatibility-all system bootflash:/m9700-sf4ek9-mz.8.4.1.bin
+    #     cmd = "show incompatibility-all system " + system
+    #     out = self.show(cmd, raw_text=True)
+    #     alllines = out.splitlines()
+    #     noincompat = 0
+    #     for eachline in alllines:
+    #         if "No incompatible configurations" in eachline:
+    #             noincompat += 1
+    #     if noincompat != 2:
+    #         log.error(
+    #             self.ipaddr
+    #             + ": Incompatibilty check failed, please fix the incompatibilities. Skipping upgrade"
+    #         )
+    #         log.error(out)
+    #         return ("FAILED", out)
+    #     print_and_log(
+    #         self.ipaddr
+    #         + ": No incompatible configurations, so continuing with ISSU checks"
+    #     )
+    #
+    #     # Check impact status to determine if its disruptive or non-disruptive
+    #     # show install all impact kickstart m9700-sf4ek9-kickstart-mz.8.4.1.bin system m9700-sf4ek9-mz.8.4.1.bin
+    #     cmd = "show install all impact kickstart " + kickstart + " system " + system
+    #     out = self.show(cmd, raw_text=True)
+    #     alllines = out.splitlines()
+    #     nondisruptive = False
+    #     for eachline in alllines:
+    #         if "non-disruptive" in eachline:
+    #             nondisruptive = True
+    #             log.debug(
+    #                 self.ipaddr
+    #                 + ": 'show install all impact' was success, continuing with non-disruptive ISSU "
+    #             )
+    #             break
+    #     if not nondisruptive:
+    #         log.error(
+    #             self.ipaddr
+    #             + ": ERROR!!! Cannot do non-disruptive upgrade. Skipping upgrade"
+    #         )
+    #         log.error(out)
+    #         return ("FAILED", out)
+    #
+    #     log.info(self.ipaddr + ": Starting install all cmd for non-disruptive ISSU")
+    #     cmd = (
+    #         "terminal dont-ask ; install all kickstart "
+    #         + kickstart
+    #         + " system "
+    #         + system
+    #     )
+    #     if post_issu_checks:
+    #         status, out = self._verify_basic_stuff(cmd, "install all", timeout)
+    #     else:
+    #         status, out = self._execute_install_all(cmd, timeout)
+    #     self.issu_status = status
+    #     return status, out
 
     def _execute_install_all(self, cmd, timeout):
         # Send install all cmd
@@ -969,7 +984,7 @@ class Switch(SwitchUtils):
 
             # show install all status - Install has been successful
             cmd = "show install all status"
-            out = self.show(cmd, raw_text=True)
+            out = self.show(command=cmd, raw_text=True)
             log.debug(out)
             alllines = out.splitlines()
             for eachline in alllines:
@@ -989,8 +1004,8 @@ class Switch(SwitchUtils):
         print_and_log(
             self.ipaddr + ": Collecting basic info before '" + action_string + "'"
         )
-        shmod_before = self.show("show module", raw_text=True).split("\n")
-        shintb_before = self.show("show interface brief", raw_text=True).split("\n")
+        shmod_before = self.show(command="show module", raw_text=True).split("\n")
+        shintb_before = self.show(command="show interface brief", raw_text=True).split("\n")
         print_and_log(self.ipaddr + ": Started " + action_string + " . Please wait...")
         if "install all" in action_string:
             status, error = self._execute_install_all(cmd, timeout)
@@ -1003,8 +1018,8 @@ class Switch(SwitchUtils):
         print_and_log(
             self.ipaddr + ": Collecting basic info after '" + action_string + "'"
         )
-        shmod_after = self.show("show module", raw_text=True).split("\n")
-        shintb_after = self.show("show interface brief", raw_text=True).split("\n")
+        shmod_after = self.show(command="show module", raw_text=True).split("\n")
+        shintb_after = self.show(command="show interface brief", raw_text=True).split("\n")
 
         cores = self.cores
         if cores is not None:

@@ -2,12 +2,11 @@ from mdssdk.switch import Switch
 import json
 import time
 
-# sw = Switch('10.126.94.216','admin','nbv!2345',connection_type='ssh')
+sw = Switch('10.126.94.216', 'admin', 'nbv!2345', connection_type='ssh')
 
-sw = Switch('10.197.106.40', 'admin', 'nbv_!2345', connection_type='ssh')
-print(sw.version)
 
-exit()
+# sw = Switch('10.197.106.40', 'admin', 'nbv_!2345', connection_type='ssh')
+# print(sw.version)
 
 
 def checkACLCC(sw):
@@ -65,9 +64,7 @@ while True:
     print("------------------- Iteration ---------- " + str(counter))
     checkACLCC(sw)
     # interfaces = ipsint + fcipint
-    interfaces = ipsint
-    # interfaces = ['fcip4', 'fcip5', 'fcip6', 'fcip10', 'fcip11', 'fcip12', 'fcip30', 'fcip31', 'fcip32', 'fcip40',
-    #              'fcip41', 'fcip42']
+    interfaces = fcipint
     for intf in interfaces:
         print("Shutting down.................... " + intf)
         sw.config("interface " + intf + " ;  shutdown")
