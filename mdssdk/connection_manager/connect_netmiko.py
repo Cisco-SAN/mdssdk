@@ -76,7 +76,7 @@ class SSHSession(object):
         elif timeout <= self.timeout:
             df = 1
         else:
-            df = int(self.timeout / timeout)
+            df = int(timeout / self.timeout)
         output = self._connection.send_command(
             cmd,
             delay_factor=df,

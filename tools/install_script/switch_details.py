@@ -26,16 +26,21 @@ class SwitchDetails(object):
         self.t = threading.Thread(target=self.get_upg_img_status, args=(upgver,))
         return self.t
 
-    def set_thread_to_start_upgrade(self):
-        self.t = threading.Thread(target=self.start_install, args=())
+    def set_thread_to_start_upgrade(self, timeout=1800):
+        self.t = threading.Thread(target=self.start_install, args=(timeout,))
 
-    def start_install(self):
-        self.retstr = "Starting install..Please Wait.."
-        cmd = "terminal dont-ask"
-        self.swobj.show(cmd)
-        install_cmd = "install all kickstart " + self.kickupgimg + " system " + self.sysupgimg
-        self.swobj.show(install_cmd, expect_string="Performing configuration copy.")
-        self.retstr = "Upgrade complete!!!!"
+    def start_install(self, timeout=1800):
+        self.install_status = "Install Starting.."
+        if self.swobj.issu(self.kickupgimg, self.sysupgimg, timeout=timeout):
+            count = 1
+            while count <= timeout:
+                self.install_status = self.swobj.get_install_all_status()
+                if "Install has been successful" in self.install_status:
+                    break
+                # print(count)
+                # print("CURR STATE: " + self.get_install_all_status())
+                count = count + 1
+                time.sleep(1)
 
     def collect_basic_info(self):
         self.ver = self.swobj.version
@@ -68,7 +73,9 @@ class SwitchDetails(object):
         self.done_upgrade_checks = True
 
     def is_upgrade_required(self, upgver):
-        if self.ver == upgver:
+        ver_format = self.ver.replace('(', '.').replace(')', '')
+        upgver_format = upgver.replace('(', '.').replace(')', '')
+        if ver_format == upgver_format:
             self.retstr = utils.RED("Switch version is same as the upgrade version - " + upgver + ".")
             return False
         return True

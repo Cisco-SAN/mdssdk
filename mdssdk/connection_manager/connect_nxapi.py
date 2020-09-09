@@ -45,6 +45,7 @@ class ConnectNxapi(object):
             log.debug(
                 "'verify_ssl' flag is set to True, so hopefully SSL connections is setup"
             )
+        self.send_request("show version")
 
     def _build_payload(self, commands, rpc_version, method):
 
@@ -108,6 +109,7 @@ class ConnectNxapi(object):
         )
         log.debug("req response")
         log.debug(response)
+        # response.raise_for_status()
         response_list = response.json()
 
         if isinstance(response_list, dict):

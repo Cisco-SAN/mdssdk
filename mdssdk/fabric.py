@@ -74,7 +74,8 @@ class Fabric(object):
                 try:
                     log.debug(fut.result())
                 except Exception as e:
-                    log.debug(str(e))
+                    log.exception("Executor Exception")
+                    # log.debug(str(e))
                     # print("Got exception")
                     # print(str(e))
                     # print(type(e))

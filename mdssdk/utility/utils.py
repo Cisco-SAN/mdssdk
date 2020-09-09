@@ -60,10 +60,12 @@ def _run_show_fcns_for_npv(sw):
     # Show fcns
     log.debug("Fcns")
     if sw.is_connection_type_ssh():
-        out = sw.show("show fcns database detail  | i node-ip | ex 0.0.0.0")
+        out = sw.show("show fcns database detail  | i node-ip | ex 0.0.0.0", raw_text=True).split("\n")
         if out:
             for eachline in out:
-                peer_ip_list.append(eachline.split(':')[1])
+                if ":" in eachline:
+                    # print(eachline)
+                    peer_ip_list.append(eachline.split(':')[1])
     else:
         fcns = Fcns(sw)
         out = fcns.database(detail=True)

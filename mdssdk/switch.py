@@ -3,8 +3,10 @@ __author__ = "Suhas Bharadwaj (subharad)"
 import logging
 import re
 import time
+from time import perf_counter
 import os
 import sys
+from netmiko.ssh_exception import *
 
 from .analytics import Analytics
 from .fcns import Fcns
@@ -100,9 +102,9 @@ class Switch(SwitchUtils):
         self.connection_type = connection_type
         if port is None:
             if connection_type == 'https':
-                self.port == 8443
+                self.port = 8443
             elif connection_type == 'http':
-                self.port == 8080
+                self.port = 8080
         else:
             self.port = port
         self.timeout = timeout
@@ -122,18 +124,21 @@ class Switch(SwitchUtils):
             self._set_connection_type_based_on_version()
 
         # Connect to ssh
-        self.connect_to_ssh()
-
+        self._connect_to_ssh()
         log.debug("is_connection_type_ssh " + str(self.is_connection_type_ssh()))
 
-    def connect_to_ssh(self):
-        log.debug("Opening up a ssh connection for switch with ip " + self.__ip_address)
-        self._ssh_handle = SSHSession(
-            host=self.__ip_address,
-            username=self.__username,
-            password=self.__password,
-            timeout=self.timeout,
-        )
+    def _connect_to_ssh(self, reconnect=False):
+        if reconnect:
+            log.debug("Reconnecting the ssh connection for switch with ip " + self.__ip_address)
+            self._ssh_handle._connect()
+        else:
+            log.debug("Opening up a ssh connection for switch with ip " + self.__ip_address)
+            self._ssh_handle = SSHSession(
+                host=self.__ip_address,
+                username=self.__username,
+                password=self.__password,
+                timeout=self.timeout,
+            )
         log.debug("Finished up a ssh connection for switch with ip " + self.__ip_address)
 
     def _set_connection_type_based_on_version(self):
@@ -688,7 +693,8 @@ class Switch(SwitchUtils):
                 textfsm = False
             else:
                 textfsm = True
-            outlines, error = self._ssh_handle.show(command, timeout, expect_string=expect_string, use_textfsm=textfsm)
+            outlines, error = self._ssh_handle.show(cmd=command, timeout=timeout, expect_string=expect_string,
+                                                    use_textfsm=textfsm)
             # print("IN show")
             # print(error)
             # print(outlines)
@@ -864,14 +870,91 @@ class Switch(SwitchUtils):
         out = self._verify_basic_stuff(cmd, action_string, timeout)
         return out
 
-    def issu(self, kickstart, system, timeout=1800, expect_string=r"Performing configuration copy."):
+    def _get_alt_handle(self):
+        alt_handle = SSHSession(
+            host=self.__ip_address,
+            username=self.__username,
+            password=self.__password,
+            timeout=self.timeout,
+        )
+        return alt_handle
+
+    def issu(self, kickstart, system, timeout=1800, expect_string=r".*"):
+        self.curr_status = None
         cmd = (
                 "terminal dont-ask ; install all kickstart "
                 + kickstart
                 + " system "
                 + system
         )
+        # t1_start = perf_counter()
         self.show(command=cmd, expect_string=expect_string, timeout=timeout)
+        return True
+        # t1_stop = perf_counter()
+        # time_diff = timeout - int(t1_stop-t1_start)
+        # if time_diff < 0:
+        #    return False
+
+        # count = 1
+        # while count <= 1800:
+        #     print(count)
+        #     print("CURR STATE: " + self.get_install_all_status())
+        #     count = count + 1
+        #     time.sleep(1)
+
+    def get_install_all_status(self):
+        from netmiko import CNTL_SHIFT_6
+        # Flags and status init
+        if self.curr_status is None:
+            self.curr_status = "Install in progress"
+        try:
+            alt_handle = self._get_alt_handle()
+            self._connect_to_ssh(reconnect=True)
+        except Exception:
+            self.curr_status = "Switch is going for reboot/switchover as part of install"
+            return self.curr_status
+        cmd = "show install all status"
+        alt_handle._connection.write_channel("\nend\n")
+        alt_handle._connection.read_channel()
+        alt_handle._connection.write_channel(cmd + "\n")
+        time.sleep(0.25)
+        alt_handle._connection.write_channel(CNTL_SHIFT_6)
+        time.sleep(0.25)
+        out = alt_handle._connection.read_channel()
+        # print(out)
+        status = alt_handle._connection.normalize_linefeeds(alt_handle._connection.strip_prompt(out)).split("\n")
+        while "" in status:
+            status.remove("")
+        status.reverse()
+        # print(status)
+        if status:
+            for eachline in status:
+                if "Install has been successful" in eachline:
+                    self.curr_status = "Install has been successful"
+                    break
+                elif "<" in eachline:
+                    continue
+                elif "#" in eachline:
+                    continue
+                elif "(" in eachline:
+                    continue
+                elif "Module" in eachline:
+                    continue
+                elif "--" in eachline:
+                    continue
+                elif "^" in eachline:
+                    continue
+                elif "yes" in eachline:
+                    continue
+                elif "hitless" in eachline:
+                    continue
+                elif cmd in eachline:
+                    continue
+                else:
+                    self.curr_status = eachline.strip()[:60]
+                    break
+        del (alt_handle)
+        return self.curr_status
 
     # def issu(self, kickstart, system, timeout=1800, post_issu_checks=True):
     #     self.issu_status = None
@@ -939,148 +1022,148 @@ class Switch(SwitchUtils):
     #     self.issu_status = status
     #     return status, out
 
-    def _execute_install_all(self, cmd, timeout):
-        # Send install all cmd
-        try:
-            out = self._show_ssh(
-                cmd,
-                timeout,
-                "All telnet and ssh connections will now be temporarily terminated",
-            )
-        except CLIError as e:
-            if (
-                "Installer will perform compatibility check first. Please wait"
-                not in e.message
-            ):
-                raise CLIError
-        print_and_log(
-            self.ipaddr
-            + ": Please wait for install all to complete. This will take a while..."
-        )
-
-        # Wait for switch reboot after install all so that you can reconnect back to switch via ssh
-        time.sleep(240)
-        log.debug(self.ipaddr + ": Reconnecting back to switch via ssh after upgrade")
-        log.info(
-            self.ipaddr
-            + ": Ignore the error 'Socket exception: Connection reset by peer' if seen"
-        )
-        self.connect_to_ssh()
-
-        # Wait for atleast half hr for ISSU to complete, means all LC to be upgraded
-        # Wait every 2 mins and check if install is a success
-        if timeout < 1800:
-            waittime = 1800
-        else:
-            waittime = timeout
-
-        timestocheck = int(waittime / 120)
-
-        for i in range(timestocheck):
-            print_and_log(
-                self.ipaddr
-                + ": Checking if install is complete and successful. Please wait..."
-            )
-
-            # show install all status - Install has been successful
-            cmd = "show install all status"
-            out = self.show(command=cmd, raw_text=True)
-            log.debug(out)
-            alllines = out.splitlines()
-            for eachline in alllines:
-                if "Install has been successful" in eachline:
-                    print_and_log(self.ipaddr + ": Upgrade has been successfully done")
-                    return ("SUCCESS", None)
-            time.sleep(120)
-
-        log.error(
-            self.ipaddr
-            + ": ERROR!!!Could not get install all success message from show install all status cmd, please check the log file for more details"
-        )
-        log.info(out)
-        return ("FAILED", out)
-
-    def _verify_basic_stuff(self, cmd, action_string, timeout):
-        print_and_log(
-            self.ipaddr + ": Collecting basic info before '" + action_string + "'"
-        )
-        shmod_before = self.show(command="show module", raw_text=True).split("\n")
-        shintb_before = self.show(command="show interface brief", raw_text=True).split("\n")
-        print_and_log(self.ipaddr + ": Started " + action_string + " . Please wait...")
-        if "install all" in action_string:
-            status, error = self._execute_install_all(cmd, timeout)
-            if status == "FAILED":
-                return status, error
-        else:
-            out = self.config(cmd)
-            print_and_log(self.ipaddr + ": Please wait for " + str(timeout) + "secs..")
-            time.sleep(timeout)
-        print_and_log(
-            self.ipaddr + ": Collecting basic info after '" + action_string + "'"
-        )
-        shmod_after = self.show(command="show module", raw_text=True).split("\n")
-        shintb_after = self.show(command="show interface brief", raw_text=True).split("\n")
-
-        cores = self.cores
-        if cores is not None:
-            log.error(
-                self.ipaddr
-                + ": Cores present on the switch, please check the switch and also the log file"
-            )
-            log.error(cores)
-            return ("FAILED", out)
-
-        if shmod_before == shmod_after:
-            log.debug(self.ipaddr + ": 'show module' is correct after " + action_string)
-        else:
-            log.error(
-                self.ipaddr
-                + ": 'show module' output is different from before and after "
-                + action_string
-                + ", please check the log file"
-            )
-            log.debug(self.ipaddr + ": 'show module' before " + action_string)
-            log.debug(shmod_before)
-            log.debug(self.ipaddr + ": 'show module' after " + action_string)
-            log.debug(shmod_after)
-
-            bset = set(shmod_before)
-            aset = set(shmod_after)
-            bef = list(bset - aset)
-            aft = list(aset - bset)
-            log.debug(self.ipaddr + ": diff of before after " + action_string)
-            log.debug(bef)
-            log.debug(aft)
-            return ("FAILED", [bef, aft])
-
-        if shintb_before == shintb_after:
-            log.debug(
-                self.ipaddr
-                + ": 'show interface brief' is correct after "
-                + action_string
-            )
-        else:
-            log.error(
-                self.ipaddr
-                + ": 'show interface brief' output is different from before and after "
-                + action_string
-                + ", please check the log file"
-            )
-            log.debug(self.ipaddr + ": 'show interface brief' before " + action_string)
-            log.debug(shintb_before)
-            log.debug(self.ipaddr + ": 'show interface brief' after " + action_string)
-            log.debug(shintb_after)
-
-            bset = set(shintb_before)
-            aset = set(shintb_after)
-            bef = list(bset - aset)
-            aft = list(aset - bset)
-            log.debug(self.ipaddr + ": diff of before after " + action_string)
-            log.debug(bef)
-            log.debug(aft)
-            return ("FAILED", [bef, aft])
-        log.info(self.ipaddr + ": Basic info is correct after " + action_string)
-        return ("SUCCESS", None)
+    # def _execute_install_all(self, cmd, timeout):
+    #     # Send install all cmd
+    #     try:
+    #         out = self._show_ssh(
+    #             cmd,
+    #             timeout,
+    #             "All telnet and ssh connections will now be temporarily terminated",
+    #         )
+    #     except CLIError as e:
+    #         if (
+    #             "Installer will perform compatibility check first. Please wait"
+    #             not in e.message
+    #         ):
+    #             raise CLIError
+    #     print_and_log(
+    #         self.ipaddr
+    #         + ": Please wait for install all to complete. This will take a while..."
+    #     )
+    #
+    #     # Wait for switch reboot after install all so that you can reconnect back to switch via ssh
+    #     time.sleep(240)
+    #     log.debug(self.ipaddr + ": Reconnecting back to switch via ssh after upgrade")
+    #     log.info(
+    #         self.ipaddr
+    #         + ": Ignore the error 'Socket exception: Connection reset by peer' if seen"
+    #     )
+    #     self._connect_to_ssh()
+    #
+    #     # Wait for atleast half hr for ISSU to complete, means all LC to be upgraded
+    #     # Wait every 2 mins and check if install is a success
+    #     if timeout < 1800:
+    #         waittime = 1800
+    #     else:
+    #         waittime = timeout
+    #
+    #     timestocheck = int(waittime / 120)
+    #
+    #     for i in range(timestocheck):
+    #         print_and_log(
+    #             self.ipaddr
+    #             + ": Checking if install is complete and successful. Please wait..."
+    #         )
+    #
+    #         # show install all status - Install has been successful
+    #         cmd = "show install all status"
+    #         out = self.show(command=cmd, raw_text=True)
+    #         log.debug(out)
+    #         alllines = out.splitlines()
+    #         for eachline in alllines:
+    #             if "Install has been successful" in eachline:
+    #                 print_and_log(self.ipaddr + ": Upgrade has been successfully done")
+    #                 return ("SUCCESS", None)
+    #         time.sleep(120)
+    #
+    #     log.error(
+    #         self.ipaddr
+    #         + ": ERROR!!!Could not get install all success message from show install all status cmd, please check the log file for more details"
+    #     )
+    #     log.info(out)
+    #     return ("FAILED", out)
+    #
+    # def _verify_basic_stuff(self, cmd, action_string, timeout):
+    #     print_and_log(
+    #         self.ipaddr + ": Collecting basic info before '" + action_string + "'"
+    #     )
+    #     shmod_before = self.show(command="show module", raw_text=True).split("\n")
+    #     shintb_before = self.show(command="show interface brief", raw_text=True).split("\n")
+    #     print_and_log(self.ipaddr + ": Started " + action_string + " . Please wait...")
+    #     if "install all" in action_string:
+    #         status, error = self._execute_install_all(cmd, timeout)
+    #         if status == "FAILED":
+    #             return status, error
+    #     else:
+    #         out = self.config(cmd)
+    #         print_and_log(self.ipaddr + ": Please wait for " + str(timeout) + "secs..")
+    #         time.sleep(timeout)
+    #     print_and_log(
+    #         self.ipaddr + ": Collecting basic info after '" + action_string + "'"
+    #     )
+    #     shmod_after = self.show(command="show module", raw_text=True).split("\n")
+    #     shintb_after = self.show(command="show interface brief", raw_text=True).split("\n")
+    #
+    #     cores = self.cores
+    #     if cores is not None:
+    #         log.error(
+    #             self.ipaddr
+    #             + ": Cores present on the switch, please check the switch and also the log file"
+    #         )
+    #         log.error(cores)
+    #         return ("FAILED", out)
+    #
+    #     if shmod_before == shmod_after:
+    #         log.debug(self.ipaddr + ": 'show module' is correct after " + action_string)
+    #     else:
+    #         log.error(
+    #             self.ipaddr
+    #             + ": 'show module' output is different from before and after "
+    #             + action_string
+    #             + ", please check the log file"
+    #         )
+    #         log.debug(self.ipaddr + ": 'show module' before " + action_string)
+    #         log.debug(shmod_before)
+    #         log.debug(self.ipaddr + ": 'show module' after " + action_string)
+    #         log.debug(shmod_after)
+    #
+    #         bset = set(shmod_before)
+    #         aset = set(shmod_after)
+    #         bef = list(bset - aset)
+    #         aft = list(aset - bset)
+    #         log.debug(self.ipaddr + ": diff of before after " + action_string)
+    #         log.debug(bef)
+    #         log.debug(aft)
+    #         return ("FAILED", [bef, aft])
+    #
+    #     if shintb_before == shintb_after:
+    #         log.debug(
+    #             self.ipaddr
+    #             + ": 'show interface brief' is correct after "
+    #             + action_string
+    #         )
+    #     else:
+    #         log.error(
+    #             self.ipaddr
+    #             + ": 'show interface brief' output is different from before and after "
+    #             + action_string
+    #             + ", please check the log file"
+    #         )
+    #         log.debug(self.ipaddr + ": 'show interface brief' before " + action_string)
+    #         log.debug(shintb_before)
+    #         log.debug(self.ipaddr + ": 'show interface brief' after " + action_string)
+    #         log.debug(shintb_after)
+    #
+    #         bset = set(shintb_before)
+    #         aset = set(shintb_after)
+    #         bef = list(bset - aset)
+    #         aft = list(aset - bset)
+    #         log.debug(self.ipaddr + ": diff of before after " + action_string)
+    #         log.debug(bef)
+    #         log.debug(aft)
+    #         return ("FAILED", [bef, aft])
+    #     log.info(self.ipaddr + ": Basic info is correct after " + action_string)
+    #     return ("SUCCESS", None)
 
     def discover_peer_npv_switches(self):
         if self.npv:

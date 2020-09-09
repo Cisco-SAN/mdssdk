@@ -19,7 +19,7 @@ import time
 # Change root logger level from WARNING (default) to NOTSET in order for all messages to be delegated.
 logging.getLogger().setLevel(logging.NOTSET)
 logFileFormatter = logging.Formatter(
-    "[%(asctime)s] [%(module)-14.14s] [%(levelname)-5.5s] %(message)s"
+    "[%(asctime)s] [%(module)-14.14s] [%(lineno)d] [%(levelname)-5.5s] %(message)s"
 )
 logConsoleFormatter = logging.Formatter(
     "[%(asctime)s] %(message)s"
@@ -39,6 +39,10 @@ logging.getLogger().addHandler(fileHandler)
 
 log = logging.getLogger(__name__)
 
+sw = Switch("10.197.106.40", username="admin", password="nbv_!2345", connection_type="https", verify_ssl=False)
+print(sw.version)
+time.sleep(1222222)
+
 import sys
 
 sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=40, cols=150))
@@ -47,10 +51,10 @@ utils.banner("Starting install script for the entire fabric")
 START = time.perf_counter()
 
 y = PrettyTable()
-y.field_names = ["Switch Name", "IP Address", "Version"]
+y.field_names = ["Switch Name", "IP Address", "Curr Version"]
 y.sortby = "IP Address"
 x = PrettyTable()
-x.field_names = ["Switch Name", "IP Address", "Version", "NPV?", "Status"]
+x.field_names = ["Switch Name", "IP Address", "Curr Version", "NPV?", "Status"]
 x.sortby = "IP Address"
 x.align = 'l'
 
@@ -119,8 +123,8 @@ while True:
 x.clear_rows()
 # Start upgrade checks threads
 for sw in swdetail_list:
-    # sw.set_thread_get_upg_img_status(upgver)
-    # sw.t.start()
+    sw.set_thread_get_upg_img_status(upgver)
+    sw.t.start()
     x.add_row([sw.name, sw.ip, sw.ver, sw.npv, sw.retstr])
 # Update table, if thread is complete then exit
 while True:
@@ -130,13 +134,20 @@ while True:
     for sw in swdetail_list:
         if sw.t.is_alive():
             exit = False
-        if sw.can_upgrade:
-            swdetail_upgrade.append(sw)
         x.add_row([sw.name, sw.ip, sw.ver, sw.npv, sw.retstr])
     time.sleep(0.25)
     if exit:
         utils.print_table_in_same_place(len(swdetail_list), x)
         break
+
+for sw in swdetail_list:
+    if sw.can_upgrade:
+        swdetail_upgrade.append(sw)
+if not swdetail_upgrade:
+    print("No switches to upgrade!!!")
+    log.info("Done with the script!!")
+    END = time.perf_counter()
+    utils.banner("End of script (Took " + utils.timeelaped(START, END) + " complete)")
 
 if pc:
     print("Doing checks")
@@ -145,12 +156,13 @@ if pc:
 # Now start the upgrade
 # Clear rows in table
 x.clear_rows()
+x.field_names = ["Switch Name", "IP Address", "Curr Version", "Upg Version", "Install Status"]
 # Start upgrade checks threads
 for sw in swdetail_upgrade:
-    sw.set_thread_to_start_upgrade()
+    sw.set_thread_to_start_upgrade()  # TODO: pass timeout
     sw.t.start()
-    x.add_row([sw.name, sw.ip, sw.ver, sw.npv, sw.retstr])
-
+    x.add_row([sw.name, sw.ip, sw.ver, upgver, "Install Starting.."])
+print(x)
 while True:
     exit = True
     utils.print_table_in_same_place(len(swdetail_upgrade), x)
@@ -158,7 +170,7 @@ while True:
     for sw in swdetail_upgrade:
         if sw.t.is_alive():
             exit = False
-        x.add_row([sw.name, sw.ip, sw.ver, sw.npv, sw.retstr])
+        x.add_row([sw.name, sw.ip, sw.ver, upgver, sw.install_status])
         time.sleep(0.25)
     if exit:
         utils.print_table_in_same_place(len(swdetail_upgrade), x)

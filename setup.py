@@ -2,14 +2,17 @@ import os
 import re
 
 from setuptools import setup, find_packages
+import pathlib
 
-with open("requirements.txt") as rf:
+p = str(pathlib.Path(__file__).parent.absolute())
+
+with open(p + "/requirements.txt") as rf:
     requirements = rf.readlines()
 
-with open("README.md") as readme_file:
+with open(p + "/README.md") as readme_file:
     readme = readme_file.read()
 
-with open("HISTORY.rst") as history_file:
+with open(p + "/HISTORY.rst") as history_file:
     history = history_file.read().replace(".. :changelog:", "")
 
 
@@ -33,7 +36,7 @@ def find_version(*file_paths):
 
 setup(
     name="mdssdk",
-    version=find_version("mdssdk", "__init__.py"),
+    version=find_version(p, "mdssdk", "__init__.py"),
     description="Generic Python SDK/API library for Cisco MDS Switches",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/markdown",
