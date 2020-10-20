@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 class TestVsanAddInterfaces(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -44,7 +44,11 @@ class TestVsanAddInterfaces(unittest.TestCase):
     def test_addinterfaces(self):
         self.v.create()
         self.pc.create()
-        self.v.add_interfaces([self.fc, self.pc])
+        try:
+            self.v.add_interfaces([self.fc, self.pc])
+        except CLIError as c:
+            if "port already in a port-channel" in c.message:
+                self.skipTest("Skipping the test case because: " + c.message)
         self.assertEqual(self.fc.name, self.v.interfaces[0].name)
         self.assertEqual(self.pc.name, self.v.interfaces[1].name)
         self.pc.delete()
@@ -75,9 +79,13 @@ class TestVsanAddInterfaces(unittest.TestCase):
     def test_addinterfaces_repeated(self):
         self.v.create()
         self.pc.create()
-        self.v.add_interfaces(
-            [self.fc, self.fc, self.pc]
-        )  ## self.fc even though repeated will not be added
+        try:
+            self.v.add_interfaces(
+                [self.fc, self.fc, self.pc]
+            )  ## self.fc even though repeated will not be added
+        except CLIError as c:
+            if "port already in a port-channel" in c.message:
+                self.skipTest("Skipping the test case because: " + c.message)
         self.assertEqual(self.fc.name, self.v.interfaces[0].name)
         self.assertEqual(2, len(self.v.interfaces))
         self.pc.delete()

@@ -1,7 +1,7 @@
 import logging
 import re
 from time import sleep
-
+from ..constants import SSH_CONN_TIMEOUT
 from netmiko import ConnectHandler
 
 log = logging.getLogger(__name__)
@@ -12,7 +12,7 @@ class SSHSession(object):
        Generic SSHSession which can be used to run commands
        """
 
-    def __init__(self, host, username, password, timeout=60):
+    def __init__(self, host, username, password, timeout=SSH_CONN_TIMEOUT):
         """
         Establish SSH Connection using given hostname, username and
         password which can be used to run commands.
@@ -38,15 +38,17 @@ class SSHSession(object):
     def __del__(self):
         """Try to close connection if possible"""
         try:
-            sleep(2)
+            sleep(1)
             self._disconnect()
         except Exception:
             pass
 
     def _reconnect(self):
         log.debug("Inside reconnect " + self._host)
+        log.debug(self._connection.is_alive())
         self._disconnect()
         self._connect()
+        log.debug(self._connection.is_alive())
 
     def _disconnect(self):
         if not self.anyerror:
@@ -73,10 +75,9 @@ class SSHSession(object):
     def show(self, cmd, timeout=None, expect_string=None, use_textfsm=True):
         if timeout is None:
             df = 1
-        elif timeout <= self.timeout:
-            df = 1
         else:
-            df = int(timeout / self.timeout)
+            df = int(timeout / 100)  # 100 beacause thats the timeout netmiko uses
+            log.debug("Delay factor is " + str(df))
         output = self._connection.send_command(
             cmd,
             delay_factor=df,
@@ -115,10 +116,16 @@ class SSHSession(object):
             return retout, " ".join(retout)  # There is some error
         return retout, None  # there is no error
 
-    def config(self, cmd):
+    def config(self, cmd, timeout=None):
+        if timeout is None:
+            df = 1
+        else:
+            df = int(timeout / 100)  # 100 beacause thats the timeout netmiko uses
+            log.debug("Delay factor is " + str(df))
         retout = []
         output = self._connection.send_config_set(
             cmd,
+            delay_factor=df,
             strip_prompt=True,
             strip_command=True,
             config_mode_command="configure terminal",

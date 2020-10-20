@@ -1,11 +1,10 @@
 import logging
 import re
 import time
-import random
+import tools.install_script.utils as utils
+import threading
 
 log = logging.getLogger(__name__)
-import utils
-import threading
 
 
 class SwitchDetails(object):
@@ -14,33 +13,83 @@ class SwitchDetails(object):
         self.ip = ip
         self.swobj = swobj
 
-    def get_cmd_output(self, cmd):
-        out = self.swobj.show(cmd, raw_text=True)
+        self.start_time = time.time()
+        self.e_time = int(time.time() - self.start_time)
+
+    @property
+    def elapsed_time(self):
+        # if "Install has been successful" in self.install_status:
+        #     self.e_time
+        # else:
+        #     self.e_time = utils.timeelaped(self.start_time,time.time())
+        # return self.e_time
+        if self.t.is_alive():
+            self.e_time = utils.timeelaped(self.start_time, time.time())
+        else:
+            self.e_time
+        return self.e_time
+
+    def get_cmd_output(self, cmd, only_npv=False, only_npiv=False):
+        if only_npv:
+            if self.swobj.npv:
+                out = self.swobj.show(cmd, raw_text=True)
+            else:
+                out = ""
+        elif only_npiv:
+            if self.swobj.npv:
+                out = ""
+            else:
+                out = self.swobj.show(cmd, raw_text=True)
+        else:
+            out = self.swobj.show(cmd, raw_text=True)
         return out
 
     def set_thread_basic_info(self):
         self.t = threading.Thread(target=self.collect_basic_info, args=())
-        return self.t
+        # self.t = utils.PropagatingThread(target=self.collect_basic_info, args=())
+        self.t.start()
+        # return self.t
 
     def set_thread_get_upg_img_status(self, upgver):
+        self.start_time = time.time()
         self.t = threading.Thread(target=self.get_upg_img_status, args=(upgver,))
-        return self.t
+        # self.t = utils.PropagatingThread(target=self.get_upg_img_status, args=(upgver,))
+        self.t.start()
 
     def set_thread_to_start_upgrade(self, timeout=1800):
-        self.t = threading.Thread(target=self.start_install, args=(timeout,))
+        self.start_time = time.time()
+        try:
+            self.t = threading.Thread(target=self.start_install, args=(timeout,))
+            self.t.start()
+        except Exception as e:
+            log.debug(e, exc_info=True)
+        # self.t = utils.PropagatingThread(target=self.start_install, args=(timeout,))
+        # self.t = utils.ExcThread(bucket,target=self.start_install, args=(timeout,))
 
     def start_install(self, timeout=1800):
-        self.install_status = "Install Starting.."
+        log.debug("Starting install...")
+        self.start_time = time.time()
+        self.install_status = utils.BLUE("Install Starting..")
         if self.swobj.issu(self.kickupgimg, self.sysupgimg, timeout=timeout):
             count = 1
             while count <= timeout:
-                self.install_status = self.swobj.get_install_all_status()
-                if "Install has been successful" in self.install_status:
+                try:
+                    tmp = self.swobj.get_install_all_status()
+                    log.info(tmp)
+                except Exception as e:
+                    log.debug(e, exc_info=True)
+                if "Install has been successful" in tmp:
+                    self.install_status = utils.GREEN(tmp)
                     break
-                # print(count)
-                # print("CURR STATE: " + self.get_install_all_status())
+                elif any(ext in tmp for ext in utils.ALL_FAILURES):
+                    self.install_status = utils.RED(tmp)
+                    break
+                else:
+                    self.install_status = utils.BLUE(tmp)
+                log.debug("CURR STATE: " + self.install_status + " " + str(count))
                 count = count + 1
                 time.sleep(1)
+            log.debug("--------------------- VERSION is " + self.swobj.version)
 
     def collect_basic_info(self):
         self.ver = self.swobj.version
@@ -49,7 +98,7 @@ class SwitchDetails(object):
         self.name = re.sub(r'\..*', '', n)
         self.model = self.swobj.model
         self.imgstr = self.swobj.image_string
-        self.retstr = "Checking if upgrade is possible..Please Wait.."
+        self.retstr = utils.BLUE("Checking if upgrade is possible..Please Wait..")
         self.done_upgrade_checks = False
         self.can_upgrade = False
 
@@ -81,7 +130,7 @@ class SwitchDetails(object):
         return True
 
     def is_img_present(self, upgver):
-        self.retstr = "Checking if upgrade images are present in the switch..Please Wait.."
+        self.retstr = utils.BLUE("Checking if upgrade images are present in the switch..Please Wait..")
         kf = utils.is_image_present(self.swobj, self.kickupgimg)
         sf = utils.is_image_present(self.swobj, self.sysupgimg)
         if not kf:
@@ -98,7 +147,7 @@ class SwitchDetails(object):
         return True
 
     def _is_incompatibile(self):
-        self.retstr = "Checking for incompatibilities..Please Wait.."
+        self.retstr = utils.BLUE("Checking for incompatibilities..Please Wait..")
         log.debug("Checking incompatibilty on switch " + self.ip)
         cmd = "show incompatibility-all system " + self.sysupgimg
         # self.swobj.timeout = 1000
@@ -124,9 +173,9 @@ class SwitchDetails(object):
         # Check impact status to determine if its disruptive or non-disruptive
         # show install all impact kickstart m9700-sf4ek9-kickstart-mz.8.4.1.bin system m9700-sf4ek9-mz.8.4.1.bin
         log.debug("Checking impact status on switch " + self.ip)
-        self.retstr = "Checking if non-disruptive upgrade is possible..Please Wait.."
+        self.retstr = utils.BLUE("Checking if non-disruptive upgrade is possible..Please Wait..")
         cmd = "show install all impact kickstart " + self.kickupgimg + " system " + self.sysupgimg
-        out = self.swobj.show(cmd, raw_text=True, timeout=2800)
+        out = self.swobj.show(cmd, raw_text=True, timeout=1000)
         self.impact = out
         alllines = out.splitlines()
         nondisruptive = False

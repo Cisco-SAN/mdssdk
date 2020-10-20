@@ -8,6 +8,7 @@ from requests.auth import HTTPBasicAuth
 from urllib3.exceptions import InsecureRequestWarning
 
 from .errors import NXOSError
+from ..constants import CLI_CMD_TIMEOUT
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ class ConnectNxapi(object):
     """
 
     def __init__(
-        self, host, username, password, transport=u"https", port=None, verify_ssl=True
+            self, host, username, password, transport=u"https", port=None, verify_ssl=True
     ):
 
         if transport not in ["http", "https"]:
@@ -81,9 +82,8 @@ class ConnectNxapi(object):
             log.debug(payload)
             return payload
 
-    def send_request(self, commands, rpc_version=u"2.0", method=u"cli", timeout=30):
+    def send_request(self, commands, rpc_version=u"2.0", method=u"cli", timeout=CLI_CMD_TIMEOUT):
         """
-
         :param commands:
         :param rpc_version:
         :param method:

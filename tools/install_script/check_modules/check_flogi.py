@@ -6,6 +6,5 @@ class Check_Flogi(Check):
         super().__init__(sw)
         self.name = "FLOGI"
         self.cmd_list = ["show flogi database"]
-
-    def compare(self):
-        pass
+        self.only_npiv = True
+        self.run_cmd()

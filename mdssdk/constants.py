@@ -2,6 +2,17 @@
 
 DEFAULT = "DEFAULT"
 
+# Timeouts in secs
+SSH_CONN_TIMEOUT = 100
+NXAPI_CONN_TIMEOUT = 100
+CLI_CMD_TIMEOUT = 100
+RELOAD_TIMEOUT = 300
+ISSU_TIMEOUT = 1800
+
+# DEF PORTS
+HTTPS_PORT = 8443
+HTTP_PORT = 8080
+
 # Patterns
 PAT_FC = "^fc([1-9][0-9]?)/([1-9][0-9]?)$"
 PAT_PC = "^port-channel([1-9][0-9]?[0-9]?)$"

@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 class TestPortChannelAddMembers(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -25,7 +25,7 @@ class TestPortChannelAddMembers(unittest.TestCase):
         self.pc = PortChannel(self.switch, self.pc_id)
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if type(v) is Fc:
+            if type(v) is Fc and v.status not in ['up', 'trunking']:
                 self.fc = v
                 log.debug(k)
                 break
@@ -46,14 +46,16 @@ class TestPortChannelAddMembers(unittest.TestCase):
                 self.skipTest(
                     "Skipping test as as port not compatible. Please rerun the test cases"
                 )
-        self.assertIn(self.fc.name, self.pc.members)
+        pcmembrs = self.pc.members
+        if pcmembrs is not None:
+            self.assertIn(self.fc.name, pcmembrs)
         self.pc.delete()
 
     def test_add_members_multiple(self):
         self.pc.create()
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if type(v) is Fc and k != self.fc.name:
+            if type(v) is Fc and k != self.fc.name and v.status not in ['up', 'trunking']:
                 fc2 = v
                 log.debug(k)
                 break

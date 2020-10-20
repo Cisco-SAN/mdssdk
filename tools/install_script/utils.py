@@ -1,5 +1,26 @@
 import sys
 import pyinputplus as pyinput
+from threading import Thread
+
+
+class PropagatingThread(Thread):
+    def run(self):
+        self.exc = None
+        try:
+            if hasattr(self, '_Thread__target'):
+                # Thread uses name mangling prior to Python 3.
+                self.ret = self._Thread__target(*self._Thread__args, **self._Thread__kwargs)
+            else:
+                self.ret = self._target(*self._args, **self._kwargs)
+        except BaseException as e:
+            self.exc = e
+
+    def join(self, timeout):
+        super(PropagatingThread, self).join(timeout=timeout)
+        if self.exc:
+            raise self.exc
+        return self.ret
+
 
 # Color
 R = "\x1b[38;5;9mHello World\x1b[39;49m"  # Red
@@ -8,9 +29,15 @@ Y = "\x1b[38;5;11mHello World\x1b[39;49m"  # Yellow
 B = "\x1b[38;5;14mHello World\x1b[39;49m"  # Blue
 N = "\033[0m"  # Reset
 
+ALL_FAILURES = ['fail', 'FAIL']
+
 
 def GREEN(x):
     return G.replace("Hello World", x) + N
+
+
+def BLUE(x):
+    return B.replace("Hello World", x) + N
 
 
 def RED(x):
@@ -30,7 +57,7 @@ def banner(text, ch='-', length=78):
 def timeelaped(start, end):
     hours, rem = divmod(end - start, 3600)
     minutes, seconds = divmod(rem, 60)
-    return ("{:0>2}h:{:0>2}m:{:05.2f}s".format(int(hours), int(minutes), seconds))
+    return ("{:0>1}h:{:0>1}m:{:02.1f}s".format(int(hours), int(minutes), seconds))
 
 
 def get_kick_sys_img_string(upgimg, imgstr):
@@ -58,7 +85,7 @@ def clr_lines(num_of_lines):
 
 
 def print_table_in_same_place(rowlength, x):
-    clr_lines(rowlength + 4)
+    clr_lines(rowlength + 6)
     print(x)
 
 

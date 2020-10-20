@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class TestDeviceAliasAttrDatabase(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -55,5 +55,5 @@ class TestDeviceAliasAttrDatabase(unittest.TestCase):
                 self.assertNotIn(self.pwwn, newdb.values())
         except CLIError as c:
             if "Device Alias not present" not in c.message:
-                #raise CLIError(c.args)
+                # raise CLIError(c.args)
                 raise CLIError(c.command, c.message)

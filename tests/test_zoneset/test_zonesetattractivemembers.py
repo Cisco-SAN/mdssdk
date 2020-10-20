@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 class TestZoneSetAttrActiveMembers(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -40,9 +40,9 @@ class TestZoneSetAttrActiveMembers(unittest.TestCase):
 
     def test_active_members_read_nonexisting(self):
         self.skipTest("not a correct test case Needs to be fixed")
-        with self.assertRaises(CLIError) as e:
-            self.z.active_members
-        self.assertIn("Zoneset not present", str(e.exception))
+        # with self.assertRaises(CLIError) as e:
+        #     self.z.active_members
+        # self.assertIn("Zoneset not present", str(e.exception))
 
     def test_active_members_write_error(self):
         with self.assertRaises(AttributeError) as e:

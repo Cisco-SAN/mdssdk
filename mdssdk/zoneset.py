@@ -35,7 +35,7 @@ class ZoneSet(object):
         self._vsan = vsan
         self._name = name
         # Create a dummy zone obj to send zoneset cmds, DO NOT use 'create' method with it!!
-        log.debug("Init a dummy zone object for the zoneset with name " + self._name)
+        log.debug("Init a dummy zone object for the zoneset with name " + self._name + " and vsan " + str(self._vsan))
         self.__zoneObj = Zone(self.__swobj, name=None, vsan=self._vsan)
 
     @property
@@ -249,19 +249,19 @@ class ZoneSet(object):
         if self.name is not None:
             if action:
                 cmd = (
-                    "terminal dont-ask ; zoneset activate name "
-                    + self._name
-                    + " vsan "
-                    + str(self._vsan)
-                    + " ; no terminal dont-ask"
+                        "terminal dont-ask ; zoneset activate name "
+                        + self._name
+                        + " vsan "
+                        + str(self._vsan)
+                        + " ; no terminal dont-ask"
                 )
             else:
                 cmd = (
-                    "terminal dont-ask ; no zoneset activate name "
-                    + self._name
-                    + " vsan "
-                    + str(self._vsan)
-                    + " ; no terminal dont-ask"
+                        "terminal dont-ask ; no zoneset activate name "
+                        + self._name
+                        + " vsan "
+                        + str(self._vsan)
+                        + " ; no terminal dont-ask"
                 )
             try:
                 self.__zoneObj._send_zone_cmd(cmd)
@@ -306,37 +306,28 @@ class ZoneSet(object):
         return False
 
     def __add_remove_members(self, members, remove=False):
-        if self.__show_zoneset_name_brief is not None:
+        if self.__show_zoneset_name_brief:
             cmdlist = []
             cmdlist.append("zoneset name " + self._name + " vsan " + str(self._vsan))
             for eachmem in members:
                 name_of_zone = eachmem.name
-                if remove:
-                    cmd = "no member " + name_of_zone
-                else:
-                    cmd = "member " + name_of_zone
-                cmdlist.append(cmd)
+                if name_of_zone:
+                    if remove:
+                        cmd = "no member " + name_of_zone
+                    else:
+                        cmd = "member " + name_of_zone
+                    cmdlist.append(cmd)
             cmds_to_send = " ; ".join(cmdlist)
             out = self.__zoneObj._send_zone_cmd(cmds_to_send)
 
-    def __show_zoneset_name_brief(self,active=False):
+    def __show_zoneset_name_brief(self, active=False):
         if active:
             cmd = "show zoneset name " + self._name + " brief active vsan " + str(self._vsan)
         else:
             cmd = "show zoneset name " + self._name + " brief vsan " + str(self._vsan)
-        out = self.__swobj.show(cmd)
-        if out:
-            if self.__swobj.is_connection_type_ssh():
-                if type(out[0]) is str:
-                    if (
-                        "VSAN " + str(self._vsan) + " is not configured"
-                        == out[0].strip()
-                    ):
-                        raise CLIError(cmd, out[0])
-                    if "Zoneset not present" == out[0].strip():
-                        raise CLIError(cmd, out[0])
-        return out
 
+        out = self.__zoneObj._send_zone_show_cmd(cmd)
+        return out
 
 # TODO active members and members when zs is not present
 # TODO in zone module to add active members

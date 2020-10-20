@@ -36,11 +36,8 @@ This library will be useful for automating day to day tasks or developing new to
        or 
        . ./install.sh
        
-       
-       
-   NOTE:
 6) Once successfully done issue `pip list` and you should see mdssdk package installed
-        
+                           
         >>> pip list
         Package    Version   
         ---------- ----------
@@ -62,3 +59,9 @@ To uninstall mdssdk,
 
 * http://mdssdk.readthedocs.io
 
+## Support Matrix
+
+|**NXOS Version**|**SDK Version** |
+| :------: | :------:  |
+| 8.4(2b) and below | 1.0.2 |
+| 8.4(2a) and below | 1.0.1 |

@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class TestZoneSetAddMembers(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -26,11 +26,12 @@ class TestZoneSetAddMembers(unittest.TestCase):
         self.zoneset = ZoneSet(self.switch, "test_zoneset", self.id)
         self.zoneset.create()
 
-    def test_add_members_nonexisting(self):
-        zone = Zone(self.switch, "test_zone", self.id)
-        with self.assertRaises(CLIError) as e:
-            self.zoneset.add_members([zone])
-        self.assertIn("Zone not present", str(e.exception))
+    # def test_add_members_nonexisting(self):
+    #     zone = Zone(self.switch, "test_zone", self.id)
+    #     # TODO: Was working in 8.4.2a not in 8.4.2b (CSCvv59174)
+    #     with self.assertRaises(CLIError) as e:
+    #         self.zoneset.add_members([zone])
+    #     self.assertIn("Zone not present", str(e.exception))
 
     def test_add_members(self):
         zone1 = Zone(self.switch, "test_zone1", self.id)

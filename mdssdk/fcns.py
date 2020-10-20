@@ -48,7 +48,7 @@ class Fcns(object):
                 return out["TABLE_fcns_vsan"]["ROW_fcns_vsan"]
             else:
                 if type(out[0]) is str:
-                    if ("vsan not present"== out[0].strip()):
+                    if ("vsan not present" == out[0].strip()):
                         return {}
             return out
         else:
@@ -86,7 +86,7 @@ class Fcns(object):
                 return out["TABLE_fcns_vsan"]["ROW_fcns_vsan"]
             else:
                 if type(out[0]) is str:
-                    if ("vsan not present"== out[0].strip()):
+                    if ("vsan not present" == out[0].strip()):
                         return {}
             return out
         else:

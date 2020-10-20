@@ -2,6 +2,7 @@ import logging
 import re
 
 from .connection_manager.errors import InvalidProfile
+from .connection_manager.errors import CLIError
 
 log = logging.getLogger(__name__)
 
@@ -11,7 +12,7 @@ log = logging.getLogger(__name__)
 # view: scsi_initiator_it_flow
 # where:[port,vsan]
 # sort: vsan
-# asc: True
+# desc: False
 # limit: 10
 
 # Be extra careful while changing the patterns or the keys of the patten
@@ -20,7 +21,7 @@ PROTOCOL = "protocol"
 VIEW = "view"
 WHERE = "where"
 SORT = "sort"
-ASC = "asc"
+DESC = "desc"
 LIMIT = "limit"
 
 VALID_PROTOCOLS = ["scsi", "nvme"]
@@ -53,8 +54,8 @@ class Analytics:
 
     """
 
-    def __init__(self, sw):
-        self._sw = sw
+    def __init__(self, switch):
+        self._sw = switch
 
     def _show_analytics_system_load(self):
 
@@ -114,7 +115,14 @@ class Analytics:
         """
 
         all = []
-        out = self._sw.show("show analytics system-load", use_ssh=True)
+        try:
+            cmd = "show analytics system-load"
+            out = self._sw.show(cmd, use_ssh=True)
+        except CLIError as c:
+            if "Invalid command" in c.message:
+                return None
+            else:
+                raise CLIError(cmd, c.message)
         for eachout in out:
             eachout = eachout.strip()
             if any(char.isdigit() for char in eachout):
@@ -142,14 +150,13 @@ class Analytics:
     def _validate_profile(self, profile):
         # TODO
         # LIMITATIONS:
-        # Need to do validation for profiles
-        # Does not support where clause for now
+        # Does not support where clause/sort/limit for now
         proto = profile.get(PROTOCOL, None)
         metrics = profile.get(PROTOCOL, None)
         view = profile.get(PROTOCOL, None)
         where = profile.get(WHERE, None)
         sort = profile.get(SORT, None)
-        asc = profile.get(ASC, None)
+        desc = profile.get(DESC, False)
         limit = profile.get(LIMIT, None)
 
         if proto is None:
@@ -174,8 +181,18 @@ class Analytics:
                 "'" + PROTOCOL + "' key needs to one of " + ",".join(VALID_PROTOCOLS)
             )
         if where is not None:
-            if type(where) is not list:
-                raise InvalidProfile("where ")
+            if type(where) is not dict:
+                raise InvalidProfile(
+                    "where clause details must be in dict format. Example where = {'port': 'fc1/1', 'vsan': '100'}")
+        if sort is not None:
+            if type(sort) is not str:
+                raise InvalidProfile("sort can only be done on one coloumn")
+        if desc is not None:
+            if type(desc) is not bool:
+                raise InvalidProfile("'" + DESC + "' key needs to either True or False")
+        if limit is not None:
+            if type(limit) is not int:
+                raise InvalidProfile("'" + LIMIT + "' key needs to an integer")
 
         return True
 
@@ -186,22 +203,22 @@ class Analytics:
             metrics = profile.get(METRICS, None)
         where = profile.get(WHERE, None)
         sort = profile.get(SORT, None)
-        asc = profile.get(ASC, None)
+        desc = profile.get(DESC, None)
         limit = profile.get(LIMIT, None)
 
         if (metrics is None) or (len(metrics) == 0):
             selq = (
-                "select all from fc-" + profile.get(PROTOCOL) + "." + profile.get(VIEW)
+                    "select all from fc-" + profile.get(PROTOCOL) + "." + profile.get(VIEW)
             )
         else:
             allmetrics = ",".join(metrics)
             selq = (
-                "select "
-                + allmetrics
-                + " from fc-"
-                + profile.get(PROTOCOL)
-                + "."
-                + profile.get(VIEW)
+                    "select "
+                    + allmetrics
+                    + " from fc-"
+                    + profile.get(PROTOCOL)
+                    + "."
+                    + profile.get(VIEW)
             )
         return selq
 
@@ -239,12 +256,12 @@ class Analytics:
         if self._validate_profile(profile):
             selq = self._get_select_query_string(profile)
             cmd = (
-                'analytics query "'
-                + selq
-                + '" name '
-                + name
-                + " type periodic interval "
-                + str(interval)
+                    'analytics query "'
+                    + selq
+                    + '" name '
+                    + name
+                    + " type periodic interval "
+                    + str(interval)
             )
             if clear:
                 if differential:

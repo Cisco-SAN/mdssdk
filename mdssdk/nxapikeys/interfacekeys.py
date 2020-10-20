@@ -14,6 +14,19 @@ INT_OPER_SPEED = {DEFAULT: "oper_speed"}
 INT_LOGICAL_TYPE = {DEFAULT: "logical_type"}
 
 # ------------------------------------ #
+# show interface <> brief
+# ------------------------------------ #
+_INTERFACE = {DEFAULT: "interface"}
+_INT_VSAN = {DEFAULT: "vsan_brief"}
+_INT_ADMIN_MODE = {DEFAULT: "admin_mode"}
+_INT_ADMIN_TRUNK_MODE = {DEFAULT: "admin_trunk_mode"}
+_INT_STATUS = {DEFAULT: "status"}
+_INT_FCOT_INFO = {DEFAULT: "fcot_info"}
+_INT_OPER_MODE = {DEFAULT: "oper_mode"}
+_INT_OPER_SPEED = {DEFAULT: "oper_speed"}
+_INT_LOGICAL_TYPE = {DEFAULT: "logical_type"}
+
+# ------------------------------------ #
 # show interface <> transceiver details
 # ------------------------------------ #
 SFP = {DEFAULT: "sfp"}

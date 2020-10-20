@@ -1,8 +1,28 @@
 from mdssdk.switch import Switch
 import json
 import time
+from pprint import pprint
 
-sw = Switch('10.126.94.216', 'admin', 'nbv!2345', connection_type='ssh')
+
+def dump(obj):
+    for attr in dir(obj):
+        print("obj.%s = %r" % (attr, getattr(obj, attr)))
+
+
+sw = Switch('10.126.94.216', 'admin', 'nbv!2345', connection_type='ssh', verify_ssl=False)
+
+# out = sw.show("show fcns database detail vsan 50")
+# print(out)
+# print(len(out))
+i = 0
+while True:
+    cmd = "ivr zoneset name IVR_Zoneset1 ; member zKess" + str(i)
+    print(cmd)
+    i = i + 1
+    sw.config(cmd)
+    if i == 1023:
+        break
+exit()
 
 
 # sw = Switch('10.197.106.40', 'admin', 'nbv_!2345', connection_type='ssh')
@@ -63,8 +83,8 @@ while True:
     counter = counter + 1
     print("------------------- Iteration ---------- " + str(counter))
     checkACLCC(sw)
-    # interfaces = ipsint + fcipint
-    interfaces = fcipint
+    interfaces = ipsint + fcipint
+    # interfaces = fcipint
     for intf in interfaces:
         print("Shutting down.................... " + intf)
         sw.config("interface " + intf + " ;  shutdown")

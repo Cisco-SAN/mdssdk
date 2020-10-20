@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class TestFlogiDatabase(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -36,7 +36,7 @@ class TestFlogiDatabase(unittest.TestCase):
             log.debug(flogidb)
             self.assertNotEqual({}, flogidb)
         self.skipTest("need to fix assertion")
-        
+
     def test_database_nonexistingentry(self):
         flogidb = self.flogi_obj.database()
         if flogidb is not None:

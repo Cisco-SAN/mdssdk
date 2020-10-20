@@ -6,6 +6,4 @@ class Check_Interface(Check):
         super().__init__(sw)
         self.name = "INTERFACE"
         self.cmd_list = ["show interface brief"]
-
-    def compare(self):
-        pass
+        self.run_cmd()

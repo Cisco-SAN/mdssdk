@@ -6,6 +6,4 @@ class Check_Module(Check):
         super().__init__(sw)
         self.name = "MODULE"
         self.cmd_list = ["show module"]
-
-    def compare(self):
-        pass
+        self.run_cmd()

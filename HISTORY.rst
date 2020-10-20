@@ -4,6 +4,12 @@
 History
 =======
 
+1.0.2 (2020-08-15)
+---------------------
+
+* Support for 8.4(2b) release
+* Many bug fixes and improvements
+
 1.0.1 (2020-05-11)
 ---------------------
 

@@ -4,6 +4,7 @@ import string
 
 log = logging.getLogger(__name__)
 
+
 def get_random_pwwn():
     choicelist = [
         "0",

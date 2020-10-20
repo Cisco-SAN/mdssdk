@@ -4,12 +4,13 @@ import random
 from mdssdk.fcns import Fcns
 
 import logging
+
 log = logging.getLogger(__name__)
 
 
 class TestFcnsStatistics(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:

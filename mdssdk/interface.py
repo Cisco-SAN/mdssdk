@@ -3,6 +3,8 @@ import re
 
 from .constants import PAT_PC, PAT_FC
 from .nxapikeys import interfacekeys
+from .connection_manager.errors import CLIError
+
 from .parsers.interface import (
     ShowInterfaceBrief,
     ShowInterfaceDescription,
@@ -132,10 +134,13 @@ class Interface(object):
             >>>
         """
         if self.__swobj.is_connection_type_ssh():
-            outlines = self.__swobj.show("show interface brief")
+            try:
+                outlines = self.__swobj.show("show interface " + self._name + " brief")
+            except CLIError:
+                return None
             shintbr = ShowInterfaceBrief(outlines, self._name)
             return shintbr.mode
-        out = self.__parse_show_int_brief()
+        out = self.__parse_show_int_brief_all()
         if out:
             return out[get_key(interfacekeys.INT_OPER_MODE, self._SW_VER)]
         return None
@@ -169,7 +174,10 @@ class Interface(object):
             >>>
         """
         if self.__swobj.is_connection_type_ssh():
-            outlines = self.__swobj.show("show interface brief")
+            try:
+                outlines = self.__swobj.show("show interface " + self._name + " brief")
+            except CLIError:
+                return None
             shintbr = ShowInterfaceBrief(outlines, self._name)
             return shintbr.speed
         out = self.__parse_show_int_brief()
@@ -206,7 +214,10 @@ class Interface(object):
             >>>
         """
         if self.__swobj.is_connection_type_ssh():
-            outlines = self.__swobj.show("show interface brief")
+            try:
+                outlines = self.__swobj.show("show interface " + self._name + " brief")
+            except CLIError:
+                return None
             shintbr = ShowInterfaceBrief(outlines, self._name)
             return shintbr.trunk
         out = self.__parse_show_int_brief()
@@ -244,7 +255,10 @@ class Interface(object):
             >>>
         """
         if self.__swobj.is_connection_type_ssh():
-            outlines = self.__swobj.show("show interface brief")
+            try:
+                outlines = self.__swobj.show("show interface " + self._name + " brief")
+            except CLIError:
+                return None
             shintbr = ShowInterfaceBrief(outlines, self._name)
             return shintbr.status
         out = self.__parse_show_int_brief()
@@ -255,11 +269,11 @@ class Interface(object):
     @status.setter
     def status(self, value):
         cmd = (
-            "terminal dont-ask ; interface "
-            + self._name
-            + " ; "
-            + value
-            + " ; no terminal dont-ask "
+                "terminal dont-ask ; interface "
+                + self._name
+                + " ; "
+                + value
+                + " ; no terminal dont-ask "
         )
         out = self.__swobj.config(cmd)
 
@@ -276,7 +290,7 @@ class Interface(object):
         """
         return self.Counters(self)
 
-    def __parse_show_int_brief(self):
+    def __parse_show_int_brief_all(self):
         out = self.__swobj.show("show interface brief")
         fcmatch = re.match(PAT_FC, self._name)
         pcmatch = re.match(PAT_PC, self._name)
@@ -284,8 +298,8 @@ class Interface(object):
             out = out["TABLE_interface_brief_fc"]["ROW_interface_brief_fc"]
             for eachout in out:
                 if (
-                    eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
-                    == self._name
+                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                        == self._name
                 ):
                     return eachout
         elif pcmatch:
@@ -300,8 +314,46 @@ class Interface(object):
                 outlist = out
             for eachout in outlist:
                 if (
-                    eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
-                    == self._name
+                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                        == self._name
+                ):
+                    return eachout
+        return None
+
+    def __parse_show_int_brief(self):
+        try:
+            out = self.__swobj.show("show interface " + self._name + " brief")
+        except CLIError:
+            return None
+        fcmatch = re.match(PAT_FC, self._name)
+        pcmatch = re.match(PAT_PC, self._name)
+        if fcmatch:
+            # print(out)
+            out = out["TABLE_interface_brief_if"]["ROW_interface_brief_if"]
+            if type(out) is dict:
+                out = [out]
+            # print(out)
+            # print(self._swobj.connection_type)
+            for eachout in out:
+                # print(eachout)
+                # print(self._SW_VER)
+                # print(interfacekeys.INTERFACE)
+                if (eachout[get_key(interfacekeys._INTERFACE, self._SW_VER)] == self._name):
+                    return eachout
+        elif pcmatch:
+            # Need to check if "sh int brief" has PC info
+            pcinfo = out.get("TABLE_interface_brief_portchannel", None)
+            if pcinfo is None:
+                return None
+            out = pcinfo["ROW_interface_brief_portchannel"]
+            if type(out) is dict:
+                outlist = [out]
+            else:
+                outlist = out
+            for eachout in outlist:
+                if (
+                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                        == self._name
                 ):
                     return eachout
         return None
@@ -359,7 +411,10 @@ class Interface(object):
                 {'input_rate': 0, 'frames_in': 14970, 'output_rate': 0, 'frames_out': 14831}
                 >>>
             """
-            out = self.__intobj._execute_counters_brief_cmd()
+            try:
+                out = self.__intobj._execute_counters_brief_cmd()
+            except CLIError:
+                return None
             if self.__swobj.is_connection_type_ssh():
                 shintcb = ShowInterfaceCountersBrief(out)
                 return shintcb.brief

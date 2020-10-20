@@ -36,7 +36,7 @@ class Zone(object):
         >>>
     """
 
-    def __init__(self, switch, name, vsan):
+    def __init__(self, switch, name, vsan, check_npv=True):
         self.__swobj = switch
         self._SW_VER = switch._SW_VER
         self._vsan = vsan
@@ -45,6 +45,15 @@ class Zone(object):
         self.__rpc = None
         self.__method = u"cli_conf"
         self._part_of_active_zs = False
+        if check_npv:
+            self._check_if_npv()
+
+    # Make sure that the switch is not in NPV mode
+    def _check_if_npv(self):
+        if self.__swobj.npv:
+            raise TypeError(
+                "Switch(" + self.__swobj.ipaddr + ") is in NPV mode, hence cannot create zone/zoneset object"
+            )
 
     def _set_part_of_active(self, val):
         self._part_of_active_zs = val
@@ -295,11 +304,11 @@ class Zone(object):
     @mode.setter
     def mode(self, value):
         cmd = (
-            "terminal dont-ask ; zone mode "
-            + ENHANCED
-            + " vsan "
-            + str(self._vsan)
-            + " ; no terminal dont-ask"
+                "terminal dont-ask ; zone mode "
+                + ENHANCED
+                + " vsan "
+                + str(self._vsan)
+                + " ; no terminal dont-ask"
         )
         if value.lower() == ENHANCED:
             self._send_zone_cmd(cmd)
@@ -351,11 +360,11 @@ class Zone(object):
     @default_zone.setter
     def default_zone(self, value):
         cmd = (
-            "terminal dont-ask ; zone default-zone "
-            + PERMIT
-            + " vsan "
-            + str(self._vsan)
-            + " ; no terminal dont-ask"
+                "terminal dont-ask ; zone default-zone "
+                + PERMIT
+                + " vsan "
+                + str(self._vsan)
+                + " ; no terminal dont-ask"
         )
         if value.lower() == PERMIT:
             self._send_zone_cmd(cmd)
@@ -520,7 +529,6 @@ class Zone(object):
         else:
             return None
 
-
     @property
     def activedb_zone_count(self):
         """
@@ -619,6 +627,7 @@ class Zone(object):
             return int(retout)
         else:
             return None
+
     @property
     def effectivedb_size(self):
         """
@@ -702,9 +711,9 @@ class Zone(object):
         """
 
         cmd = (
-            "terminal dont-ask ; clear zone lock vsan  "
-            + str(self._vsan)
-            + " ; no terminal dont-ask"
+                "terminal dont-ask ; clear zone lock vsan  "
+                + str(self._vsan)
+                + " ; no terminal dont-ask"
         )
         out = self.__swobj.config(cmd)
         if out:
@@ -826,7 +835,7 @@ class Zone(object):
     def __add_remove_members(self, members, remove=False):
 
         cmdlist = []
-        if self.__show_zone_name() is not None:
+        if self.__show_zone_name():
             cmdlist.append("zone name " + self._name + " vsan " + str(self._vsan))
             for eachmem in members:
                 if (type(eachmem) is Fc) or (type(eachmem) is PortChannel):
@@ -878,49 +887,51 @@ class Zone(object):
 
     def __show_zone_name(self):
         cmd = "show zone name " + self._name + " vsan  " + str(self._vsan)
-        out = self.__swobj.show(cmd)
-        if out:
-            if self.__swobj.is_connection_type_ssh():
-                if type(out[0]) is str:
-                    if (
-                        "VSAN " + str(self._vsan) + " is not configured"
-                        == out[0].strip()
-                    ):
-                        raise CLIError(cmd, out[0])
-                    if "Zone not present" == out[0].strip():
-                        raise CLIError(cmd, out[0])
+        out = self._send_zone_show_cmd(cmd)
         return out
 
     def __show_zone_name_active(self):
         cmd = "show zone name " + self._name + " active vsan  " + str(self._vsan)
-        out = self.__swobj.show(cmd)
-        if out:
-            if self.__swobj.is_connection_type_ssh():
-                if type(out[0]) is str:
-                    if (
-                        "VSAN " + str(self._vsan) + " is not configured"
-                        == out[0].strip()
-                    ):
-                        raise CLIError(cmd, out[0])
-                    if "Zone not present" == out[0].strip():
-                        raise CLIError(cmd, out[0])
+        out = self._send_zone_show_cmd(cmd)
         return out
 
     def __show_zone_status(self):
         cmd = "show zone status vsan  " + str(self._vsan)
-        out = self.__swobj.show(cmd)
+        out = self._send_zone_show_cmd(cmd)
+        if out:
+            if self.__swobj.is_connection_type_ssh():
+                return out
+            return out["TABLE_zone_status"]["ROW_zone_status"]
+        return out
+
+    def _send_zone_show_cmd(self, cmd):
+        try:
+            out = self.__swobj.show(cmd)
+        except CLIError as c:
+            if "Zone not present" in c.message:
+                # raise CLIError(cmd, out[0]) #Was working in 8.4.2a not in 8.4.2b (CSCvv59174)
+                return {}
+            elif "Zoneset not present" in c.message:
+                # raise CLIError(cmd, out[0]) #Was working in 8.4.2a not in 8.4.2b (CSCvv59174)
+                return {}
+            else:
+                raise CLIError(cmd, c.message)
+
         if out:
             if self.__swobj.is_connection_type_ssh():
                 if type(out[0]) is str:
                     if (
-                        "VSAN " + str(self._vsan) + " is not configured"
-                        == out[0].strip()
+                            "VSAN " + str(self._vsan) + " is not configured"
+                            == out[0].strip()
                     ):
                         raise CLIError(cmd, out[0])
-                return out
-            return out["TABLE_zone_status"]["ROW_zone_status"]
-        else:
-            raise CLIError(cmd, "VSAN " + str(self._vsan) + " is not configured")
+                    if "Zone not present" == out[0].strip():
+                        # raise CLIError(cmd, out[0]) #Was working in 8.4.2a not in 8.4.2b (CSCvv59174)
+                        return {}
+                    if "Zoneset not present" == out[0].strip():
+                        # raise CLIError(cmd, out[0]) #Was working in 8.4.2a not in 8.4.2b (CSCvv59174)
+                        return {}
+        return out
 
     def _send_zone_cmd(self, cmd):
         out = None
@@ -979,7 +990,7 @@ class Zone(object):
             self.clear_lock()
 
     def __commit_config_if_locked(self):
-        time.sleep(2)
+        time.sleep(1)
         if self.locked:
             log.debug("Sending commit cmd as lock is acquired")
             cmd = "show zone pending-diff vsan " + str(self._vsan)
@@ -992,12 +1003,16 @@ class Zone(object):
                     if msg:
                         if "Commit operation initiated. Check zone status" in msg:
                             return
+                        elif "No pending info found" in msg:
+                            return
                         else:
                             log.debug(msg)
                             raise CLIError(cmd, msg)
             except CLIError as c:
                 msg = c.message
-                if "No pending info found" in msg:
+                if "Commit operation initiated. Check zone status" in msg:
+                    return
+                elif "No pending info found" in msg:
                     return
                 else:
                     raise CLIError(cmd, msg)

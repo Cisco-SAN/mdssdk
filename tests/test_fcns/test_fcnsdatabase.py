@@ -9,14 +9,14 @@ log = logging.getLogger(__name__)
 
 class TestFcnsDatabase(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
         log.debug(self.switch.version)
         log.debug(self.switch.ipaddr)
         self.fcns_obj = Fcns(switch=self.switch)
- 
+
     def test_database(self):
         fcnsdb = self.fcns_obj.database()
         log.debug(fcnsdb)
@@ -25,7 +25,7 @@ class TestFcnsDatabase(unittest.TestCase):
             res = self.fcns_obj.database(detail=True)
             log.debug(res)
             self.assertNotEqual({}, res)
-            
+
             if type(fcnsdb) is dict:
                 fcnsdb = [fcnsdb]
             vsan = fcnsdb[0]["vsan_id"]

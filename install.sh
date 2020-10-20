@@ -26,4 +26,7 @@ $s $DIR/setup.py install
 unset NET_TEXTFSM
 #echo $(pwd)
 export NET_TEXTFSM=$DIR/templates/
-
+echo ""
+echo "NOTE: You could add the below to your env permanently if needed"
+echo "      export NET_TEXTFSM=$DIR/templates/"
+echo ""

@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 class TestFcnsNoAutoPoll(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -24,7 +24,7 @@ class TestFcnsNoAutoPoll(unittest.TestCase):
             if type(fcnsdb) is dict:
                 fcnsdb = [fcnsdb]
             vsan = fcnsdb[0]["vsan_id"]
-            fcnsentry = fcnsdb[0]["TABLE_fcns_database"]["ROW_fcns_database"] # change
+            fcnsentry = fcnsdb[0]["TABLE_fcns_database"]["ROW_fcns_database"]  # change
             if type(fcnsentry) is dict:
                 fcnsentry = [fcnsentry]
             pwwn = fcnsentry[0]["pwwn"]

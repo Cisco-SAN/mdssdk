@@ -48,7 +48,7 @@ class ShowTopology(object):
                 # print(intlist)
         if vsan is not None:
             self._parse_data[vsan] = intlist
-        #print(self._parse_data)
+        # print(self._parse_data)
 
     def get_all_data(self):
         return self._parse_data

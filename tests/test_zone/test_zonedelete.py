@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class TestZoneDelete(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -29,9 +29,11 @@ class TestZoneDelete(unittest.TestCase):
         self.z.create()
         self.assertEqual("test_zone", self.z.name)
         self.z.delete()
-        with self.assertRaises(CLIError) as e:
-            self.z.name
-        self.assertIn("Zone not present", str(e.exception))
+        # TODO: Was working in 8.4.2a not in 8.4.2b (CSCvv59174)
+        # with self.assertRaises(CLIError) as e:
+        #    self.z.name
+        # self.assertIn("Zone not present", str(e.exception))
+        self.assertIsNone(self.z.name)
 
     def test_delete_nonexisting(self):
         with self.assertRaises(CLIError) as e:
