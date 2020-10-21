@@ -63,5 +63,5 @@ To uninstall mdssdk,
 
 |**NXOS Version**|**SDK Version** |
 | :------: | :------:  |
-| 8.4(2b) and below | 1.1.0 |
-| 8.4(2a) and below | 1.0.1 |
+| 8.4(2b) and below | v1.1.0 |
+| 8.4(2a) and below | v1.0.1 |
