@@ -42,9 +42,9 @@ class Fc(Interface):
         if type(value) is not bool:
             raise TypeError("Only bool value(true/false) supported.")
         cmd = (
-            "terminal dont-ask ; interface "
-            + self.name
-            + " ; out-of-service force ; no terminal dont-ask "
+                "terminal dont-ask ; interface "
+                + self.name
+                + " ; out-of-service force ; no terminal dont-ask "
         )
         if value:
             # First shutdown the port then
@@ -347,14 +347,14 @@ class Fc(Interface):
             out = self.__fcobj._execute_transceiver_cmd()
             if self.__swobj.is_connection_type_ssh():
                 shitd = ShowInterfaceTransceiverDetail(out)
-                return shitd.min_speed
+                return int(shitd.min_speed)
             supported_speed = get_key(interfacekeys.SUPP_SPEED, self._SW_VER)
             supp_speed = out.get(supported_speed, None)
             if supp_speed is not None:
                 pat = "Min speed: (\d+) Mb/s, Max speed: (\d+) Mb/s"
                 match = re.match(pat, supp_speed)
                 if match:
-                    return match.group(1)
+                    return int(match.group(1))
             return None
 
         @property
@@ -374,14 +374,14 @@ class Fc(Interface):
             out = self.__fcobj._execute_transceiver_cmd()
             if self.__swobj.is_connection_type_ssh():
                 shitd = ShowInterfaceTransceiverDetail(out)
-                return shitd.max_speed
+                return int(shitd.max_speed)
             supported_speed = get_key(interfacekeys.SUPP_SPEED, self._SW_VER)
             supp_speed = out.get(supported_speed, None)
             if supp_speed is not None:
                 pat = "Min speed: (\d+) Mb/s, Max speed: (\d+) Mb/s"
                 match = re.match(pat, supp_speed)
                 if match:
-                    return match.group(2)
+                    return int(match.group(2))
             return None
 
         @property
@@ -401,13 +401,16 @@ class Fc(Interface):
             out = self.__fcobj._execute_transceiver_cmd()
             if self.__swobj.is_connection_type_ssh():
                 shitd = ShowInterfaceTransceiverDetail(out)
-                return shitd.temperature
+                return shitd.temperature.strip()
             try:
                 calibdetails = out["TABLE_calibration"]["ROW_calibration"][
                     "TABLE_detail"
                 ]["ROW_detail"]
                 temp = get_key(interfacekeys.TEMPERATURE, self._SW_VER)
-                return calibdetails.get(temp, None)
+                t = calibdetails.get(temp, None)
+                if t is not None:
+                    return t.strip()
+                return None
             except KeyError:
                 return None
 
@@ -428,13 +431,16 @@ class Fc(Interface):
             out = self.__fcobj._execute_transceiver_cmd()
             if self.__swobj.is_connection_type_ssh():
                 shitd = ShowInterfaceTransceiverDetail(out)
-                return shitd.voltage
+                return shitd.voltage.strip()
             try:
                 calibdetails = out["TABLE_calibration"]["ROW_calibration"][
                     "TABLE_detail"
                 ]["ROW_detail"]
                 vol = get_key(interfacekeys.VOLTAGE, self._SW_VER)
-                return calibdetails.get(vol, None)
+                v = calibdetails.get(vol, None)
+                if v is not None:
+                    return v.strip()
+                return None
             except KeyError:
                 return None
 
@@ -455,13 +461,14 @@ class Fc(Interface):
             out = self.__fcobj._execute_transceiver_cmd()
             if self.__swobj.is_connection_type_ssh():
                 shitd = ShowInterfaceTransceiverDetail(out)
-                return shitd.current
+                return shitd.current.strip()
             try:
-                calibdetails = out["TABLE_calibration"]["ROW_calibration"][
-                    "TABLE_detail"
-                ]["ROW_detail"]
+                calibdetails = out["TABLE_calibration"]["ROW_calibration"]["TABLE_detail"]["ROW_detail"]
                 curr = get_key(interfacekeys.CURRENT, self._SW_VER)
-                return calibdetails.get(curr, None)
+                c = calibdetails.get(curr, None)
+                if c is not None:
+                    return c.strip()
+                return None
             except KeyError:
                 return None
 
@@ -482,13 +489,16 @@ class Fc(Interface):
             out = self.__fcobj._execute_transceiver_cmd()
             if self.__swobj.is_connection_type_ssh():
                 shitd = ShowInterfaceTransceiverDetail(out)
-                return shitd.tx_power
+                return shitd.tx_power.strip()
             try:
                 calibdetails = out["TABLE_calibration"]["ROW_calibration"][
                     "TABLE_detail"
                 ]["ROW_detail"]
                 txpow = get_key(interfacekeys.TX_POWER, self._SW_VER)
-                return calibdetails.get(txpow, None)
+                tp = calibdetails.get(txpow, None)
+                if tp is not None:
+                    return tp.strip()
+                return None
             except KeyError:
                 return None
 
@@ -509,12 +519,14 @@ class Fc(Interface):
             out = self.__fcobj._execute_transceiver_cmd()
             if self.__swobj.is_connection_type_ssh():
                 shitd = ShowInterfaceTransceiverDetail(out)
-                return shitd.rx_power
+                return shitd.rx_power.strip()
             try:
-                calibdetails = out["TABLE_calibration"]["ROW_calibration"][
-                    "TABLE_detail"
-                ]["ROW_detail"]
+                calibdetails = out["TABLE_calibration"]["ROW_calibration"]["TABLE_detail"]["ROW_detail"]
                 rxpow = get_key(interfacekeys.RX_POWER, self._SW_VER)
-                return calibdetails.get(rxpow, None)
+                rp = calibdetails.get(rxpow, None)
+                if rp is not None:
+                    return rp.strip()
+                return None
+
             except KeyError:
                 return None

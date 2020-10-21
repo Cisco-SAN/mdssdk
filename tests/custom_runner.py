@@ -4,6 +4,7 @@ import unittest
 
 writer = csv.writer(open('time.csv', 'w', newline=''))
 
+
 class MyTestLoader(unittest.TestLoader):
 
     def __init__(self, arg):
@@ -19,7 +20,7 @@ class MyTestLoader(unittest.TestLoader):
         testCaseNames = self.getTestCaseNames(testCaseClass)
         if not testCaseNames and hasattr(testCaseClass, 'runTest'):
             testCaseNames = ['runTest']
-        
+
         # Modification here: parse keyword arguments to testCaseClass.
         test_cases = []
         for test_case_name in testCaseNames:
@@ -27,6 +28,7 @@ class MyTestLoader(unittest.TestLoader):
 
         loaded_suite = self.suiteClass(test_cases)
         return loaded_suite
+
 
 class TimeLoggingTestResult(unittest.TextTestResult):
 
@@ -49,5 +51,5 @@ class TimeLoggingTestResult(unittest.TextTestResult):
         super().addFailure(test, err)
 
     def addSkip(self, test, reason):
-        writer.writerow([self.getDescription(test), "skipped: "+str(reason), 0])
+        writer.writerow([self.getDescription(test), "skipped: " + str(reason), 0])
         super().addSkip(test, reason)

@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class TestPortChannelAttrCounters(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -24,10 +24,12 @@ class TestPortChannelAttrCounters(unittest.TestCase):
         self.pc = PortChannel(self.switch, self.pc_id)
 
     def test_counters_read_nonexisting(self):
-        with self.assertRaises(CLIError) as e:
-            log.debug(self.pc.counters.__getattribute__("brief"))
-        self.assertIn("Invalid range", str(e.exception))
-        self.pc.delete()
+        c = self.pc.counters
+        self.assertIsNone(c.brief)
+        # with self.assertRaises(CLIError) as e:
+        #     log.debug(self.pc.counters.__getattribute__("brief"))
+        # self.assertIn("Invalid range", str(e.exception))
+        # self.pc.delete()
 
     def test_counters_read(self):
         self.pc.create()

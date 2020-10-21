@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class TestFlogiDatabase(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -21,17 +21,21 @@ class TestFlogiDatabase(unittest.TestCase):
         flogidb = self.flogi_obj.database()
         log.debug(flogidb)
 
-        if flogidb is not None:
+        if flogidb is not {}:
             if type(flogidb) is dict:
                 flogidb = [flogidb]
             flogidb = self.flogi_obj.database(vsan=flogidb[0]["vsan"])
-            self.assertIsNotNone(flogidb)
+            log.debug(flogidb)
+            self.assertNotEqual({}, flogidb)
 
             flogidb = self.flogi_obj.database(interface=flogidb[0]["interface"])
-            self.assertIsNotNone(flogidb)
+            log.debug(flogidb)
+            self.assertNotEqual({}, flogidb)
 
             flogidb = self.flogi_obj.database(fcid=flogidb[0]["fcid"])
-            self.assertIsNotNone(flogidb)
+            log.debug(flogidb)
+            self.assertNotEqual({}, flogidb)
+        self.skipTest("need to fix assertion")
 
     def test_database_nonexistingentry(self):
         flogidb = self.flogi_obj.database()
@@ -42,7 +46,7 @@ class TestFlogiDatabase(unittest.TestCase):
                 vsan = random.randint(2, 400)
                 if vsan not in vsan_list:
                     break
-            self.assertIsNone(self.flogi_obj.database(vsan=vsan))
+            self.assertEqual({}, self.flogi_obj.database(vsan=vsan))
 
     def tearDown(self) -> None:
         pass

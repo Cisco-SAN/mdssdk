@@ -2,8 +2,10 @@ import logging
 import random
 import string
 
+
 def get_random_id(start=2, end=400):
     return random.randint(start, end)
+
 
 def get_random_pwwn():
     choicelist = [

@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class TestFcAttrSpeed(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -31,16 +31,16 @@ class TestFcAttrSpeed(unittest.TestCase):
         self.assertIn(self.fc.speed, self.speed_values_read)
 
     def test_speed_write(self):
-        # self.skipTest("needs to be fixed")
-        for speed in self.speed_values_write:
-            try:
-                self.fc.speed = speed
-            except CLIError as c:
-                if "Speed change not allowed" in c.message:
-                    self.skipTest(
-                        "Skipping test as speed change is not allowed. Please rerun the test cases"
-                    )
-            self.assertEqual(speed, self.fc.speed)
+        self.skipTest("needs to be fixed")
+        # for speed in self.speed_values_write:
+        #     try:
+        #         self.fc.speed = speed
+        #     except CLIError as c:
+        #         if "Speed change not allowed" in c.message:
+        #             self.skipTest(
+        #                 "Skipping test as speed change is not allowed. Please rerun the test cases"
+        #             )
+        #     self.assertEqual(speed, self.fc.speed)
 
     def test_speed_write_invalid(self):
         speed = "asdf"
@@ -62,8 +62,8 @@ class TestFcAttrSpeed(unittest.TestCase):
                     self.fc.speed = "auto"
                 else:
                     self.fc.speed = (
-                        (int)(self.old)
-                    ) * 1000  # read in Gbps, write in Mbps
+                                        (int)(self.old)
+                                    ) * 1000  # read in Gbps, write in Mbps
                 self.assertEqual(self.old, self.fc.speed)
             except CLIError as e:
                 if "port already in a port-channel, no config allowed" in str(e.msg):

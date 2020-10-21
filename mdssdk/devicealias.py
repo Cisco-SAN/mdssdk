@@ -22,9 +22,9 @@ class DeviceAlias(object):
 
     """
 
-    def __init__(self, sw):
-        self.__swobj = sw
-        self._SW_VER = sw._SW_VER
+    def __init__(self, switch):
+        self.__swobj = switch
+        self._SW_VER = switch._SW_VER
 
     @property
     def mode(self):
@@ -364,8 +364,8 @@ class DeviceAlias(object):
                 msg = c.message
             if msg is not None:
                 if (
-                    "The following device-alias changes are about to be committed"
-                    in msg
+                        "The following device-alias changes are about to be committed"
+                        in msg
                 ):
                     pass
                 elif "There are no pending changes" in msg:

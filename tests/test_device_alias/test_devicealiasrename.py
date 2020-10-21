@@ -6,10 +6,11 @@ from tests.test_device_alias.vars import *
 
 log = logging.getLogger(__name__)
 
+
 class TestDeviceAliasRename(unittest.TestCase):
 
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -25,8 +26,8 @@ class TestDeviceAliasRename(unittest.TestCase):
                 self.name = get_random_string()
                 self.pwwn = get_random_pwwn()
                 if (
-                    self.name not in self.olddb.keys()
-                    and self.pwwn not in self.olddb.values()
+                        self.name not in self.olddb.keys()
+                        and self.pwwn not in self.olddb.values()
                 ):
                     break
         log.debug({self.name: self.pwwn})

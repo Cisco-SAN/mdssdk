@@ -1,7 +1,7 @@
 import logging
 import re
 from time import sleep
-
+from ..constants import SSH_CONN_TIMEOUT
 from netmiko import ConnectHandler
 
 log = logging.getLogger(__name__)
@@ -12,19 +12,21 @@ class SSHSession(object):
        Generic SSHSession which can be used to run commands
        """
 
-    def __init__(self, host, username, password, timeout=60):
+    def __init__(self, host, username, password, timeout=SSH_CONN_TIMEOUT):
         """
         Establish SSH Connection using given hostname, username and
         password which can be used to run commands.
         """
         self._host = host
+        self.timeout = timeout
         self._cisco_device = {
             "device_type": "cisco_nxos",
             "host": self._host,
             "username": username,
             "password": password,
-            "timeout": 60,
+            "timeout": self.timeout,
         }
+        self.anyerror = False
         self._connect()
 
     def __repr__(self):
@@ -36,22 +38,25 @@ class SSHSession(object):
     def __del__(self):
         """Try to close connection if possible"""
         try:
-            sleep(2)
+            sleep(1)
             self._disconnect()
         except Exception:
             pass
 
     def _reconnect(self):
-        log.debug("Inside reconnect")
+        log.debug("Inside reconnect " + self._host)
+        log.debug(self._connection.is_alive())
         self._disconnect()
         self._connect()
+        log.debug(self._connection.is_alive())
 
     def _disconnect(self):
-        log.debug("Inside disconnect")
-        self._connection.disconnect()
+        if not self.anyerror:
+            log.debug("Inside disconnect " + self._host)
+            self._connection.disconnect()
 
     def _connect(self):
-        log.debug("Inside Connect")
+        log.debug("Inside Connect " + self._host)
         self._connection = ConnectHandler(**self._cisco_device)
         self.prompt = self._connection.find_prompt()
         log.debug("Prompt is " + self.prompt)
@@ -67,13 +72,17 @@ class SSHSession(object):
                 return True
         return False
 
-    def show(self, cmd, timeout=100, expect_string=None):
-        df = int(timeout / 100)
+    def show(self, cmd, timeout=None, expect_string=None, use_textfsm=True):
+        if timeout is None:
+            df = 1
+        else:
+            df = int(timeout / 100)  # 100 beacause thats the timeout netmiko uses
+            log.debug("Delay factor is " + str(df))
         output = self._connection.send_command(
             cmd,
             delay_factor=df,
             expect_string=expect_string,
-            use_textfsm=True,
+            use_textfsm=use_textfsm,
             strip_prompt=True,
         )
         if type(output) == str:
@@ -107,10 +116,16 @@ class SSHSession(object):
             return retout, " ".join(retout)  # There is some error
         return retout, None  # there is no error
 
-    def config(self, cmd):
+    def config(self, cmd, timeout=None):
+        if timeout is None:
+            df = 1
+        else:
+            df = int(timeout / 100)  # 100 beacause thats the timeout netmiko uses
+            log.debug("Delay factor is " + str(df))
         retout = []
         output = self._connection.send_config_set(
             cmd,
+            delay_factor=df,
             strip_prompt=True,
             strip_command=True,
             config_mode_command="configure terminal",

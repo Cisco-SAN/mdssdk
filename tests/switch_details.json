@@ -1,8 +1,8 @@
 {
-    "ip_address": "10.126.94.121",
-    "username": "admin",
-    "password": "nbv!2345",
-    "port": 8443,
-    "timeout": 30,
-    "connection_type": "ssh"
+  "ip_address": "10.126.94.123",
+  "username": "admin",
+  "password": "nbv!2345",
+  "port": 8443,
+  "timeout": 30,
+  "connection_type": "https"
 }

@@ -1,5 +1,7 @@
 # Python SDK/API library for Cisco MDS Switches.
 
+![Python](https://img.shields.io/badge/python-v3.6+-blue.svg)
+
 This library will be useful for automating day to day tasks or developing new tools which involve Cisco MDS switches
 
 * Python version: 3.6 and above
@@ -29,9 +31,13 @@ This library will be useful for automating day to day tasks or developing new to
        
        cd mdssdk-master/
        source install.sh
+       or
+       source ./install.sh
+       or 
+       . ./install.sh
        
 6) Once successfully done issue `pip list` and you should see mdssdk package installed
-        
+                           
         >>> pip list
         Package    Version   
         ---------- ----------
@@ -52,3 +58,10 @@ To uninstall mdssdk,
 ## Documentation
 
 * http://mdssdk.readthedocs.io
+
+## Support Matrix
+
+|**NXOS Version**|**SDK Version** |
+| :------: | :------:  |
+| 8.4(2b) and below | 1.1.0 |
+| 8.4(2a) and below | 1.0.1 |

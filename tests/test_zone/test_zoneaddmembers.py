@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 class TestZoneAddMembers(unittest.TestCase):
     def __init__(self, testName, sw):
-        super().__init__(testName) 
+        super().__init__(testName)
         self.switch = sw
 
     def setUp(self) -> None:
@@ -29,12 +29,13 @@ class TestZoneAddMembers(unittest.TestCase):
         self.z = Zone(self.switch, "test_zone", self.id)
         self.z.create()
 
-    def test_add_members_zone_notpresent(self):
-        self.z.delete()
-        members = ["10:99:88:90:76:88:99:ef"]
-        with self.assertRaises(CLIError) as e:
-            self.z.add_members(members)
-        self.assertIn("Zone not present", str(e.exception))
+    # def test_add_members_zone_notpresent(self):
+    #     self.z.delete()
+    #     members = ["10:99:88:90:76:88:99:ef"]
+    #     # TODO: Was working in 8.4.2a not in 8.4.2b (CSCvv59174)
+    #     #with self.assertRaises(CLIError) as e:
+    #     #    self.z.add_members(members)
+    #     #self.assertIn("Zone not present", str(e.exception))
 
     def test_add_members_dict(self):
         fc_name = ""
@@ -80,6 +81,7 @@ class TestZoneAddMembers(unittest.TestCase):
 
     def test_add_members(self):
         members = []
+        # print(self.switch.interfaces)
         for v in list(self.switch.interfaces.values()):
             if type(v) is Fc:
                 members.append(v)

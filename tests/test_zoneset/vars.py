@@ -3,8 +3,10 @@ import random
 
 log = logging.getLogger(__name__)
 
+
 def get_random_id(start=2, end=400):
     return random.randint(start, end)
+
 
 def get_random_pwwn():
     choicelist = [
@@ -32,6 +34,7 @@ def get_random_pwwn():
         if i % 2 == 1:
             entry = entry + ":"
     return entry.rstrip(":")
+
 
 members_dict = [
     {"pwwn": get_random_pwwn()},
