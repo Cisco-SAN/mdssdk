@@ -57,7 +57,7 @@ class ConnectNxapi(object):
                 payload = dict(
                     jsonrpc=rpc_version,
                     method=method,
-                    params=dict(cmd=command, version=1.2),
+                    params=dict(cmd=command, version=1),
                     id=id_num,
                 )
 

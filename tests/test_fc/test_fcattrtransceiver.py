@@ -20,9 +20,8 @@ class TestFcAttrTransceiver(unittest.TestCase):
             k, v = random.choice(list(interfaces.items()))
             if type(v) is Fc:
                 self.fc = v
-                if self.fc.transceiver.sfp_present:
-                    log.debug(k)
-                    break
+                log.debug(k)
+                break
 
     def test_transceiver_read(self):
         self.assertIsNotNone(self.fc.transceiver, "fc.transceiver did not get transceiver objects")

@@ -901,13 +901,7 @@ class Zone(object):
         if out:
             if self.__swobj.is_connection_type_ssh():
                 return out
-            else:
-                retout = out["TABLE_zone_status"]["ROW_zone_status"]
-                if type(retout) is list:
-                    r = retout[0]
-                else:
-                    r = retout
-            return r
+            return out["TABLE_zone_status"]["ROW_zone_status"]
         return out
 
     def _send_zone_show_cmd(self, cmd):

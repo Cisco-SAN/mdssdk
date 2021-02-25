@@ -4,19 +4,13 @@
 History
 =======
 
-v1.2.0 (2021-2-17)
----------------------
-
-* Support for 8.5(1) release
-* Some bug fixes and improvements
-
-v1.1.0 (2020-08-21)
+1.1.0 (2020-08-21)
 ---------------------
 
 * Support for 8.4(2b) release
 * Many bug fixes and improvements
 
-v1.0.1 (2020-05-11)
+1.0.1 (2020-05-11)
 ---------------------
 
 * Python SDK/API library for Cisco MDS switches

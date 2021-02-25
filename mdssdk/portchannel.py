@@ -317,8 +317,6 @@ class PortChannel(Interface):
         )
         out = self.__swobj.show(cmd)
         detailoutput = out["TABLE_port_channel_database"]["ROW_port_channel_database"]
-        if type(detailoutput) is list:
-            detailoutput = detailoutput[0]
         return detailoutput
 
     def __is_pc_present(self):

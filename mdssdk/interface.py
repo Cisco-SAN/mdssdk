@@ -92,11 +92,7 @@ class Interface(object):
                 return ""
             return shint.description
         out = self.__swobj.show(cmd)
-        retout = out["TABLE_interface"]["ROW_interface"]
-        if type(retout) is list:
-            desc = retout[0]["description"]
-        else:
-            desc = retout["description"]
+        desc = out["TABLE_interface"]["ROW_interface"]["description"]
         # IF the string is a big one then the return element is of type list
         if type(desc) is list:
             retval = "".join(desc)
@@ -336,7 +332,12 @@ class Interface(object):
             out = out["TABLE_interface_brief_if"]["ROW_interface_brief_if"]
             if type(out) is dict:
                 out = [out]
+            # print(out)
+            # print(self._swobj.connection_type)
             for eachout in out:
+                # print(eachout)
+                # print(self._SW_VER)
+                # print(interfacekeys.INTERFACE)
                 if (eachout[get_key(interfacekeys._INTERFACE, self._SW_VER)] == self._name):
                     return eachout
         elif pcmatch:
@@ -363,10 +364,7 @@ class Interface(object):
             out = self.__swobj.show(cmd)
             return out
         out = self.__swobj.show(cmd)
-        retout = out["TABLE_counters"]["ROW_counters"]
-        if type(retout) is list:
-            return retout[0]
-        return retout
+        return out["TABLE_counters"]["ROW_counters"]
 
     def _execute_counters_brief_cmd(self):
         cmd = "show interface " + self._name + " counters brief"
@@ -374,10 +372,7 @@ class Interface(object):
             out = self.__swobj.show(cmd)
             return out
         out = self.__swobj.show(cmd)
-        retout = out["TABLE_counters_brief"]["ROW_counters_brief"]
-        if type(retout) is list:
-            return retout[0]
-        return retout
+        return out["TABLE_counters_brief"]["ROW_counters_brief"]
 
     def _execute_clear_counters_cmd(self):
         cmd = "clear counters interface " + self._name

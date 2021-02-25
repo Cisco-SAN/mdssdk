@@ -60,8 +60,6 @@ class ZoneSet(object):
                 return out[0]['zonesetname']
             else:
                 out = out.get("TABLE_zoneset").get("ROW_zoneset")
-                if type(out) is list:
-                    out = out[0]
                 return out[get_key(zonekeys.NAME, self._SW_VER)]
         return None
 
@@ -111,8 +109,6 @@ class ZoneSet(object):
             else:
                 zonesetdata = out.get("TABLE_zoneset", None).get("ROW_zoneset", None)
                 if zonesetdata is not None:
-                    if type(zonesetdata) is list:
-                        zonesetdata = zonesetdata[0]
                     zonedata = zonesetdata.get("TABLE_zone", None)
                     if zonedata is not None:
                         zdb = zonedata.get("ROW_zone", None)
@@ -304,8 +300,6 @@ class ZoneSet(object):
                 return False
         if out:
             azsdetails = out["TABLE_zoneset"]["ROW_zoneset"]
-            if type(azsdetails) is list:
-                azsdetails = azsdetails[0]
             azs = azsdetails[get_key(zonekeys.NAME, self._SW_VER)]
             if azs == self._name:
                 return True

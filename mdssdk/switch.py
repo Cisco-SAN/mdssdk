@@ -26,7 +26,6 @@ from .utility.utils import get_key
 
 log = logging.getLogger(__name__)
 
-VALID_CONN_TYPES = ['https', 'https', 'ssh']
 
 def print_and_log(msg):
     log.debug(msg)
@@ -116,9 +115,6 @@ class Switch(SwitchUtils):
         self._SW_VER = self.version
         log.debug("sw version is " + self._SW_VER)
 
-    def reconnect(self):
-        self._reconnect_to_ssh()
-
     def _reconnect_to_ssh(self):
         log.debug("Re-establishing the ssh connection for switch with ip " + self.__ip_address)
         self._ssh_handle._reconnect()
@@ -134,11 +130,14 @@ class Switch(SwitchUtils):
             self._SW_VER = ver
             log.debug("sw version is " + self._SW_VER)
         except KeyError:
-            log.error("Got keyerror while getting version, setting connection type to ssh. Please wait..")
+            log.error("Got keyerror while getting version, setting connection type to ssh")
+            cmd = "show version"
+            outlines = self.show(command=cmd)
+            ver = outlines[0]["version"]
+            log.debug("ssh: " + ver)
+            self._SW_VER = ver
+            log.debug("sw version is " + self._SW_VER)
             self.connection_type = "ssh"
-            # Connect to ssh
-            self._connect_to_ssh()
-            ver = self._SW_VER
         PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>[a-z+])?\)(?P<other>.*)"
         RE_COMP = re.compile(PAT_VER)
         result_ver = RE_COMP.match(ver)

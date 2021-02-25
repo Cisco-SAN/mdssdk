@@ -30,8 +30,6 @@ status_values = [
     "outofServc",
     "isolated",
     "licenseNotAvail",
-    "init",
-    "offline"
 ]
 
 
