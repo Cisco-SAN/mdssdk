@@ -130,8 +130,9 @@ class Vsan(object):
             shvsan = ShowVsanMembership(outlines)
             allint = shvsan.interfaces
         else:
-            out = self.__swobj.show(cmd)
-            out = out["TABLE_vsan_membership"]["ROW_vsan_membership"]
+            out = self.__swobj.show(cmd)["TABLE_vsan_membership"]["ROW_vsan_membership"]
+            if type(out) is list:
+                out = out[0]
             allint = out.get("interfaces", None)
         if allint is None:
             return None
@@ -310,3 +311,4 @@ class Vsan(object):
             return None
 
         return dict(shvsan_req_out)
+
