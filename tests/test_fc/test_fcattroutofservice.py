@@ -52,8 +52,8 @@ class TestFcAttrOutOfService(unittest.TestCase):
                     )
             self.assertEqual("outOfServc", self.fc.status)
             self.fc.out_of_service = False
-            # if self.old != "down":
-            self.fc.status = "no shutdown"
+            if self.old != "down":
+                self.fc.status = "no shutdown"
             time.sleep(2)
             self.assertEqual(self.old, self.fc.status)
 
@@ -64,7 +64,7 @@ class TestFcAttrOutOfService(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.fc.out_of_service = False
-        # if self.old != "down":
-        self.fc.status = "no shutdown"
-        time.sleep(5)
+        if self.old != "down":
+            self.fc.status = "no shutdown"
+        time.sleep(2)
         self.assertEqual(self.old, self.fc.status)
