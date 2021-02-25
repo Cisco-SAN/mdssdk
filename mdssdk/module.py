@@ -175,4 +175,6 @@ class Module(object):
             retout = out[0]
         else:
             retout = out["TABLE_modinfo"]["ROW_modinfo"]
+            if type(retout) is list:
+                retout = retout[0]
         return retout

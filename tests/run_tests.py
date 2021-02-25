@@ -41,14 +41,14 @@ def get_suite_list(sw):
     # suiteList.append(MyTestLoader(sw).discover("tests.test_port_channel", "test_*.py"))
     # suiteList.append(MyTestLoader(sw).discover("tests.test_fcns", "test_*.py"))
     # suiteList.append(MyTestLoader(sw).discover("tests.test_flogi", "test_*.py"))
-    suiteList.append(MyTestLoader(sw).discover("tests.test_switch", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("tests.test_switch", "test_*.py"))
     # suiteList.append(MyTestLoader(sw).discover("tests.test_vsan", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("tests.test_zone", "test_*.py"))
-    suiteList.append(MyTestLoader(sw).discover("tests.test_zoneset", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("tests.test_zoneset", "test_*.py"))
     return suiteList
 
 
-for conntype in ["ssh", "https"]:
+for conntype in ["https", "ssh"]:
     with open("switch_details.json", "r+", encoding="utf-8") as f:
         data = json.load(f)
         print(

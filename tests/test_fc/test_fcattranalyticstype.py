@@ -4,7 +4,7 @@ import unittest
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc, InvalidAnalyticsType
 from tests.test_fc.vars import *
-
+from mdssdk.connection_manager.errors import UnsupportedFeature
 log = logging.getLogger(__name__)
 
 
@@ -19,7 +19,11 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
         log.debug(self.switch.ipaddr)
         self.ana_before = self.switch.feature("analytics")
         if not self.ana_before:
-            self.switch.feature("analytics", True)
+            try:
+                self.switch.feature("analytics", True)
+            except UnsupportedFeature as e:
+                self.skipTest(e.message)
+
         self.anaenabled = self.switch.feature("analytics")
         if not self.anaenabled:
             self.skipTest("Ana feature not enabled or supported")
