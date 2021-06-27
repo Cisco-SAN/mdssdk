@@ -6,7 +6,7 @@ from .utils import get_key
 from .. import constants
 from ..fc import Fc
 from ..module import Module
-from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys
+from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys, inventorykeys
 from ..parsers.interface import ShowInterfaceBrief
 from ..parsers.vsan import ShowVsan
 from ..portchannel import PortChannel
@@ -18,6 +18,27 @@ log = logging.getLogger(__name__)
 
 
 class SwitchUtils:
+
+    def _is_mds_switch(self):
+        self.__supported = False
+        cmd = "show inventory"
+        if self.connection_type != "ssh":
+            inv = self.show(command=cmd,use_ssh=False)
+            self.inv_details = inv['TABLE_inv']['ROW_inv']
+        else:
+            inv = self.show(command=cmd,use_ssh=True)
+            self.inv_details = inv
+        for eachline in self.inv_details:
+            if eachline['name'] == 'Chassis':
+                # Not using get_key here because this is run before we get the sw version
+                # Hence 'productid' is hardcoded here
+                self._product_id = eachline['productid']
+                self._serial_num = eachline['serialnum']
+                # 'DS-' is for MDS switches and 89 is for Raven switches
+                if self.product_id.startswith("DS-") or self.product_id.startswith("89"):
+                    self.__supported = True
+                return self.__supported
+        return self.__supported
 
     @property
     def interfaces(self):

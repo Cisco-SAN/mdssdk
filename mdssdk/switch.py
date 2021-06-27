@@ -16,8 +16,8 @@ from .connection_manager.errors import (
     VersionNotFound,
     UnsupportedFeature,
     UnsupportedConfig,
+    UnsupportedSwitch
 )
-from .constants import DEFAULT
 from .nxapikeys import versionkeys, featurekeys
 from .parsers.switch import ShowTopology
 from .utility.switch_utility import SwitchUtils
@@ -25,8 +25,6 @@ from .utility import utils
 from .utility.utils import get_key
 
 log = logging.getLogger(__name__)
-
-VALID_CONN_TYPES = ['https', 'https', 'ssh']
 
 def print_and_log(msg):
     log.debug(msg)
@@ -86,7 +84,9 @@ class Switch(SwitchUtils):
             self.port = port
         self.timeout = timeout
         self.__verify_ssl = verify_ssl
+        self.__supported = None
 
+        # If connection type is https/http then we need to open nxapi connection
         if self.connection_type != "ssh":
             log.info("Opening up a nxapi connection for switch with ip " + self.__ip_address)
             self.__connection = ConnectNxapi(
@@ -97,12 +97,18 @@ class Switch(SwitchUtils):
                 port=self.port,
                 verify_ssl=self.__verify_ssl,
             )
-            log.info("Along with NXAPI opening up a parallel ssh connection for switch with ip " + self.__ip_address)
+            self._check_if_supported_switch()
             self._set_connection_type_based_on_version()
 
+        log.info("Along with NXAPI opening up a parallel ssh connection for switch with ip " + self.__ip_address)
         # Connect to ssh
         self._connect_to_ssh()
         log.debug("is_connection_type_ssh " + str(self.is_connection_type_ssh()))
+
+    def _check_if_supported_switch(self):
+        if self.__supported is None:
+            if not self._is_mds_switch():
+                raise UnsupportedSwitch("SDK supports only MDS switches. " + self.__ip_address + "(" + self.product_id +") is not a supported switch ")
 
     def _connect_to_ssh(self):
         log.debug("Opening up a ssh connection for switch with ip " + self.__ip_address)
@@ -112,7 +118,8 @@ class Switch(SwitchUtils):
             password=self.__password,
             timeout=self.timeout,
         )
-        log.debug("Finished up a ssh connection for switch with ip " + self.__ip_address)
+        self._check_if_supported_switch()
+        log.debug("ssh connection established for switch with ip " + self.__ip_address)
         self._SW_VER = self.version
         log.debug("sw version is " + self._SW_VER)
 
@@ -188,11 +195,43 @@ class Switch(SwitchUtils):
         return self.connection_type == "ssh"
 
     @property
+    def serial_num(self):
+        """
+        Get serial number of the switch
+
+        :return: serial number of switch
+        :rtype: str
+
+        :example:
+            >>> print(switch_obj.serial_num)
+            FXS1928Q402
+            >>>
+        """
+
+        return self._serial_num
+
+    @property
+    def product_id(self):
+        """
+        Get mgmt product_id address of the switch
+
+        :return: product_id address of switch
+        :rtype: str
+
+        :example:
+            >>> print(switch_obj.product_id)
+            DS-C9706
+            >>>
+        """
+
+        return self._product_id
+
+    @property
     def ipaddr(self):
         """
-        Get mgmt ip address of the switch
+        Get mgmt IPv4 address of the switch
 
-        :return: IP address of switch
+        :return: IPv4 address of switch
         :rtype: str
 
         :example:
@@ -285,6 +324,8 @@ class Switch(SwitchUtils):
         log.debug("Running version API")
         if self.is_connection_type_ssh():
             outlines = self.show(command=cmd)
+            #print(self.ipaddr)
+            #print(outlines)
             ver = outlines[0]["version"]
             log.debug("ssh: " + ver)
         else:
@@ -494,6 +535,97 @@ class Switch(SwitchUtils):
         return out[get_key(versionkeys.ISAN_FILE, self._SW_VER)]
 
     @property
+    def system_uptime(self):
+        """
+        Returns the switch uptime
+
+        :return: Returns the switch uptime
+        :rtype: datetime.timedelta
+
+        :example:
+            >>> print(switch_obj.system_uptime)
+            datetime.timedelta(days=7, seconds=7561)
+            >>>
+        """
+        from datetime import timedelta
+        system_uptime_obj = None
+        cmd = "show version"
+        if self.is_connection_type_ssh():
+            outlines = self.show(command=cmd)
+            utdays = outlines[0]["uptime_days"]
+            uthrs = outlines[0]["uptime_hours"]
+            utmins = outlines[0]["uptime_mins"]
+            utsecs = outlines[0]["uptime_secs"]
+
+            system_uptime_obj = timedelta(
+                days=int(utdays),
+                hours=int(uthrs),
+                minutes=int(utmins),
+                seconds=int(utsecs),
+            )
+            return system_uptime_obj
+
+        out = self.show(command=cmd)
+        if not out:
+            return None
+        utdays = out[get_key(versionkeys.UPTIME_DAYS, self._SW_VER)]
+        uthrs = out[get_key(versionkeys.UPTIME_HOURS, self._SW_VER)]
+        utmins = out[get_key(versionkeys.UPTIME_MINS, self._SW_VER)]
+        utsecs = out[get_key(versionkeys.UPTIME_SECS, self._SW_VER)]
+        system_uptime_obj = timedelta(
+            days=int(utdays),
+            hours=int(uthrs),
+            minutes=int(utmins),
+            seconds=int(utsecs),
+        )
+        return system_uptime_obj
+
+    @property
+    def last_boot_time(self):
+        """
+        Returns the last boot time of the switch
+
+        :return: Returns the last boot time of the switch
+        :rtype: datetime.datetime
+
+        :example:
+            >>> print(switch_obj.last_boot_time)
+            datetime.datetime(2021, 6, 15, 11, 14, 51, 617398)
+            >>>
+        """
+        from datetime import datetime
+        date_time_obj = None
+        cmd = "show version"
+        if self.is_connection_type_ssh():
+            outlines = self.show(command=cmd)
+
+            # 617398
+            lrusecs = outlines[0]["last_reset_usecs"]
+
+            # Tue Jun 15 11:14:51 2021
+            lrtime = outlines[0]["last_reset_time"]
+
+            # lrtime + " " + lrusecs
+            # Tue Jun 15 11:14:51 2021 617398
+            date_time_obj = datetime.strptime(lrtime + " " + lrusecs, '%a %b %d %H:%M:%S %Y %f')
+            return date_time_obj
+
+        out = self.show(command=cmd)
+        if not out:
+            return None
+
+        # 617398
+        lrusecs = out[get_key(versionkeys.LAST_RESET_USECS, self._SW_VER)]
+
+        # Tue Jun 15 11:14:51 2021
+        lrtime = out[get_key(versionkeys.LAST_RESET_TIME, self._SW_VER)]
+
+        # lrtime + " " + lrusecs
+        # Tue Jun 15 11:14:51 2021 617398
+        date_time_obj = datetime.strptime(str(lrtime) + " " + str(lrusecs), '%a %b %d %H:%M:%S %Y %f')
+        return date_time_obj
+
+    @property
     def analytics(self):
         """
         Returns handler for analytics module, using which we could do analytics related operations
@@ -507,94 +639,6 @@ class Switch(SwitchUtils):
         """
 
         return Analytics(self)
-
-    # # Bug doesnt work on npv, NXOS needs to fix, once fixed uncomment this
-    # def feature(self, name, enable=None):
-    #
-    #     """
-    #     Enable or disable a feature or get the status of the feature
-    #
-    #     :param name: Name of the feature
-    #     :param enable: Set to True to enable the feature or set to False to disable the feature or set to None (deafault) to get the status of the feature
-    #     :return: Returns True of False if enable is set to None
-    #
-    #     :example:
-    #         >>>
-    #         >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password)
-    #         >>> # Get the status of the feature, in this case analytics is disabled
-    #         >>> ana = switch_obj.feature('analytics')
-    #         >>> print(ana)
-    #         False
-    #         >>> # Now lets enable the feature
-    #         >>> switch_obj.feature('analytics', True)
-    #         >>> print(switch_obj.feature('analytics'))
-    #         True
-    #         >>> # Now lets disable the feature
-    #         >>> switch_obj.feature('analytics', False)
-    #         >>> print(switch_obj.feature('analytics'))
-    #         False
-    #         >>>
-    #
-    #     .. warning:: Disabling feature 'nxapi' or 'ssh' via this API is not allowed
-    #
-    #     """
-    #     # Do a type check on the enable flag
-    #     if enable is not None:
-    #         if type(enable) is not bool:
-    #             raise TypeError(
-    #                 "enable flag must be True(to enable the feature) or False(to disable the feature)"
-    #             )
-    #
-    #     if enable is None:
-    #         log.debug("Get the status of the feature " + name)
-    #         cmd = "show feature"
-    #         out = self.show(command=cmd)
-    #         # print(out)
-    #
-    #
-    #         if self.is_connection_type_ssh():
-    #             # print("--Get the status of the feature " + name)
-    #             for eachrow in out:
-    #                 if eachrow["feature"] == name:
-    #                     if eachrow["state"] == "enabled":
-    #                         return True
-    #                     else:
-    #                         return False
-    #             return False
-    #
-    #         list_of_features = out["TABLE_cfcFeatureCtrl2Table"][
-    #             "ROW_cfcFeatureCtrl2Table"
-    #         ]
-    #         for eachfeature in list_of_features:
-    #             feature_name = eachfeature[
-    #                 get_key(featurekeys.NAME, self._SW_VER)
-    #             ].strip()
-    #             feature_status = eachfeature[
-    #                 get_key(featurekeys.STATUS, self._SW_VER)
-    #             ].strip()
-    #             if name == feature_name:
-    #                 return feature_status == "enabled"
-    #         return False
-    #     elif enable:
-    #         log.debug("Trying to enable the feature " + name)
-    #         cmd = "feature " + name
-    #     else:
-    #         # if we try to disable ssh or nxapi via this SDK then throw an exception
-    #         if name == "ssh" or name == "nxapi":
-    #             raise UnsupportedConfig(
-    #                 "Disabling the feature '"
-    #                 + name
-    #                 + "' via this SDK API is not allowed!!"
-    #             )
-    #         log.debug("Trying to disable the feature " + name)
-    #         cmd = "no feature " + name
-    #     try:
-    #         out = self.config(cmd)
-    #     except CLIError as c:
-    #         if "Invalid command" in c.message:
-    #             raise UnsupportedFeature(
-    #                 "This feature '" + name + "' is not supported on this switch "
-    #             )
 
     def feature(self, name, enable=None):
 
@@ -636,7 +680,6 @@ class Switch(SwitchUtils):
             log.debug("Get the status of the feature " + name)
             cmd = "show feature"
             out = self.show(command=cmd, use_ssh=True)
-
             for eachrow in out:
                 if eachrow["feature"] == name:
                     if eachrow["state"] == "enabled":
@@ -891,7 +934,7 @@ class Switch(SwitchUtils):
 
         return return_list
 
-    def reload(self, module=None, timeout=RELOAD_TIMEOUT, copyrs=True):
+    def reload(self, module=None, timeout=RELOAD_TIMEOUT,  non_disruptive=False , copyrs=True, basic_verification=False):
         """
         Reload a switch or a module
 
@@ -922,21 +965,28 @@ class Switch(SwitchUtils):
         else:
             # Module reload
             mod = str(module)
-            cmd = "terminal dont-ask ; reload module " + mod
-            action_string = "reload module " + str(mod)
+            if non_disruptive:
+                cmd = "terminal dont-ask ; reload module " + mod + " non-disruptive "
+                action_string = "reload module " + str(mod) +" non-disruptively"
+            else:
+                cmd = "terminal dont-ask ; reload module " + mod
+                action_string = "reload module " + str(mod)
+
             if copyrs:
                 log.info(
                     "Reloading the module "
                     + mod
                     + " after copy running-config startup-config"
                 )
-                crs = self.show(command="copy running-config startup-config", raw_text=True)
-                if "Copy complete" in crs:
-                    log.info("copy running-config startup-config is successful")
-                else:
-                    log.error("copy running-config startup-config failed")
-                    log.error(crs.split("\n")[-1])
-                    return {"FAILED": crs}
+
+                crs = self.show(command="copy running-config startup-config", raw_text=True, timeout=120,expect_string=".*")
+                print(crs)
+                # if "Copy complete" in crs:
+                #     log.info("copy running-config startup-config is successful")
+                # else:
+                #     log.error("copy running-config startup-config failed")
+                #     log.error(crs.split("\n")[-1])
+                #     return {"FAILED": crs}
             else:
                 log.info(
                     "Reloading the module "
@@ -944,8 +994,22 @@ class Switch(SwitchUtils):
                     + " without copy running-config startup-config"
                 )
 
-        out = self._verify_basic_stuff(cmd, action_string, timeout)
-        return out
+        if basic_verification:
+            out = self._verify_basic_stuff(cmd, action_string, timeout)
+            print(out)
+            return out
+        else:
+            try:
+                out = self.show(cmd,expect_string=".*")
+            except CLIError as c:
+                if "reloading module" in c.message:
+                    pass
+                elif "Warning: This will non-disruptively reload" in c.message:
+                    pass
+                else:
+                    raise CLIError(c)
+            print_and_log(self.ipaddr + ": " + action_string + ". Please wait for " + str(timeout) + " secs..")
+            time.sleep(timeout)
 
     def _get_alt_handle(self):
         log.debug("Getting an alt handle")
@@ -1058,3 +1122,90 @@ class Switch(SwitchUtils):
         peer_ip_list = utils._run_show_topo_for_npiv(self)
         return list(set(peer_ip_list))
 
+    def _verify_basic_stuff(self, cmd, action_string, timeout):
+        print_and_log(
+            self.ipaddr + ": Collecting basic info before '" + action_string + "'"
+        )
+        shmod_before = self.show(command="show module", raw_text=True).split("\n")
+        shintb_before = self.show(command="show interface brief", raw_text=True).split("\n")
+        print_and_log(self.ipaddr + ": Started " + action_string + ". Please wait...")
+        if "install all" in action_string:
+            status, error = self._execute_install_all(cmd, timeout)
+            if status == "FAILED":
+                return status, error
+        else:
+            try:
+                out = self.config(cmd)
+            except CLIError as c:
+                if "reloading module" in c.message:
+                    pass
+                else:
+                    raise CLIError(c)
+            print_and_log(self.ipaddr + ": Please wait for " + str(timeout) + " secs..")
+            time.sleep(timeout)
+        print_and_log(
+            self.ipaddr + ": Collecting basic info after '" + action_string + "'"
+        )
+        shmod_after = self.show(command="show module", raw_text=True).split("\n")
+        shintb_after = self.show(command="show interface brief", raw_text=True).split("\n")
+
+        cores = self.cores
+        if cores is not None:
+            log.error(
+                self.ipaddr
+                + ": Cores present on the switch, please check the switch and also the log file"
+            )
+            log.error(cores)
+            return ("FAILED", out)
+
+        if shmod_before == shmod_after:
+            log.debug(self.ipaddr + ": 'show module' is correct after " + action_string)
+        else:
+            log.error(
+                self.ipaddr
+                + ": 'show module' output is different from before and after "
+                + action_string
+                + ", please check the log file"
+            )
+            log.debug(self.ipaddr + ": 'show module' before " + action_string)
+            log.debug(shmod_before)
+            log.debug(self.ipaddr + ": 'show module' after " + action_string)
+            log.debug(shmod_after)
+
+            bset = set(shmod_before)
+            aset = set(shmod_after)
+            bef = list(bset - aset)
+            aft = list(aset - bset)
+            log.debug(self.ipaddr + ": diff of before after " + action_string)
+            log.debug(bef)
+            log.debug(aft)
+            return ("FAILED", [bef, aft])
+
+        if shintb_before == shintb_after:
+            log.debug(
+                self.ipaddr
+                + ": 'show interface brief' is correct after "
+                + action_string
+            )
+        else:
+            log.error(
+                self.ipaddr
+                + ": 'show interface brief' output is different from before and after "
+                + action_string
+                + ", please check the log file"
+            )
+            log.debug(self.ipaddr + ": 'show interface brief' before " + action_string)
+            log.debug(shintb_before)
+            log.debug(self.ipaddr + ": 'show interface brief' after " + action_string)
+            log.debug(shintb_after)
+
+            bset = set(shintb_before)
+            aset = set(shintb_after)
+            bef = list(bset - aset)
+            aft = list(aset - bset)
+            log.debug(self.ipaddr + ": diff of before after " + action_string)
+            log.debug(bef)
+            log.debug(aft)
+            return ("FAILED", [bef, aft])
+        log.info(self.ipaddr + ": Basic info is correct after " + action_string)
+        return ("SUCCESS", None)

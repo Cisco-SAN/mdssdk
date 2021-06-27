@@ -47,7 +47,7 @@ class TestPortChannelAddMembers(unittest.TestCase):
                     "Skipping test as as port not compatible. Please rerun the test cases"
                 )
         pcmembrs = self.pc.members
-        if pcmembrs is not None:
+        if pcmembrs:
             self.assertIn(self.fc.name, pcmembrs)
         self.pc.delete()
 
@@ -55,7 +55,7 @@ class TestPortChannelAddMembers(unittest.TestCase):
         self.pc.create()
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if type(v) is Fc and k != self.fc.name and v.status not in ['up', 'trunking']:
+            if type(v) is Fc and k != self.fc.name and v.status not in ['up', 'trunking'] and self.fc.mode == v.mode:
                 fc2 = v
                 log.debug(k)
                 break
@@ -66,6 +66,9 @@ class TestPortChannelAddMembers(unittest.TestCase):
                 self.skipTest(
                     "Skipping test as as port not compatible. Please rerun the test cases"
                 )
+            else:
+                raise c
+        print(self.fc.name, self.pc.members, self.pc.id)
         self.assertIn(self.fc.name, self.pc.members)
         self.assertIn(fc2.name, self.pc.members)
         self.pc.delete()

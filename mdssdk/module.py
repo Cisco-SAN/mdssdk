@@ -1,4 +1,5 @@
 import logging
+import time
 
 from .nxapikeys import modulekeys
 from .utility.utils import get_key
@@ -161,6 +162,7 @@ class Module(object):
         """
         self.__modinfo = self.__get_modinfo()
         if self.__swobj.is_connection_type_ssh():
+            #print(self.__modinfo)
             self.__mod_status = self.__modinfo["status"]
         else:
             self.__mod_status = self.__modinfo[
@@ -173,6 +175,11 @@ class Module(object):
         out = self.__swobj.show(cmd)
         if self.__swobj.is_connection_type_ssh():
             retout = out[0]
+            if "Ejector status could not be retrieved" in retout:
+                time.sleep(5)
+                cmd = "show module " + str(self.__mod_num)
+                out = self.__swobj.show(cmd)
+                retout = out[0]
         else:
             retout = out["TABLE_modinfo"]["ROW_modinfo"]
             if type(retout) is list:

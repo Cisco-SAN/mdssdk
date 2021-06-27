@@ -49,6 +49,11 @@ def background(f):
 
     return backgrnd_func
 
+def convert_to_list(items):
+    if type(items) is list:
+        return items
+    else:
+        return [items]
 
 def _run_show_topo_for_npiv(sw):
     peer_ip_list = []
@@ -60,11 +65,16 @@ def _run_show_topo_for_npiv(sw):
         # print(out)
         peer_ip_list = shtopo.get_all_peer_ip_addrs()
     else:
-        alltopo = out['TABLE_topology_vsan']['ROW_topology_vsan']
-        for eachvsan in alltopo:
-            topolines = eachvsan['TABLE_topology']['ROW_topology']
-            for eachline in topolines:
-                peer_ip_list.append(eachline['peer_ip_address'])
+        #alltopo = out['TABLE_topology_vsan']['ROW_topology_vsan']
+        alltopo = out.get('TABLE_topology_vsan', [])
+        if alltopo:
+            for eachvsan in convert_to_list(alltopo['ROW_topology_vsan']):
+                #topolines = eachvsan['TABLE_topology']['ROW_topology']
+                topolines = eachvsan.get('TABLE_topology', [])
+                if topolines:
+                    for eachline in convert_to_list(topolines['ROW_topology']):
+                        peer_ip_list.append(eachline['peer_ip_address'])
+
     return list(set(peer_ip_list))
 
 
@@ -79,12 +89,28 @@ def _run_show_fcns_for_npv(sw):
                 if ":" in eachline:
                     # print(eachline)
                     peer_ip_list.append(eachline.split(':')[1])
+    # else:
+    #     fcns = Fcns(sw)
+    #     out = fcns.database(detail=True)
+    #     for eachrow in out:
+    #         z = eachrow['TABLE_fcns_database']['ROW_fcns_database']['node_ip_addr']
+    #         if z == '0.0.0.0':
+    #             continue
+    #         peer_ip_list.append(z)
     else:
         fcns = Fcns(sw)
         out = fcns.database(detail=True)
         for eachrow in out:
-            z = eachrow['TABLE_fcns_database']['ROW_fcns_database']['node_ip_addr']
-            if z == '0.0.0.0':
-                continue
-            peer_ip_list.append(z)
+            # z = eachrow['TABLE_fcns_database']['ROW_fcns_database']['node_ip_addr']
+            z = eachrow.get('TABLE_fcns_database', [])
+            if z:
+                det = convert_to_list(z.get('ROW_fcns_database', []))
+                if det:
+                    for eachline in det:
+                        nodeipdr = eachline['node_ip_addr']
+                        if nodeipdr == '0.0.0.0':
+                            continue
+                        peer_ip_list.append(nodeipdr)
+
+
     return list(set(peer_ip_list))

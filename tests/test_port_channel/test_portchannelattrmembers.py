@@ -25,7 +25,7 @@ class TestPortChannelAttrMembers(unittest.TestCase):
         self.pc = PortChannel(self.switch, self.pc_id)
 
     def test_members_read_nonexisting(self):
-        self.assertIsNone(self.pc.members)
+        self.assertEqual(self.pc.members,{})
 
     def test_members_read(self):
         self.pc.create()

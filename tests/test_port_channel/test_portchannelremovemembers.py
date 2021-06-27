@@ -54,6 +54,7 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
                     "Skipping test as as port not compatible. Please rerun the test cases"
                 )
         self.pc.remove_members([self.fc])
+        #print(self.fc.name, self.pc.members)
         self.assertNotIn(self.fc.name, self.pc.members)
         self.assertIn(fc2.name, self.pc.members)
         self.pc.delete()
@@ -74,7 +75,7 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
                     "Skipping test as as port not compatible. Please rerun the test cases"
                 )
         self.pc.remove_members([self.fc, fc2])
-        self.assertIsNone(self.pc.members)
+        self.assertEquals(self.pc.members, {})
         self.pc.delete()
 
     def test_remove_members_nonexistingpc(self):

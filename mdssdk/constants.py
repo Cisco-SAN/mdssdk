@@ -2,6 +2,9 @@
 
 DEFAULT = "DEFAULT"
 
+#Supported connection types
+VALID_CONN_TYPES = ['https', 'http', 'ssh']
+
 # Timeouts in secs
 SSH_CONN_TIMEOUT = 100
 NXAPI_CONN_TIMEOUT = 100

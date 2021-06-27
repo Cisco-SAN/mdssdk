@@ -149,12 +149,12 @@ class PortChannel(Interface):
         """
         Get the members of the port-channel
 
-        :return: members of the port-channel in dictionary format, None if port-channel is not present or port-channel has no members
+        :return: members of the port-channel in dictionary format
         :rtype: dict(name: obj(Fc))
         """
 
         if not self.__is_pc_present():
-            return None
+            return {}
         if self.__swobj.is_connection_type_ssh():
             outlines = self.__swobj.show(
                 "show port-channel database detail interface port-channel "
@@ -163,7 +163,7 @@ class PortChannel(Interface):
             shpc = ShowPortChannelDatabaseDetail(outlines)
             memdetail = shpc.members
             if memdetail is None:
-                return None
+                return {}
             else:
                 allintnames = []
                 for eachmem in memdetail:
@@ -172,7 +172,7 @@ class PortChannel(Interface):
             detailout = self.__get_pc_facts()
             memdetail = detailout.get("TABLE_port_channel_member_detail", None)
             if memdetail is None:
-                return None
+                return {}
             else:
                 allintnames = []
                 allmem = memdetail["ROW_port_channel_member_detail"]
@@ -270,6 +270,7 @@ class PortChannel(Interface):
             )
             try:
                 out = self.__swobj.config(cmd)
+                print(cmd,out)
             except CLIError as c:
                 if (
                         str(eachint.name)
