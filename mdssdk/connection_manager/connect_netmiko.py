@@ -1,8 +1,10 @@
 import logging
 import re
 from time import sleep
-from ..constants import SSH_CONN_TIMEOUT
+
 from netmiko import ConnectHandler
+
+from ..constants import SSH_CONN_TIMEOUT
 
 log = logging.getLogger(__name__)
 

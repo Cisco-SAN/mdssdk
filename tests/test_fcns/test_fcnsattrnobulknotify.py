@@ -1,7 +1,7 @@
+import logging
 import unittest
 
 from mdssdk.fcns import Fcns
-import logging
 
 log = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@
 
 DEFAULT = "DEFAULT"
 
-#Supported connection types
+# Supported connection types
 VALID_CONN_TYPES = ['https', 'http', 'ssh']
 
 # Timeouts in secs

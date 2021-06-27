@@ -173,4 +173,3 @@ class Fc(Interface):
         else:
             result = out
         return result
-

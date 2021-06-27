@@ -1,10 +1,9 @@
 import logging
 import re
 
+from .connection_manager.errors import CLIError
 from .constants import PAT_PC, PAT_FC
 from .nxapikeys import interfacekeys
-from .connection_manager.errors import CLIError
-
 from .parsers.interface import (
     ShowInterfaceBrief,
     ShowInterfaceDescription,
@@ -552,5 +551,3 @@ class Interface(object):
             if total is not None:
                 return total.get("ROW_others", None)
             return None
-
-

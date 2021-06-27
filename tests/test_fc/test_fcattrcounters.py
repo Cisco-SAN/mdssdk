@@ -1,5 +1,5 @@
-import unittest
 import random
+import unittest
 
 from mdssdk.fc import Fc
 from tests.test_fc.vars import *

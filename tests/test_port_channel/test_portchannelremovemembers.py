@@ -1,5 +1,5 @@
-import unittest
 import random
+import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
@@ -54,7 +54,7 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
                     "Skipping test as as port not compatible. Please rerun the test cases"
                 )
         self.pc.remove_members([self.fc])
-        #print(self.fc.name, self.pc.members)
+        # print(self.fc.name, self.pc.members)
         self.assertNotIn(self.fc.name, self.pc.members)
         self.assertIn(fc2.name, self.pc.members)
         self.pc.delete()

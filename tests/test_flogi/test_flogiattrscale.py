@@ -1,7 +1,7 @@
+import logging
 import unittest
 
 from mdssdk.flogi import Flogi
-import logging
 
 log = logging.getLogger(__name__)
 

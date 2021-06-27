@@ -14,7 +14,7 @@ class TestSwitchFeature(unittest.TestCase):
     def setUp(self) -> None:
         log.debug(self.switch.version)
         log.debug(self.switch.ipaddr)
-        self.name = "ldap" 
+        self.name = "ldap"
         log.debug("Feature " + self.name)
         self.old = self.switch.feature(self.name)
 

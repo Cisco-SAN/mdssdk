@@ -3,14 +3,11 @@ __author__ = 'Suhas Bharadwaj (subharad)'
 import logging
 import multiprocessing
 import re
-# import ConfigParser
-import os
-from functools import wraps
-from concurrent.futures.thread import ThreadPoolExecutor
 from concurrent.futures import wait
+from concurrent.futures.thread import ThreadPoolExecutor
 
-from .switch import Switch
 from .connection_manager.errors import UnsupportedSeedSwitch
+from .switch import Switch
 
 # from .utility.utils import _wait_till_connect_threads_complete
 
@@ -21,23 +18,23 @@ class Fabric(object):
     """
     Fabric module
 
-    :param ip_address: mgmt ip address of switch
+    :param ip_address: mgmt ip address of the seed switch
     :type ip_address: str
     :param username: username
     :type id: str
     :param password: password
     :type password: str
-    :param connection_type: connection type 'http' or 'https'(optional, default: 'https')
+    :param connection_type: connection type 'http' or 'https' or 'ssh' (default: 'https')
     :type connection_type: str
-    :param port: port number (optional, default: 8443)
+    :param port: port number (default: 8443 for https and 8080 for http) , ignored when connection type is ssh
     :type port: int
-    :param timeout: timeout period in seconds (optional, default: 30)
+    :param timeout: timeout period in seconds (default: 30)
     :type timeout: int
-    :param verify_ssl: SSL verification (optional, default: True)
+    :param verify_ssl: SSL verification (default: True)
     :type verify_ssl: bool
 
     :example:
-        >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password)
+        >>> fabric_obj = Fabric(ip_address = switch_ip, username = switch_username, password = switch_password)
 
     """
 
@@ -66,22 +63,29 @@ class Fabric(object):
 
     def discover_all_switches(self, npv_discovery=True):
         """
-        Returns all switches in the fabric
+        Discovers all the switches in the fabric
 
-        :param npv_discovery: If npv switches needs to be discovered too
+        :param npv_discovery: Set to true if npv switches needs to be discovered
         :type npv_discovery: bool (default True)
-        :return: Returns all switches
+        :return: Returns all switches in the fabric
         :rtype: dict
 
         :example:
-            >>> f1 = Fabric(seed_ip_aadr, username, passwd, connection_type='ssh', timeout=600)
-            datetime.datetime(2021, 6, 15, 11, 14, 51, 617398)
+            >>> from mdssdk.fabric import Fabric
+            >>> f = Fabric(ip, user, pw, verify_ssl=False)
+            >>> out= f.discover_all_switches(npv_discovery=True)
+            >>> print(out)
+            Discovering all switches in the fabric(seed ip: 10.127.190.34). Please wait...
+            10.127.190.55: is not an MDS switch, hence skipping it.
+            {'10.127.190.34': <mdssdk.switch.Switch object at 0x10f14e978>, '10.127.190.50': <mdssdk.switch.Switch object at 0x10f14e908>}
+            >>>
             >>>
         """
-        print("Discovering all switches in the fabric(seed ip: "+ self.__ip_address + "). Please wait...")
+        print("Discovering all switches in the fabric(seed ip: " + self.__ip_address + "). Please wait...")
         npv = self.seed_switch.npv
         if npv:
-            raise UnsupportedSeedSwitch("Cannot discover the fabric using an NPV switch, Please use an NPIV switch for discovery")
+            raise UnsupportedSeedSwitch(
+                "Cannot discover the fabric using an NPV switch, Please use an NPIV switch for discovery")
         while self._ips_to_be_discovered.__len__() != 0:
             m = multiprocessing.Manager()
             lock = m.Lock()
@@ -94,7 +98,7 @@ class Fabric(object):
             wait(allfutures)
             for fut in allfutures:
                 self._ips_to_be_discovered = list(set(self._ips_to_be_discovered))
-                #print(self._ips_to_be_discovered)
+                # print(self._ips_to_be_discovered)
                 try:
                     log.debug(fut.result())
                 except Exception as e:
@@ -165,10 +169,8 @@ class Fabric(object):
             return found
         return 'NONE'
 
-
-
 #######################################
-#----- Placeholder for notes -----
+# ----- Placeholder for notes -----
 ########################################
 # -- Invalid user name password
 #    NetmikoAuthenticationException

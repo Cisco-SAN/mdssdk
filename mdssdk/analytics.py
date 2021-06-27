@@ -1,8 +1,8 @@
 import logging
 import re
 
-from .connection_manager.errors import InvalidProfile
 from .connection_manager.errors import CLIError
+from .connection_manager.errors import InvalidProfile
 
 log = logging.getLogger(__name__)
 

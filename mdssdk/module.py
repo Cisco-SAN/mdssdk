@@ -162,7 +162,7 @@ class Module(object):
         """
         self.__modinfo = self.__get_modinfo()
         if self.__swobj.is_connection_type_ssh():
-            #print(self.__modinfo)
+            # print(self.__modinfo)
             self.__mod_status = self.__modinfo["status"]
         else:
             self.__mod_status = self.__modinfo[
@@ -185,4 +185,3 @@ class Module(object):
             if type(retout) is list:
                 retout = retout[0]
         return retout
-

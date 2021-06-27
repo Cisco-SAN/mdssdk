@@ -1,5 +1,5 @@
-import unittest
 import random
+import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.portchannel import PortChannel

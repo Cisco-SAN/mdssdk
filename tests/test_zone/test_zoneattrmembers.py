@@ -5,7 +5,6 @@ from mdssdk.fc import Fc
 from mdssdk.portchannel import PortChannel
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
-from mdssdk.connection_manager.errors import CLIError
 from tests.test_zone.vars import *
 
 log = logging.getLogger(__name__)

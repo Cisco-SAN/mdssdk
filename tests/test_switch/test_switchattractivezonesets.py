@@ -1,5 +1,5 @@
-import unittest
 import random
+import unittest
 
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone

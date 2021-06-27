@@ -1,8 +1,8 @@
+import logging
 import unittest
 
-from mdssdk.flogi import Flogi
 from mdssdk.connection_manager.errors import CLIError
-import logging
+from mdssdk.flogi import Flogi
 
 log = logging.getLogger(__name__)
 

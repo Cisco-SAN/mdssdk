@@ -270,7 +270,7 @@ class PortChannel(Interface):
             )
             try:
                 out = self.__swobj.config(cmd)
-                print(cmd,out)
+                print(cmd, out)
             except CLIError as c:
                 if (
                         str(eachint.name)
@@ -348,4 +348,3 @@ class PortChannel(Interface):
         else:
             # There are no PC in the switch
             return False
-

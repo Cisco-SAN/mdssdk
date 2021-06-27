@@ -311,4 +311,3 @@ class Vsan(object):
             return None
 
         return dict(shvsan_req_out)
-

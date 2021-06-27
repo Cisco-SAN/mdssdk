@@ -1,18 +1,18 @@
+import concurrent.futures
 import logging
 import re
-import concurrent.futures
 
 from .utils import get_key
 from .. import constants
 from ..fc import Fc
 from ..module import Module
-from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys, inventorykeys
+from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys
 from ..parsers.interface import ShowInterfaceBrief
 from ..parsers.vsan import ShowVsan
 from ..portchannel import PortChannel
-from ..zoneset import ZoneSet
-from ..zone import Zone
 from ..vsan import Vsan
+from ..zone import Zone
+from ..zoneset import ZoneSet
 
 log = logging.getLogger(__name__)
 
@@ -22,15 +22,15 @@ class SwitchUtils:
     def _is_mds_switch(self):
         cmd = "show inventory"
         if self.connection_type != "ssh":
-            inv = self.show(command=cmd,use_ssh=False)
+            inv = self.show(command=cmd, use_ssh=False)
             self.inv_details = inv['TABLE_inv']['ROW_inv']
         else:
-            inv = self.show(command=cmd,use_ssh=True)
+            inv = self.show(command=cmd, use_ssh=True)
             self.inv_details = inv
         # in 8.4(1a) there are quotes around the values so need to remove them
         self.inv_details = [{key: re.sub(r'"', '', val) for key, val in x.items()} for x in self.inv_details]
         log.info(self.inv_details)
-        #print(self.inv_details)
+        # print(self.inv_details)
         for eachline in self.inv_details:
             if eachline['name'] == 'Chassis':
                 # Not using get_key here because this is run before we get the sw version

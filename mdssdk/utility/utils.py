@@ -1,11 +1,10 @@
 import logging
 import re
 import threading
-from functools import wraps
 
 from ..constants import PAT_WWN
-from ..parsers.switch.show_topology import ShowTopology
 from ..fcns import Fcns
+from ..parsers.switch.show_topology import ShowTopology
 
 log = logging.getLogger()
 
@@ -49,11 +48,13 @@ def background(f):
 
     return backgrnd_func
 
+
 def convert_to_list(items):
     if type(items) is list:
         return items
     else:
         return [items]
+
 
 def _run_show_topo_for_npiv(sw):
     peer_ip_list = []
@@ -65,11 +66,11 @@ def _run_show_topo_for_npiv(sw):
         # print(out)
         peer_ip_list = shtopo.get_all_peer_ip_addrs()
     else:
-        #alltopo = out['TABLE_topology_vsan']['ROW_topology_vsan']
+        # alltopo = out['TABLE_topology_vsan']['ROW_topology_vsan']
         alltopo = out.get('TABLE_topology_vsan', [])
         if alltopo:
             for eachvsan in convert_to_list(alltopo['ROW_topology_vsan']):
-                #topolines = eachvsan['TABLE_topology']['ROW_topology']
+                # topolines = eachvsan['TABLE_topology']['ROW_topology']
                 topolines = eachvsan.get('TABLE_topology', [])
                 if topolines:
                     for eachline in convert_to_list(topolines['ROW_topology']):
@@ -111,6 +112,5 @@ def _run_show_fcns_for_npv(sw):
                         if nodeipdr == '0.0.0.0':
                             continue
                         peer_ip_list.append(nodeipdr)
-
 
     return list(set(peer_ip_list))

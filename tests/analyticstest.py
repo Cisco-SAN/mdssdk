@@ -1,9 +1,7 @@
-from mdssdk.switch import Switch
-
 import logging
-import dictdiffer
 from pprint import pprint as print
-import time
+
+from mdssdk.switch import Switch
 
 logging.basicConfig(
     filename="anatest.log",

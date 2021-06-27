@@ -1,5 +1,5 @@
-import unittest
 import random
+import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
@@ -25,7 +25,7 @@ class TestPortChannelAttrMembers(unittest.TestCase):
         self.pc = PortChannel(self.switch, self.pc_id)
 
     def test_members_read_nonexisting(self):
-        self.assertEqual(self.pc.members,{})
+        self.assertEqual(self.pc.members, {})
 
     def test_members_read(self):
         self.pc.create()

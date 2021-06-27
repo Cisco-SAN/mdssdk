@@ -3,7 +3,6 @@ import unittest
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
 from tests.test_zone.vars import *
-from mdssdk.connection_manager.errors import CLIError
 
 log = logging.getLogger(__name__)
 

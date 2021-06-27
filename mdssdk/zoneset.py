@@ -3,7 +3,7 @@ import time
 
 from .connection_manager.errors import CLIError
 from .nxapikeys import zonekeys
-from .parsers.zoneset import ShowZoneset, ShowZonesetActive
+from .parsers.zoneset import ShowZonesetActive
 from .utility.utils import get_key
 from .vsan import Vsan
 from .zone import Zone
@@ -337,4 +337,3 @@ class ZoneSet(object):
 
 # TODO active members and members when zs is not present
 # TODO in zone module to add active members
-

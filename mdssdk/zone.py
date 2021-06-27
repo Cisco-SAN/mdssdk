@@ -1022,4 +1022,3 @@ class Zone(object):
                     return
                 else:
                     raise CLIError(cmd, msg)
-

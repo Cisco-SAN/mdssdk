@@ -87,11 +87,14 @@ class UnsupportedVersion(CustomException):
 class VersionNotFound(CustomException):
     pass
 
+
 class UnsupportedSwitch(CustomException):
     pass
 
+
 class UnsupportedSeedSwitch(CustomException):
     pass
+
 
 class UnsupportedFeature(CustomException):
     pass

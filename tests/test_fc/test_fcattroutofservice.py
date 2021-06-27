@@ -2,8 +2,8 @@ import random
 import time
 import unittest
 
-from mdssdk.fc import Fc
 from mdssdk.connection_manager.errors import CLIError
+from mdssdk.fc import Fc
 from tests.test_fc.vars import *
 
 log = logging.getLogger(__name__)
@@ -68,6 +68,5 @@ class TestFcAttrOutOfService(unittest.TestCase):
         # if self.old != "down":
         self.fc.status = "no shutdown"
         time.sleep(5)
-        #Sometimes the states may not be same so no need to check this as of now
-        #self.assertEqual(self.old, self.fc.status)
-
+        # Sometimes the states may not be same so no need to check this as of now
+        # self.assertEqual(self.old, self.fc.status)

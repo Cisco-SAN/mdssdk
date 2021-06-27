@@ -1,6 +1,5 @@
 import unittest
 
-from mdssdk.connection_manager.errors import CLIError
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
 from mdssdk.zoneset import ZoneSet

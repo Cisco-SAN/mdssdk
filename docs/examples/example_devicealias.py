@@ -1,5 +1,5 @@
-from mdssdk.switch import Switch
 from mdssdk.devicealias import DeviceAlias
+from mdssdk.switch import Switch
 
 user = "yourswitchusername"
 pw = "yourswitchpassword"

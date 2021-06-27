@@ -1,14 +1,14 @@
 __author__ = "Suhas Bharadwaj (subharad)"
 
 import logging
-import re
-import time
 import os
+import re
 import sys
+import time
 
 from netmiko import CNTL_SHIFT_6
+
 from .analytics import Analytics
-from .constants import *
 from .connection_manager.connect_netmiko import SSHSession
 from .connection_manager.connect_nxapi import ConnectNxapi
 from .connection_manager.errors import (
@@ -18,13 +18,14 @@ from .connection_manager.errors import (
     UnsupportedConfig,
     UnsupportedSwitch
 )
-from .nxapikeys import versionkeys, featurekeys
-from .parsers.switch import ShowTopology
-from .utility.switch_utility import SwitchUtils
+from .constants import *
+from .nxapikeys import versionkeys
 from .utility import utils
+from .utility.switch_utility import SwitchUtils
 from .utility.utils import get_key
 
 log = logging.getLogger(__name__)
+
 
 def print_and_log(msg):
     log.debug(msg)
@@ -41,13 +42,13 @@ class Switch(SwitchUtils):
     :type id: str
     :param password: password
     :type password: str
-    :param connection_type: connection type 'http' or 'https'(optional, default: 'https')
+    :param connection_type: connection type 'http' or 'https' or 'ssh' (default: 'https')
     :type connection_type: str
-    :param port: port number (optional, default: 8443 for https and 8080 for http)
+    :param port: port number (default: 8443 for https and 8080 for http) , ignored when connection type is ssh
     :type port: int
-    :param timeout: timeout period in seconds (optional, default: 30)
+    :param timeout: timeout period in seconds (default: 30)
     :type timeout: int
-    :param verify_ssl: SSL verification (optional, default: True)
+    :param verify_ssl: SSL verification (default: True)
     :type verify_ssl: bool
 
     :example:
@@ -109,7 +110,8 @@ class Switch(SwitchUtils):
         if self.__supported is None:
             self.__supported = self._is_mds_switch()
             if not self.__supported:
-                raise UnsupportedSwitch("SDK supports only MDS switches. " + self.__ip_address + "(" + self.product_id +") is not a supported switch ")
+                raise UnsupportedSwitch(
+                    "SDK supports only MDS switches. " + self.__ip_address + "(" + self.product_id + ") is not a supported switch ")
 
     def _connect_to_ssh(self):
         log.debug("Opening up a ssh connection for switch with ip " + self.__ip_address)
@@ -325,8 +327,8 @@ class Switch(SwitchUtils):
         log.debug("Running version API")
         if self.is_connection_type_ssh():
             outlines = self.show(command=cmd)
-            #print(self.ipaddr)
-            #print(outlines)
+            # print(self.ipaddr)
+            # print(outlines)
             ver = outlines[0]["version"]
             log.debug("ssh: " + ver)
         else:
@@ -935,7 +937,7 @@ class Switch(SwitchUtils):
 
         return return_list
 
-    def reload(self, module=None, timeout=RELOAD_TIMEOUT,  non_disruptive=False , copyrs=True, basic_verification=False):
+    def reload(self, module=None, timeout=RELOAD_TIMEOUT, non_disruptive=False, copyrs=True, basic_verification=False):
         """
         Reload a switch or a module
 
@@ -968,7 +970,7 @@ class Switch(SwitchUtils):
             mod = str(module)
             if non_disruptive:
                 cmd = "terminal dont-ask ; reload module " + mod + " non-disruptive "
-                action_string = "reload module " + str(mod) +" non-disruptively"
+                action_string = "reload module " + str(mod) + " non-disruptively"
             else:
                 cmd = "terminal dont-ask ; reload module " + mod
                 action_string = "reload module " + str(mod)
@@ -980,7 +982,8 @@ class Switch(SwitchUtils):
                     + " after copy running-config startup-config"
                 )
 
-                crs = self.show(command="copy running-config startup-config", raw_text=True, timeout=120,expect_string=".*")
+                crs = self.show(command="copy running-config startup-config", raw_text=True, timeout=120,
+                                expect_string=".*")
                 print(crs)
                 # if "Copy complete" in crs:
                 #     log.info("copy running-config startup-config is successful")
@@ -1001,7 +1004,7 @@ class Switch(SwitchUtils):
             return out
         else:
             try:
-                out = self.show(cmd,expect_string=".*")
+                out = self.show(cmd, expect_string=".*")
             except CLIError as c:
                 if "reloading module" in c.message:
                     pass

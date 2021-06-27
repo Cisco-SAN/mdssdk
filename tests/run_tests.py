@@ -36,15 +36,15 @@ log.info("Starting all tests...")
 
 def get_suite_list(sw):
     suiteList = []
-    #suiteList.append(MyTestLoader(sw).discover("test_device_alias", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("test_device_alias", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_fc", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_port_channel", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_fcns", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_flogi", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_switch", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_vsan", "test_*.py"))
-    #suiteList.append(MyTestLoader(sw).discover("test_zone", "test_*.py"))
-    #suiteList.append(MyTestLoader(sw).discover("test_zoneset", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("test_zone", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("test_zoneset", "test_*.py"))
     return suiteList
 
 
@@ -77,4 +77,3 @@ hours, rem = divmod(END - START, 3600)
 minutes, seconds = divmod(rem, 60)
 log.info(
     "End of Tests (Took " + ("{:0>1}h:{:0>1}m:{:02.1f}s".format(int(hours), int(minutes), seconds)) + " to complete)")
-

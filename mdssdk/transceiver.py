@@ -393,4 +393,3 @@ class Transceiver(object):
             return None
         except KeyError:
             return None
-
