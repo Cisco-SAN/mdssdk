@@ -20,7 +20,6 @@ log = logging.getLogger(__name__)
 class SwitchUtils:
 
     def _is_mds_switch(self):
-        self.__supported = False
         cmd = "show inventory"
         if self.connection_type != "ssh":
             inv = self.show(command=cmd,use_ssh=False)
@@ -28,6 +27,10 @@ class SwitchUtils:
         else:
             inv = self.show(command=cmd,use_ssh=True)
             self.inv_details = inv
+        # in 8.4(1a) there are quotes around the values so need to remove them
+        self.inv_details = [{key: re.sub(r'"', '', val) for key, val in x.items()} for x in self.inv_details]
+        log.info(self.inv_details)
+        #print(self.inv_details)
         for eachline in self.inv_details:
             if eachline['name'] == 'Chassis':
                 # Not using get_key here because this is run before we get the sw version
@@ -35,10 +38,10 @@ class SwitchUtils:
                 self._product_id = eachline['productid']
                 self._serial_num = eachline['serialnum']
                 # 'DS-' is for MDS switches and 89 is for Raven switches
-                if self.product_id.startswith("DS-") or self.product_id.startswith("89"):
-                    self.__supported = True
-                return self.__supported
-        return self.__supported
+                if self._product_id.startswith("DS-") or self._product_id.startswith("89"):
+                    return True
+                return False
+        return False
 
     @property
     def interfaces(self):

@@ -107,7 +107,8 @@ class Switch(SwitchUtils):
 
     def _check_if_supported_switch(self):
         if self.__supported is None:
-            if not self._is_mds_switch():
+            self.__supported = self._is_mds_switch()
+            if not self.__supported:
                 raise UnsupportedSwitch("SDK supports only MDS switches. " + self.__ip_address + "(" + self.product_id +") is not a supported switch ")
 
     def _connect_to_ssh(self):
