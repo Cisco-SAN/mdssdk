@@ -38,8 +38,8 @@ class TestPortChannelAttrCounters(unittest.TestCase):
         for t in dir_counters:
             val = self.pc.counters.__getattribute__(t)
             log.debug(str(t) + " " + str(val))
-            print(t)
-            print(val)
+            #print(t)
+            ##print(val)
             print(self.pc.name)
             self.assertIsNotNone(val)
             if t not in ["other_stats", "tcp_conn"]:

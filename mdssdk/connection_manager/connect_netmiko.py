@@ -3,7 +3,6 @@ import re
 from time import sleep
 
 from netmiko import ConnectHandler
-
 from ..constants import SSH_CONN_TIMEOUT
 
 log = logging.getLogger(__name__)
@@ -68,9 +67,11 @@ class SSHSession(object):
             eachline = eachline.strip()
             eachline = eachline.replace("at '^' marker.", "")
             eachline = eachline.replace("^", "")
-            if "Invalid command" in eachline:
+            if "Invalid command".lower() in eachline.lower():
                 return True
-            if "Invalid range" in eachline:
+            if "Invalid range".lower() in eachline.lower():
+                return True
+            if "No such file or directory".lower() in eachline.lower():
                 return True
         return False
 
@@ -78,7 +79,7 @@ class SSHSession(object):
         if timeout is None:
             df = 1
         else:
-            df = int(timeout / 100)  # 100 beacause thats the timeout netmiko uses
+            df = int(timeout / 100)  # 100 because that's the timeout netmiko uses
             log.debug("Delay factor is " + str(df))
         output = self._connection.send_command(
             cmd,

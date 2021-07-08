@@ -5,6 +5,11 @@ DEFAULT = "DEFAULT"
 # Supported connection types
 VALID_CONN_TYPES = ['https', 'http', 'ssh']
 
+#Supported switch PIDs
+VALID_PIDS_MDS = ("DS-", "89")
+VALID_PIDS_FI = ("UCS-FI")
+VALID_PIDS_N9K = ("N9K")
+
 # Timeouts in secs
 SSH_CONN_TIMEOUT = 100
 NXAPI_CONN_TIMEOUT = 100

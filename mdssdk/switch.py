@@ -26,7 +26,6 @@ from .utility.utils import get_key
 
 log = logging.getLogger(__name__)
 
-
 def print_and_log(msg):
     log.debug(msg)
     print(msg)
@@ -68,7 +67,8 @@ class Switch(SwitchUtils):
     ):
         # Check if "NET_TEXTFSM" is set
         if "NET_TEXTFSM" not in os.environ:
-            msg = "ERROR!! SDK is not installed correctly (NET_TEXTFSM is not set), please uninstall and follow the correct instructions from https://mdssdk.readthedocs.io/en/latest/readme.html#installation-steps"
+            msg = "ERROR!! SDK is not installed correctly (NET_TEXTFSM is not set), please uninstall and follow the " \
+                  "correct instructions from https://mdssdk.readthedocs.io/en/latest/readme.html#installation-steps "
             log.error(msg)
             sys.exit(msg)
 
@@ -77,9 +77,9 @@ class Switch(SwitchUtils):
         self.__password = password
         self.connection_type = connection_type
         if port is None:
-            if connection_type == 'https':
+            if self.connection_type == 'https':
                 self.port = HTTPS_PORT
-            elif connection_type == 'http':
+            elif self.connection_type == 'http':
                 self.port = HTTP_PORT
         else:
             self.port = port
@@ -87,33 +87,38 @@ class Switch(SwitchUtils):
         self.__verify_ssl = verify_ssl
         self.__supported = None
 
-        # If connection type is https/http then we need to open nxapi connection
-        if self.connection_type != "ssh":
-            log.info("Opening up a nxapi connection for switch with ip " + self.__ip_address)
-            self.__connection = ConnectNxapi(
-                host=self.__ip_address,
-                username=self.__username,
-                password=self.__password,
-                transport=connection_type,
-                port=self.port,
-                verify_ssl=self.__verify_ssl,
-            )
-            self._check_if_supported_switch()
-            self._set_connection_type_based_on_version()
-
-        log.info("Along with NXAPI opening up a parallel ssh connection for switch with ip " + self.__ip_address)
         # Connect to ssh
-        self._connect_to_ssh()
+        self._connect_via_ssh()
+
+        try:
+            self._parse_sh_inv(use_ssh=True)
+            # Check if its of type MDS
+            if self._product_id.startswith(VALID_PIDS_MDS):
+                # Its MDS switch
+                self._sw_type = "MDS"
+                # If connection type is not SSH get an NXAPI connection
+                if self.connection_type != "ssh":
+                    self._connect_via_nxapi()
+                    self._set_connection_type_based_on_version()
+            elif self._product_id.startswith(VALID_PIDS_N9K):
+                # Its an N9K switch, set connection_type as 'ssh'
+                self._sw_type = "N9K"
+                self.connection_type = "ssh"
+            else:
+                raise UnsupportedSwitch(self.__ip_address + "Unsupported Switch or device found, SDK supports only "
+                                                            "MDS/FI/N9k switches.")
+        except CLIError as c:
+            # Could be a FI box
+            if self._is_fabric_interconnect():
+                self._sw_type = "FI"
+                self.connection_type = "ssh"
+            else:
+                raise UnsupportedSwitch(self.__ip_address + "Unsupported Switch or device found, SDK supports only "
+                                                            "MDS/FI/N9k switches.")
+
         log.debug("is_connection_type_ssh " + str(self.is_connection_type_ssh()))
 
-    def _check_if_supported_switch(self):
-        if self.__supported is None:
-            self.__supported = self._is_mds_switch()
-            if not self.__supported:
-                raise UnsupportedSwitch(
-                    "SDK supports only MDS switches. " + self.__ip_address + "(" + self.product_id + ") is not a supported switch ")
-
-    def _connect_to_ssh(self):
+    def _connect_via_ssh(self):
         log.debug("Opening up a ssh connection for switch with ip " + self.__ip_address)
         self._ssh_handle = SSHSession(
             host=self.__ip_address,
@@ -121,10 +126,19 @@ class Switch(SwitchUtils):
             password=self.__password,
             timeout=self.timeout,
         )
-        self._check_if_supported_switch()
         log.debug("ssh connection established for switch with ip " + self.__ip_address)
-        self._SW_VER = self.version
-        log.debug("sw version is " + self._SW_VER)
+
+    def _connect_via_nxapi(self):
+        log.info("Opening up a nxapi connection for switch with ip " + self.__ip_address)
+        self.__connection = ConnectNxapi(
+            host=self.__ip_address,
+            username=self.__username,
+            password=self.__password,
+            transport=self.connection_type,
+            port=self.port,
+            verify_ssl=self.__verify_ssl,
+        )
+        log.debug("nxapi connection established for switch with ip " + self.__ip_address)
 
     def reconnect(self):
         self._reconnect_to_ssh()
@@ -132,8 +146,7 @@ class Switch(SwitchUtils):
     def _reconnect_to_ssh(self):
         log.debug("Re-establishing the ssh connection for switch with ip " + self.__ip_address)
         self._ssh_handle._reconnect()
-        self._SW_VER = self.version
-        log.debug("sw version is " + self._SW_VER)
+        self.version
 
     def _set_connection_type_based_on_version(self):
         log.info("Checking version on the switch with ip " + self.__ip_address)
@@ -141,13 +154,9 @@ class Switch(SwitchUtils):
             ver = self.version
             if ver is None:
                 raise VersionNotFound("Unable to get the switch version, please check the log file")
-            self._SW_VER = ver
-            log.debug("sw version is " + self._SW_VER)
         except KeyError:
             log.error("Got keyerror while getting version, setting connection type to ssh. Please wait..")
             self.connection_type = "ssh"
-            # Connect to ssh
-            self._connect_to_ssh()
             ver = self._SW_VER
         PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>[a-z+])?\)(?P<other>.*)"
         RE_COMP = re.compile(PAT_VER)
@@ -210,8 +219,11 @@ class Switch(SwitchUtils):
             FXS1928Q402
             >>>
         """
-
-        return self._serial_num
+        try:
+            return self._serial_num
+        except AttributeError:
+            self._parse_sh_inv()
+            return self._serial_num
 
     @property
     def product_id(self):
@@ -227,7 +239,11 @@ class Switch(SwitchUtils):
             >>>
         """
 
-        return self._product_id
+        try:
+            return self._product_id
+        except AttributeError:
+            self._parse_sh_inv()
+            return self._product_id
 
     @property
     def ipaddr(self):
@@ -275,6 +291,7 @@ class Switch(SwitchUtils):
         return self.show(command="show switchname", raw_text=True).strip()
 
     @name.setter
+    @SwitchUtils._check_for_support
     def name(self, swname):
         """
 
@@ -303,10 +320,26 @@ class Switch(SwitchUtils):
             False
             >>>
         """
-        # print("Getting npv")
-        out = self.feature("npv")
-        # print(out)
-        return out
+
+        if self._sw_type == "MDS":
+            out = self.feature("npv")
+            return out
+        elif self._sw_type == "N9K":
+            cmd = "show feature-set"
+            out = self.show(cmd)
+            for eachline in out:
+                if eachline['feature'] == 'fcoe-npv':
+                    if eachline['state'] == 'enabled':
+                        return True
+            return False
+        elif self._sw_type == "FI":
+            cmd = "sh npv status"
+            try:
+                out = self.show(cmd)
+                return True
+            except CLIError as c:
+                return False
+        return False
 
     @property
     def version(self):
@@ -327,8 +360,6 @@ class Switch(SwitchUtils):
         log.debug("Running version API")
         if self.is_connection_type_ssh():
             outlines = self.show(command=cmd)
-            # print(self.ipaddr)
-            # print(outlines)
             ver = outlines[0]["version"]
             log.debug("ssh: " + ver)
         else:
@@ -349,6 +380,7 @@ class Switch(SwitchUtils):
             ver = fullversion.split()[0]
             log.debug("nxapi: " + ver)
         self._SW_VER = ver
+        log.debug("IMP: Switch version is " + self._SW_VER)
         return ver
 
     @property
@@ -367,17 +399,11 @@ class Switch(SwitchUtils):
             MDS 9396T 96X32G FC (2 RU) Chassis
             >>>
         """
-        cmd = "show version"
-        if self.is_connection_type_ssh():
-            outlines = self.show(command=cmd)
-            return outlines[0]["model"]
-            # shver = ShowVersion(outlines)
-            # return shver.model
-        else:
-            out = self.show(command=cmd)
-            if not out:
-                return None
-            return out[get_key(versionkeys.CHASSIS_ID, self._SW_VER)]
+        try:
+            return self._model_desc
+        except AttributeError:
+            self._parse_sh_inv()
+            return self._model_desc
 
     @property
     def form_factor(self):
@@ -501,8 +527,6 @@ class Switch(SwitchUtils):
         if self.is_connection_type_ssh():
             outlines = self.show(command=cmd)
             return outlines[0]["kickstart_image"]
-            # shver = ShowVersion(outlines)
-            # return shver.kickstart_image
 
         out = self.show(command=cmd)
         if not out:
@@ -529,8 +553,6 @@ class Switch(SwitchUtils):
         if self.is_connection_type_ssh():
             outlines = self.show(command=cmd)
             return outlines[0]["system_image"]
-            # shver = ShowVersion(outlines)
-            # return shver.system_image
 
         out = self.show(command=cmd)
         if not out:
@@ -608,20 +630,26 @@ class Switch(SwitchUtils):
             # Tue Jun 15 11:14:51 2021
             lrtime = outlines[0]["last_reset_time"]
 
-            # lrtime + " " + lrusecs
-            # Tue Jun 15 11:14:51 2021 617398
-            date_time_obj = datetime.strptime(lrtime + " " + lrusecs, '%a %b %d %H:%M:%S %Y %f')
-            return date_time_obj
+            if lrusecs and lrtime:
+                # lrtime + " " + lrusecs
+                # Tue Jun 15 11:14:51 2021 617398
+                date_time_obj = datetime.strptime(lrtime + " " + lrusecs, '%a %b %d %H:%M:%S %Y %f')
+                return date_time_obj
+            else:
+                return None
 
         out = self.show(command=cmd)
         if not out:
             return None
 
-        # 617398
-        lrusecs = out[get_key(versionkeys.LAST_RESET_USECS, self._SW_VER)]
+        try:
+            # 617398
+            lrusecs = out[get_key(versionkeys.LAST_RESET_USECS, self._SW_VER)]
 
-        # Tue Jun 15 11:14:51 2021
-        lrtime = out[get_key(versionkeys.LAST_RESET_TIME, self._SW_VER)]
+            # Tue Jun 15 11:14:51 2021
+            lrtime = out[get_key(versionkeys.LAST_RESET_TIME, self._SW_VER)]
+        except KeyError:
+            return None
 
         # lrtime + " " + lrusecs
         # Tue Jun 15 11:14:51 2021 617398
@@ -629,6 +657,7 @@ class Switch(SwitchUtils):
         return date_time_obj
 
     @property
+    @SwitchUtils._check_for_support
     def analytics(self):
         """
         Returns handler for analytics module, using which we could do analytics related operations
@@ -643,6 +672,7 @@ class Switch(SwitchUtils):
 
         return Analytics(self)
 
+    @SwitchUtils._check_for_support
     def feature(self, name, enable=None):
 
         """
@@ -675,9 +705,7 @@ class Switch(SwitchUtils):
         # Do a type check on the enable flag
         if enable is not None:
             if type(enable) is not bool:
-                raise TypeError(
-                    "enable flag must be True(to enable the feature) or False(to disable the feature)"
-                )
+                raise TypeError("enable flag must be True(to enable the feature) or False(to disable the feature) or None(to get the feature status)")
 
         if enable is None:
             log.debug("Get the status of the feature " + name)
@@ -718,6 +746,7 @@ class Switch(SwitchUtils):
                 )
 
     @property
+    @SwitchUtils._check_for_support
     def cores(self):
         """
         Check if any cores are present in the switch
@@ -937,6 +966,7 @@ class Switch(SwitchUtils):
 
         return return_list
 
+    @SwitchUtils._check_for_support
     def reload(self, module=None, timeout=RELOAD_TIMEOUT, non_disruptive=False, copyrs=True, basic_verification=False):
         """
         Reload a switch or a module
@@ -1025,6 +1055,7 @@ class Switch(SwitchUtils):
         )
         return alt_handle
 
+    @SwitchUtils._check_for_support
     def issu(self, kickstart, system, timeout=ISSU_TIMEOUT, expect_string=r".*"):
         self.curr_status = None
         cmd = (
@@ -1036,6 +1067,7 @@ class Switch(SwitchUtils):
         self.show(command=cmd, expect_string=expect_string, timeout=timeout)
         return True
 
+    @SwitchUtils._check_for_support
     def get_install_all_status(self):
         # Flags and status init
         sys.tracebacklimit = 0

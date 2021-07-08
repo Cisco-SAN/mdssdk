@@ -2,31 +2,42 @@ import concurrent.futures
 import logging
 import re
 
-from .utils import get_key
+from .utils import get_key, convert_to_list
 from .. import constants
 from ..fc import Fc
 from ..module import Module
 from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys
 from ..parsers.interface import ShowInterfaceBrief
+from ..parsers.switch.show_topology import ShowTopology
 from ..parsers.vsan import ShowVsan
 from ..portchannel import PortChannel
 from ..vsan import Vsan
 from ..zone import Zone
 from ..zoneset import ZoneSet
+from ..connection_manager.errors import CLIError
 
 log = logging.getLogger(__name__)
 
 
 class SwitchUtils:
 
-    def _is_mds_switch(self):
+    def _check_for_support(f):
+        def wrapper(self, *args, **kwargs):
+            if self.product_id.startswith(constants.VALID_PIDS_MDS):
+                return f(self, *args, **kwargs)
+            return None
+        return wrapper
+
+    def _parse_sh_inv(self,use_ssh=False):
         cmd = "show inventory"
-        if self.connection_type != "ssh":
-            inv = self.show(command=cmd, use_ssh=False)
-            self.inv_details = inv['TABLE_inv']['ROW_inv']
-        else:
+        if use_ssh or self.connection_type == 'ssh':
             inv = self.show(command=cmd, use_ssh=True)
             self.inv_details = inv
+        else:
+            #NXAPI
+            inv = self.show(command=cmd, use_ssh=False)
+            self.inv_details = inv['TABLE_inv']['ROW_inv']
+
         # in 8.4(1a) there are quotes around the values so need to remove them
         self.inv_details = [{key: re.sub(r'"', '', val) for key, val in x.items()} for x in self.inv_details]
         log.info(self.inv_details)
@@ -37,13 +48,22 @@ class SwitchUtils:
                 # Hence 'productid' is hardcoded here
                 self._product_id = eachline['productid']
                 self._serial_num = eachline['serialnum']
-                # 'DS-' is for MDS switches and 89 is for Raven switches
-                if self._product_id.startswith("DS-") or self._product_id.startswith("89"):
+                self._model_desc = eachline['desc']
+                return
+
+    def _is_fabric_interconnect(self):
+        try:
+            log.debug("Check if its an FI")
+            out = self.show("connect nxos", use_ssh=True, expect_string=r"#")
+            for eachline in out:
+                if "Cisco Nexus Operating System".lower() in eachline.lower():
                     return True
-                return False
+        except CLIError as cfi:
+            return False
         return False
 
     @property
+    @_check_for_support
     def interfaces(self):
         """
         Returns all the interfaces of the switch in dictionary format(interface name:interface object)
@@ -102,6 +122,7 @@ class SwitchUtils:
         return retlist
 
     @property
+    @_check_for_support
     def vsans(self):
         """
         Returns all the vsans present on the switch in dictionary format(vsan-id:vsan object)
@@ -136,12 +157,14 @@ class SwitchUtils:
         return retlist
 
     @property
+    @_check_for_support
     def zonesets(self):
         if self.npv:
             return None
         return self._get_zs()
 
     @property
+    @_check_for_support
     def active_zonesets(self):
         """
         Returns all the active zonesets present on the switch in dictionary format(vsan-id:zoneset object)
@@ -208,6 +231,7 @@ class SwitchUtils:
         return (vsanid, zobj)
 
     @property
+    @_check_for_support
     def zones(self):
         if self.npv:
             return {}
@@ -350,6 +374,7 @@ class SwitchUtils:
     #     return retlist
 
     @property
+    @_check_for_support
     def modules(self):
         """
         Returns a list of modules present on the switch
@@ -413,6 +438,7 @@ class SwitchUtils:
         return mret
 
     @property
+    @_check_for_support
     def flogidb(self):
         if self.npv:
             cmd = "show npv flogi-table"
@@ -420,12 +446,66 @@ class SwitchUtils:
             return out
         cmd = "show flogi database"
         out = self.show(cmd)
-        return out
 
     @property
+    @_check_for_support
     def fcnsdb(self):
         if self.npv:
             return None
         cmd = "show fcns database"
         out = self.show(cmd)
         return out
+
+    def links(self, vsan=None,peer_ip_address=None):
+        if self.npv:
+            return None
+        peer_links_dict = {}
+        if vsan is None:
+            cmd = "show topology"
+        else:
+            cmd = "show topology vsan " + str(vsan)
+        out = self.show(cmd)
+        if self.is_connection_type_ssh():
+            if out:
+                for eachline in out:
+                    v = eachline.pop('vsan')
+                    tmplist = peer_links_dict.get(v, [])
+                    tmplist.append(eachline)
+                    peer_links_dict[v] = tmplist
+        else:
+            alltopo = out.get('TABLE_topology_vsan', [])
+            if alltopo:
+                alldata = convert_to_list(alltopo['ROW_topology_vsan'])
+                for eachdata in alldata:
+                    peer_links_dict[eachdata['id']] = convert_to_list(eachdata['TABLE_topology']['ROW_topology'])
+
+        if vsan is None and peer_ip_address is None:
+            return peer_links_dict
+        elif vsan is not None and peer_ip_address is None:
+            tmp = {}
+            data = peer_links_dict.get(str(vsan),[])
+            if data:
+                tmp[str(vsan)] = data
+            return tmp
+        elif vsan is None and peer_ip_address is not None:
+            tmp = {}
+            for v,values in peer_links_dict.items():
+                tmplist = []
+                for eachvalue in values:
+                    if eachvalue['peer_ip_address'] == peer_ip_address:
+                        tmplist.append(eachvalue)
+                if tmplist:
+                    tmp[v] = tmplist
+            return tmp
+        elif vsan is not None and peer_ip_address is not None:
+            tmp = {}
+            tmplist = []
+            data = peer_links_dict.get(str(vsan), [])
+            if data:
+                for eachvalue in peer_links_dict.get(str(vsan), []):
+                    if eachvalue['peer_ip_address'] == peer_ip_address:
+                        tmplist.append(eachvalue)
+                if tmplist:
+                    tmp[str(vsan)] = tmplist
+            return tmp
+

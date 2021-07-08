@@ -270,7 +270,6 @@ class PortChannel(Interface):
             )
             try:
                 out = self.__swobj.config(cmd)
-                print(cmd, out)
             except CLIError as c:
                 if (
                         str(eachint.name)

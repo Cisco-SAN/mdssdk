@@ -43,23 +43,20 @@ class Fabric(object):
             ip_address,
             username,
             password,
-            connection_type="https",
-            port=8443,
-            timeout=30,
-            verify_ssl=True,
+            timeout=30
     ):
-        log.debug("Fabric init method " + ip_address + " connection_type: " + connection_type)
+        #log.debug("Fabric init method " + ip_address + " connection_type: " + connection_type)
         self.__ip_address = ip_address
         self.__username = username
         self.__password = password
-        self.connection_type = connection_type
-        self.port = port
+        self.connection_type = "ssh"
+        #self.port = port
         self.timeout = timeout
-        self.__verify_ssl = verify_ssl
+        #self.__verify_ssl = verify_ssl
         self._switches = {}
         self._ips_to_be_discovered = [ip_address]
         self._ips_not_considered = {}
-        self.seed_switch = Switch(ip_address, username, password, connection_type, port, timeout, verify_ssl)
+        self.seed_switch = Switch(ip_address, username, password, connection_type=self.connection_type, timeout=timeout)
 
     def discover_all_switches(self, npv_discovery=True):
         """
@@ -92,8 +89,7 @@ class Fabric(object):
             allfutures = []
             executor = ThreadPoolExecutor(len(self._ips_to_be_discovered))
             for ip in self._ips_to_be_discovered:
-                fut = executor.submit(self.__connect_to_switch, lock, ip, self.__username, self.__password,
-                                      self.connection_type, self.port, self.timeout, self.__verify_ssl, npv_discovery)
+                fut = executor.submit(self.__connect_to_switch, lock, ip, self.__username, self.__password,self.connection_type, self.timeout, npv_discovery)
                 allfutures.append(fut)
             wait(allfutures)
             for fut in allfutures:
@@ -130,6 +126,7 @@ class Fabric(object):
                     self._ips_to_be_discovered.remove(eachip)
         if self._ips_not_considered:
             for val in self._ips_not_considered.values():
+                #print("_ips_not_considered")
                 print(val)
         return self._switches
 
@@ -137,27 +134,28 @@ class Fabric(object):
                             ip_address,
                             username,
                             password,
-                            connection_type="https",
-                            port=8443,
+                            connection_type="ssh",
                             timeout=30,
-                            verify_ssl=True, discover_npv=True):
+                            discover_npv=True):
 
-        switch = Switch(ip_address, username, password, connection_type, port, timeout, verify_ssl)
+        switch = Switch(ip_address, username, password, connection_type=connection_type, timeout=timeout)
+        #print(ip_address)
         npv = switch.npv
         if not npv:
             peerlist = switch.discover_peer_switches()
             if discover_npv:
                 peerlist = peerlist + switch.discover_peer_npv_switches()
             peerlist = list(set(peerlist))
+            #print(peerlist)
         with lock:
-            log.info("Discovered : " + ip_address)
-            # print(ip_address + " - " + ",".join(peerlist))
-            # print(" Before : " + ",".join(self.ips_to_be_discovered))
+            #print("Discovered : " + ip_address)
+            #print(ip_address + " - " + ",".join(peerlist))
+            #print(" Before : " + ",".join(self._ips_to_be_discovered))
             self._switches[ip_address] = switch
             self._ips_to_be_discovered.remove(ip_address)
             if not npv:
                 self._ips_to_be_discovered = self._ips_to_be_discovered + peerlist
-            # print(" After : " + ",".join(self.ips_to_be_discovered))
+            #print(" After : " + ",".join(self._ips_to_be_discovered))
 
     def _extract_ip_from_exception_str(self, e):
         # Example: Authentication failure: unable to connect cisco_nxos 10.126.95.203:22

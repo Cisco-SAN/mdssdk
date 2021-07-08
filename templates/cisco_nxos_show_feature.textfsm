@@ -1,6 +1,6 @@
 Value FEATURE (\S+)
 Value INSTANCE (\d+)
-Value STATE (enabled|disabled)
+Value STATE (enabled|disabled|uninstalled)
 
 
 Start

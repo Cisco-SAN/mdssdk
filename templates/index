@@ -32,6 +32,7 @@ cisco_nxos_show_fcns_database_detail.textfsm, .*, cisco_nxos, sh[[ow]] fcn[[s]] 
 cisco_nxos_show_fcns_database.textfsm, .*, cisco_nxos, sh[[ow]] fcn[[s]] d[[atabase]]
 cisco_nxos_show_fcns_statistics.textfsm, .*, cisco_nxos, sh[[ow]] fcn[[s]] s[[tatistics]]
 cisco_nxos_show_inventory.textfsm, .*, cisco_nxos, sh[[ow]] inventory
+cisco_nxos_show_topology.textfsm, .*, cisco_nxos, sh[[ow]] topology(?: v[[san]] (\d+))?
 
 
 

@@ -68,7 +68,7 @@ class TestPortChannelAddMembers(unittest.TestCase):
                 )
             else:
                 raise c
-        print(self.fc.name, self.pc.members, self.pc.id)
+        #print(self.fc.name, self.pc.members, self.pc.id)
         self.assertIn(self.fc.name, self.pc.members)
         self.assertIn(fc2.name, self.pc.members)
         self.pc.delete()

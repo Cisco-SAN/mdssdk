@@ -58,26 +58,13 @@ def convert_to_list(items):
 
 def _run_show_topo_for_npiv(sw):
     peer_ip_list = []
-    # Show topo
-    log.debug("topo")
-    out = sw.show("show topology")
-    if sw.is_connection_type_ssh():
-        shtopo = ShowTopology(out)
-        # print(out)
-        peer_ip_list = shtopo.get_all_peer_ip_addrs()
-    else:
-        # alltopo = out['TABLE_topology_vsan']['ROW_topology_vsan']
-        alltopo = out.get('TABLE_topology_vsan', [])
-        if alltopo:
-            for eachvsan in convert_to_list(alltopo['ROW_topology_vsan']):
-                # topolines = eachvsan['TABLE_topology']['ROW_topology']
-                topolines = eachvsan.get('TABLE_topology', [])
-                if topolines:
-                    for eachline in convert_to_list(topolines['ROW_topology']):
-                        peer_ip_list.append(eachline['peer_ip_address'])
-
+    alllinks = sw.links()
+    #print(alllinks)
+    for vsan,values in alllinks.items():
+        for eachvalue in values:
+            peer_ip_list.append(eachvalue['peer_ip_address'])
+    #print(list(set(peer_ip_list)))
     return list(set(peer_ip_list))
-
 
 def _run_show_fcns_for_npv(sw):
     peer_ip_list = []
