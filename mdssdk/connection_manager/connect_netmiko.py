@@ -1,5 +1,6 @@
 import logging
 import re
+import sys
 
 from netmiko import ConnectHandler
 from time import sleep
@@ -14,18 +15,29 @@ class SSHSession(object):
     Generic SSHSession which can be used to run commands
     """
 
-    def __init__(self, host, username, password, timeout=SSH_CONN_TIMEOUT):
+    def __init__(self, host, username, password, key_file, timeout=SSH_CONN_TIMEOUT):
         """
         Establish SSH Connection using given hostname, username and
         password which can be used to run commands.
         """
         self._host = host
         self.timeout = timeout
+
+        if password is None and key_file is None:
+            msg = "ERROR!! One of either password or key_file needs to be passed for SSH connection, both cant be None"
+            log.error(msg)
+            sys.exit(msg)
+        if password is not None and key_file is not None:
+            msg = "ERROR!! One of either password or key_file needs to be passed for SSH connection, not both"
+            log.error(msg)
+            sys.exit(msg)
+
         self._cisco_device = {
             "device_type": "cisco_nxos",
             "host": self._host,
             "username": username,
             "password": password,
+            "key_file": key_file,
             "timeout": self.timeout,
         }
         self.anyerror = False

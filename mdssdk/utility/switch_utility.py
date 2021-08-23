@@ -46,7 +46,7 @@ class SwitchUtils:
             {key: re.sub(r'"', "", val) for key, val in x.items()}
             for x in self.inv_details
         ]
-        #log.info(self.inv_details)
+        # log.info(self.inv_details)
         # print(self.inv_details)
         for eachline in self.inv_details:
             if eachline["name"] == "Chassis":

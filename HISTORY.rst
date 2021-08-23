@@ -4,9 +4,10 @@
 History
 =======
 
-v1.2.1 (2021-6-27)
+v1.3.0 (2021-8-23)
 ---------------------
 
+* Support for N9K and FI
 * Some bug fixes and enhancements
 
 v1.2.0 (2021-2-17)

@@ -40,10 +40,12 @@ class Switch(SwitchUtils):
     :type ip_address: str
     :param username: username
     :type id: str
-    :param password: password
+    :param password: password (optional for ssh keys)
     :type password: str
     :param connection_type: connection type 'http' or 'https' or 'ssh' (default: 'https')
     :type connection_type: str
+    :param ssh_key_file: file name of SSH key file (optional for password auth)
+    :type ssh_key_file: str
     :param port: port number (default: 8443 for https and 8080 for http) , ignored when connection type is ssh
     :type port: int
     :param timeout: timeout period in seconds (default: 30)
@@ -53,6 +55,8 @@ class Switch(SwitchUtils):
 
     :example:
         >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password)
+        >>> # For auth with ssh key file
+        >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, connection_type = "ssh", ssh_key_file = './ssh/test_rsa'))
 
     """
 
@@ -60,8 +64,9 @@ class Switch(SwitchUtils):
         self,
         ip_address,
         username,
-        password,
+        password=None,
         connection_type="https",
+        ssh_key_file=None,
         port=None,
         timeout=NXAPI_CONN_TIMEOUT,
         verify_ssl=True,
@@ -78,6 +83,7 @@ class Switch(SwitchUtils):
         self.__ip_address = ip_address
         self.__username = username
         self.__password = password
+        self.__ssh_key_file = ssh_key_file
         self.connection_type = connection_type
         if port is None:
             if self.connection_type == "https":
@@ -86,6 +92,8 @@ class Switch(SwitchUtils):
                 self.port = HTTP_PORT
         else:
             self.port = port
+        if self.__ssh_key_file is not None:
+            self.connection_type = "ssh"
         self.timeout = timeout
         self.__verify_ssl = verify_ssl
         self.__supported = None
@@ -134,6 +142,7 @@ class Switch(SwitchUtils):
             host=self.__ip_address,
             username=self.__username,
             password=self.__password,
+            key_file=self.__ssh_key_file,
             timeout=self.timeout,
         )
         log.debug("ssh connection established for switch with ip " + self.__ip_address)
@@ -394,6 +403,11 @@ class Switch(SwitchUtils):
             >>>
         """
 
+        # Doing the below check to reduce time since version is already checked while doing a fresh connection
+        try:
+            return self._SW_VER
+        except AttributeError:
+            pass
         cmd = "show version"
         log.debug("Running version API")
         if self.is_connection_type_ssh():
@@ -1152,6 +1166,7 @@ class Switch(SwitchUtils):
             host=self.__ip_address,
             username=self.__username,
             password=self.__password,
+            key_file=self.__ssh_key_file,
             timeout=self.timeout,
         )
         return alt_handle
