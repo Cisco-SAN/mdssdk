@@ -1,8 +1,10 @@
 import logging
 import re
 from time import sleep
-from ..constants import SSH_CONN_TIMEOUT
+
 from netmiko import ConnectHandler
+
+from ..constants import SSH_CONN_TIMEOUT
 
 log = logging.getLogger(__name__)
 
@@ -26,10 +28,10 @@ class SSHSession(object):
             "timeout": self.timeout,
         }
 
-        if password:
-            self._cisco_device["password"]= password
-        else:
+        if key_file:
             self._cisco_device["key_file"]= key_file
+        else:
+            self._cisco_device["password"]= password
 
         self.anyerror = False
         self._connect()

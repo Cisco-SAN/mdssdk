@@ -40,8 +40,6 @@ class Switch(SwitchUtils):
     :type id: str
     :param password: password (optional for ssh keys)
     :type password: str
-    :param use_keys: use SSH keys? (default: False)
-    :type use_keys: bool
     :param key_file: file name of SSH key file (optional for password auth)
     :type key_file: str
     :param connection_type: connection type 'http' or 'https'(optional, default: 'https')
@@ -55,7 +53,7 @@ class Switch(SwitchUtils):
 
     :example:
         >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password)
-        >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, use_keys = True, key_file = './ssh/test_rsa')
+        >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, key_file = './ssh/test_rsa')
 
     """
 
@@ -64,7 +62,6 @@ class Switch(SwitchUtils):
             ip_address,
             username,
             password=None,
-            use_keys=False,
             key_file=None,
             connection_type="https",
             port=None,
@@ -90,24 +87,21 @@ class Switch(SwitchUtils):
         self.timeout = timeout
         self.__verify_ssl = verify_ssl
 
-        if use_keys:
-            if not key_file:
-                msg = "ERROR!! Need to supply key_file when using SSH keys"
-                log.error(msg)
-                sys.exit(msg)
+        if key_file:
             self.__password = None
             self.__key_file = key_file
-        else:
-            if not password:
-                msg = "ERROR!! Need to supply password when not using SSH keys"
-                log.error(msg)
-                sys.exit(msg)
+        elif password is not None:
             self.__password = password
             self.__key_file = None
+        else:
+            msg = "ERROR!! Need to supply password or key_file"
+            log.error(msg)
+            sys.exit(msg)
+
 
         if self.connection_type != "ssh":
-            if use_keys:
-                msg = "ERROR!! Cannot use SSH keys for non-SSH connection"
+            if password is None:
+                msg = "ERROR!!Must supply password for non-SSH connection"
                 log.error(msg)
                 sys.exit(msg)
             log.info("Opening up a nxapi connection for switch with ip " + self.__ip_address)
