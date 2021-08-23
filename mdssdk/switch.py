@@ -1,27 +1,24 @@
 __author__ = "Suhas Bharadwaj (subharad)"
 
 import logging
-import re
-import time
 import os
+import re
 import sys
+import time
 
 from netmiko import CNTL_SHIFT_6
+
 from .analytics import Analytics
-from .constants import *
 from .connection_manager.connect_netmiko import SSHSession
 from .connection_manager.connect_nxapi import ConnectNxapi
-from .connection_manager.errors import (
-    CLIError,
-    VersionNotFound,
-    UnsupportedFeature,
-    UnsupportedConfig,
-)
+from .connection_manager.errors import (CLIError, UnsupportedConfig,
+                                        UnsupportedFeature, VersionNotFound)
+from .constants import *
 from .constants import DEFAULT
-from .nxapikeys import versionkeys, featurekeys
+from .nxapikeys import featurekeys, versionkeys
 from .parsers.switch import ShowTopology
-from .utility.switch_utility import SwitchUtils
 from .utility import utils
+from .utility.switch_utility import SwitchUtils
 from .utility.utils import get_key
 
 log = logging.getLogger(__name__)
@@ -41,8 +38,12 @@ class Switch(SwitchUtils):
     :type ip_address: str
     :param username: username
     :type id: str
-    :param password: password
+    :param password: password (optional for ssh keys)
     :type password: str
+    :param use_keys: use SSH keys? (default: False)
+    :type use_keys: bool
+    :param key_file: file name of SSH key file (optional for password auth)
+    :type key_file: str
     :param connection_type: connection type 'http' or 'https'(optional, default: 'https')
     :type connection_type: str
     :param port: port number (optional, default: 8443 for https and 8080 for http)
@@ -54,6 +55,7 @@ class Switch(SwitchUtils):
 
     :example:
         >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password)
+        >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, use_keys = True, key_file = './ssh/test_rsa')
 
     """
 
@@ -61,7 +63,9 @@ class Switch(SwitchUtils):
             self,
             ip_address,
             username,
-            password,
+            password=None,
+            use_keys=False,
+            key_file=None,
             connection_type="https",
             port=None,
             timeout=NXAPI_CONN_TIMEOUT,
@@ -75,7 +79,6 @@ class Switch(SwitchUtils):
 
         self.__ip_address = ip_address
         self.__username = username
-        self.__password = password
         self.connection_type = connection_type
         if port is None:
             if connection_type == 'https':
@@ -87,7 +90,26 @@ class Switch(SwitchUtils):
         self.timeout = timeout
         self.__verify_ssl = verify_ssl
 
+        if use_keys:
+            if not key_file:
+                msg = "ERROR!! Need to supply key_file when using SSH keys"
+                log.error(msg)
+                sys.exit(msg)
+            self.__password = None
+            self.__key_file = key_file
+        else:
+            if not password:
+                msg = "ERROR!! Need to supply password when not using SSH keys"
+                log.error(msg)
+                sys.exit(msg)
+            self.__password = password
+            self.__key_file = None
+
         if self.connection_type != "ssh":
+            if use_keys:
+                msg = "ERROR!! Cannot use SSH keys for non-SSH connection"
+                log.error(msg)
+                sys.exit(msg)
             log.info("Opening up a nxapi connection for switch with ip " + self.__ip_address)
             self.__connection = ConnectNxapi(
                 host=self.__ip_address,
@@ -110,6 +132,7 @@ class Switch(SwitchUtils):
             host=self.__ip_address,
             username=self.__username,
             password=self.__password,
+            key_file=self.__key_file,
             timeout=self.timeout,
         )
         log.debug("Finished up a ssh connection for switch with ip " + self.__ip_address)

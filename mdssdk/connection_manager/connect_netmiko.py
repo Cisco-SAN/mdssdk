@@ -12,7 +12,7 @@ class SSHSession(object):
        Generic SSHSession which can be used to run commands
        """
 
-    def __init__(self, host, username, password, timeout=SSH_CONN_TIMEOUT):
+    def __init__(self, host, username, password, key_file, timeout=SSH_CONN_TIMEOUT):
         """
         Establish SSH Connection using given hostname, username and
         password which can be used to run commands.
@@ -23,9 +23,14 @@ class SSHSession(object):
             "device_type": "cisco_nxos",
             "host": self._host,
             "username": username,
-            "password": password,
             "timeout": self.timeout,
         }
+
+        if password:
+            self._cisco_device["password"]= password
+        else:
+            self._cisco_device["key_file"]= key_file
+
         self.anyerror = False
         self._connect()
 
