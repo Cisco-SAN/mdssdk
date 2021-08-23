@@ -4,51 +4,57 @@ import re
 
 from .utils import get_key, convert_to_list
 from .. import constants
+from ..connection_manager.errors import CLIError, UnsupportedSwitch
 from ..fc import Fc
 from ..module import Module
 from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys
 from ..parsers.interface import ShowInterfaceBrief
-from ..parsers.switch.show_topology import ShowTopology
 from ..parsers.vsan import ShowVsan
 from ..portchannel import PortChannel
 from ..vsan import Vsan
 from ..zone import Zone
 from ..zoneset import ZoneSet
-from ..connection_manager.errors import CLIError
 
 log = logging.getLogger(__name__)
 
 
 class SwitchUtils:
-
     def _check_for_support(f):
         def wrapper(self, *args, **kwargs):
             if self.product_id.startswith(constants.VALID_PIDS_MDS):
                 return f(self, *args, **kwargs)
-            return None
+            # return None
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this api/method is only for MDS only switches. PID:"
+                + self.product_id
+            )
+
         return wrapper
 
-    def _parse_sh_inv(self,use_ssh=False):
+    def _parse_sh_inv(self, use_ssh=False):
         cmd = "show inventory"
-        if use_ssh or self.connection_type == 'ssh':
+        if use_ssh or self.connection_type == "ssh":
             inv = self.show(command=cmd, use_ssh=True)
             self.inv_details = inv
         else:
-            #NXAPI
+            # NXAPI
             inv = self.show(command=cmd, use_ssh=False)
-            self.inv_details = inv['TABLE_inv']['ROW_inv']
+            self.inv_details = inv["TABLE_inv"]["ROW_inv"]
 
         # in 8.4(1a) there are quotes around the values so need to remove them
-        self.inv_details = [{key: re.sub(r'"', '', val) for key, val in x.items()} for x in self.inv_details]
-        log.info(self.inv_details)
+        self.inv_details = [
+            {key: re.sub(r'"', "", val) for key, val in x.items()}
+            for x in self.inv_details
+        ]
+        #log.info(self.inv_details)
         # print(self.inv_details)
         for eachline in self.inv_details:
-            if eachline['name'] == 'Chassis':
+            if eachline["name"] == "Chassis":
                 # Not using get_key here because this is run before we get the sw version
                 # Hence 'productid' is hardcoded here
-                self._product_id = eachline['productid']
-                self._serial_num = eachline['serialnum']
-                self._model_desc = eachline['desc']
+                self._product_id = eachline["productid"]
+                self._serial_num = eachline["serialnum"]
+                self._model_desc = eachline["desc"]
                 return
 
     def _is_fabric_interconnect(self):
@@ -189,8 +195,8 @@ class SwitchUtils:
         out = self.show(cmd)
         if self.is_connection_type_ssh():
             for eachrow in out:
-                v = int(eachrow['vsan'])
-                zsname = eachrow['zonesetname']
+                v = int(eachrow["vsan"])
+                zsname = eachrow["zonesetname"]
                 zsobj = ZoneSet(self, zsname, v)
                 values = retdict.get(v, None)
                 if values is None:
@@ -200,7 +206,7 @@ class SwitchUtils:
                     retdict[v] = values
         else:
             try:
-                newout = out['TABLE_zoneset']['ROW_zoneset']
+                newout = out["TABLE_zoneset"]["ROW_zoneset"]
             except KeyError:
                 return retdict
             if type(newout) is dict:
@@ -456,7 +462,7 @@ class SwitchUtils:
         out = self.show(cmd)
         return out
 
-    def links(self, vsan=None,peer_ip_address=None):
+    def links(self, vsan=None, peer_ip_address=None):
         if self.npv:
             return None
         peer_links_dict = {}
@@ -468,31 +474,33 @@ class SwitchUtils:
         if self.is_connection_type_ssh():
             if out:
                 for eachline in out:
-                    v = eachline.pop('vsan')
+                    v = eachline.pop("vsan")
                     tmplist = peer_links_dict.get(v, [])
                     tmplist.append(eachline)
                     peer_links_dict[v] = tmplist
         else:
-            alltopo = out.get('TABLE_topology_vsan', [])
+            alltopo = out.get("TABLE_topology_vsan", [])
             if alltopo:
-                alldata = convert_to_list(alltopo['ROW_topology_vsan'])
+                alldata = convert_to_list(alltopo["ROW_topology_vsan"])
                 for eachdata in alldata:
-                    peer_links_dict[eachdata['id']] = convert_to_list(eachdata['TABLE_topology']['ROW_topology'])
+                    peer_links_dict[eachdata["id"]] = convert_to_list(
+                        eachdata["TABLE_topology"]["ROW_topology"]
+                    )
 
         if vsan is None and peer_ip_address is None:
             return peer_links_dict
         elif vsan is not None and peer_ip_address is None:
             tmp = {}
-            data = peer_links_dict.get(str(vsan),[])
+            data = peer_links_dict.get(str(vsan), [])
             if data:
                 tmp[str(vsan)] = data
             return tmp
         elif vsan is None and peer_ip_address is not None:
             tmp = {}
-            for v,values in peer_links_dict.items():
+            for v, values in peer_links_dict.items():
                 tmplist = []
                 for eachvalue in values:
-                    if eachvalue['peer_ip_address'] == peer_ip_address:
+                    if eachvalue["peer_ip_address"] == peer_ip_address:
                         tmplist.append(eachvalue)
                 if tmplist:
                     tmp[v] = tmplist
@@ -503,9 +511,8 @@ class SwitchUtils:
             data = peer_links_dict.get(str(vsan), [])
             if data:
                 for eachvalue in peer_links_dict.get(str(vsan), []):
-                    if eachvalue['peer_ip_address'] == peer_ip_address:
+                    if eachvalue["peer_ip_address"] == peer_ip_address:
                         tmplist.append(eachvalue)
                 if tmplist:
                     tmp[str(vsan)] = tmplist
             return tmp
-

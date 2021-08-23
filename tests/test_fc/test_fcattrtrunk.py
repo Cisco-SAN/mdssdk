@@ -35,7 +35,9 @@ class TestFcAttrTrunk(unittest.TestCase):
                 self.fc.trunk = trunk
             except CLIError as c:
                 if "port already in a port-channel, no config allowed" in c.message:
-                    self.skipTest("Skipping test as port already in a port-channel, no config allowed")
+                    self.skipTest(
+                        "Skipping test as port already in a port-channel, no config allowed"
+                    )
             self.assertEqual(trunk, self.fc.trunk)
         self.fc.trunk = self.old
         self.assertEqual(self.old, self.fc.trunk)

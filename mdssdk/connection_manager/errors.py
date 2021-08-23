@@ -4,9 +4,7 @@ log = logging.getLogger(__name__)
 
 
 class NXOSError(Exception):
-    """
-
-    """
+    """ """
 
     def __init__(self, message):
         """
@@ -27,9 +25,7 @@ class NXOSError(Exception):
 
 
 class CLIError(NXOSError):
-    """
-
-    """
+    """ """
 
     def __init__(self, command, message):
         """
@@ -59,9 +55,7 @@ class SSHException(Exception):
 
 
 class CustomException(Exception):
-    """
-
-    """
+    """ """
 
     def __init__(self, message):
         """

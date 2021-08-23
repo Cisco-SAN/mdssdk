@@ -29,7 +29,7 @@ class TestSwitchFeature(unittest.TestCase):
     def test_feature_typeerror(self):
         with self.assertRaises(TypeError) as e:
             self.switch.feature(self.name, "asdf")
-        self.assertEqual(
+        self.assertIn(
             "enable flag must be True(to enable the feature) or False(to disable the feature)",
             str(e.exception),
         )

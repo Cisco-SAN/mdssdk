@@ -28,7 +28,9 @@ class TestFcAttrCounters(unittest.TestCase):
         log.debug("Counters " + str(self.fc.name))
         for t in dir_counters:
             log.debug(str(t) + " : " + str(self.fc.counters.__getattribute__(t)))
-        self.assertIsNotNone(self.fc.counters, "fc.counters did not get counter objects")
+        self.assertIsNotNone(
+            self.fc.counters, "fc.counters did not get counter objects"
+        )
 
     def test_counters_write_error(self):
         with self.assertRaises(AttributeError) as e:

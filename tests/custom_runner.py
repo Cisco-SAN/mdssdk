@@ -1,12 +1,12 @@
 import csv
-import time
 import unittest
 
-writer = csv.writer(open('time.csv', 'w', newline=''))
+import time
+
+writer = csv.writer(open("time.csv", "w", newline=""))
 
 
 class MyTestLoader(unittest.TestLoader):
-
     def __init__(self, arg):
         super().__init__()
         self.arg = arg
@@ -14,12 +14,14 @@ class MyTestLoader(unittest.TestLoader):
     def loadTestsFromTestCase(self, testCaseClass):
         """Return a suite of all test cases contained in testCaseClass"""
         if issubclass(testCaseClass, unittest.suite.TestSuite):
-            raise TypeError("Test cases should not be derived from "
-                            "TestSuite. Maybe you meant to derive from "
-                            "TestCase?")
+            raise TypeError(
+                "Test cases should not be derived from "
+                "TestSuite. Maybe you meant to derive from "
+                "TestCase?"
+            )
         testCaseNames = self.getTestCaseNames(testCaseClass)
-        if not testCaseNames and hasattr(testCaseClass, 'runTest'):
-            testCaseNames = ['runTest']
+        if not testCaseNames and hasattr(testCaseClass, "runTest"):
+            testCaseNames = ["runTest"]
 
         # Modification here: parse keyword arguments to testCaseClass.
         test_cases = []
@@ -31,7 +33,6 @@ class MyTestLoader(unittest.TestLoader):
 
 
 class TimeLoggingTestResult(unittest.TextTestResult):
-
     def startTest(self, test):
         self._started_at = time.time()
         super().startTest(test)

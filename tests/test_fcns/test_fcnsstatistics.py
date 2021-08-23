@@ -20,9 +20,9 @@ class TestFcnsStatistics(unittest.TestCase):
     def test_statistics(self):
         fcnsdb = self.fcns_obj.statistics()
         if fcnsdb is not {}:
-            '''res = self.fcns_obj.statistics(detail=True)
+            """res = self.fcns_obj.statistics(detail=True)
             log.debug(res)
-            self.assertNotEqual({}, res)'''
+            self.assertNotEqual({}, res)"""
 
             if type(fcnsdb) is dict:
                 fcnsdb = [fcnsdb]
@@ -32,9 +32,9 @@ class TestFcnsStatistics(unittest.TestCase):
             log.debug(res)
             self.assertNotEqual({}, res)
 
-            '''res = self.fcns_obj.statistics(vsan=vsan, detail=True)
+            """res = self.fcns_obj.statistics(vsan=vsan, detail=True)
             log.debug(res)
-            self.assertNotEqual({}, res)'''
+            self.assertNotEqual({}, res)"""
         self.skipTest("need to fix assertion")
 
     def test_statistics_nonexistingentry(self):

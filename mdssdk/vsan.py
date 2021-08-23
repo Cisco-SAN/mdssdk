@@ -1,8 +1,13 @@
 import logging
 import re
 
-from .connection_manager.errors import CLIError, VsanNotPresent, InvalidInterface
-from .constants import PAT_FC, PAT_PC
+from .connection_manager.errors import (
+    CLIError,
+    VsanNotPresent,
+    InvalidInterface,
+    UnsupportedSwitch,
+)
+from .constants import PAT_FC, PAT_PC, VALID_PIDS_MDS
 from .fc import Fc
 from .nxapikeys import vsankeys
 from .parsers.vsan import ShowVsan, ShowVsanMembership
@@ -33,6 +38,10 @@ class Vsan(object):
         self.__swobj = switch
         self._id = id
         self._SW_VER = switch._SW_VER
+        if not switch.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
 
     @property
     def id(self):
@@ -260,12 +269,12 @@ class Vsan(object):
                 pcmatch = re.match(PAT_PC, eachint.name)
                 if fcmatch or pcmatch:
                     cmd = (
-                            cmd
-                            + "terminal dont-ask ; vsan database ; vsan "
-                            + str(self._id)
-                            + " interface "
-                            + eachint.name
-                            + " ; no terminal dont-ask ; "
+                        cmd
+                        + "terminal dont-ask ; vsan database ; vsan "
+                        + str(self._id)
+                        + " interface "
+                        + eachint.name
+                        + " ; no terminal dont-ask ; "
                     )
                     # cmdlist.append(cmd)
                 else:
@@ -273,15 +282,15 @@ class Vsan(object):
                         "Interface "
                         + str(eachint.name)
                         + " is not supported, and hence cannot be added to the vsan, "
-                          "supported interface types are 'fc' amd 'port-channel'"
+                        "supported interface types are 'fc' amd 'port-channel'"
                     )
             try:
                 # self.__swobj._config_list(cmdlist)
                 self.__swobj.config(cmd)
             except CLIError as c:
                 if (
-                        "membership being configured is already configured for the interface"
-                        in c.message
+                    "membership being configured is already configured for the interface"
+                    in c.message
                 ):
                     return
                 else:

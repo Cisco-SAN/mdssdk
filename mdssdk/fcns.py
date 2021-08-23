@@ -1,7 +1,8 @@
 import logging
 import re
 
-from .connection_manager.errors import CLIError
+from .connection_manager.errors import CLIError, UnsupportedSwitch
+from .constants import VALID_PIDS_MDS
 
 log = logging.getLogger(__name__)
 
@@ -9,11 +10,15 @@ log = logging.getLogger(__name__)
 class Fcns(object):
     def __init__(self, switch):
         self.__swobj = switch
+        if not switch.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
 
     def database(self, vsan=None, fcid=None, detail=False):
         """
         Get fcns database
-        
+
         :param vsan: id of vsan (optional parameter, defaults to None)
         :type vsan: int or None
         :param fcid: fcid (optional parameter, defaults to None)
@@ -25,12 +30,12 @@ class Fcns(object):
         :example:
             >>> fcns_obj = Fcns(switch_obj)
             >>> print(fcns_obj.database())
-            [{'vsan_id': '1', 'fcid': '0x2c0000', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:dc:25', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '}, 
-            {'vsan_id': '1', 'fcid': '0x2c0001', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:dc:35', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '}, 
-            {'vsan_id': '1', 'fcid': '0x2c0020', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:2c:25', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '}, 
-            {'vsan_id': '1', 'fcid': '0x2c0021', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:2d:25', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '}, 
-            {'vsan_id': '1', 'fcid': '0x2c0040', 'type': 'N', 'pwwn': '10:00:00:de:fb:b1:86:a1', 'vendor': 'Cisco', 'fc4_type_feature': 'ipfc '}, 
-            {'vsan_id': '13', 'fcid': '0x220000', 'type': 'N', 'pwwn': '10:00:00:de:fb:b1:86:a1', 'vendor': 'Cisco', 'fc4_type_feature': 'ipfc '}, 
+            [{'vsan_id': '1', 'fcid': '0x2c0000', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:dc:25', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '},
+            {'vsan_id': '1', 'fcid': '0x2c0001', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:dc:35', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '},
+            {'vsan_id': '1', 'fcid': '0x2c0020', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:2c:25', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '},
+            {'vsan_id': '1', 'fcid': '0x2c0021', 'type': 'N', 'pwwn': '10:00:54:7f:ee:eb:2d:25', 'vendor': '', 'fc4_type_feature': 'scsi-fcp:both 227 '},
+            {'vsan_id': '1', 'fcid': '0x2c0040', 'type': 'N', 'pwwn': '10:00:00:de:fb:b1:86:a1', 'vendor': 'Cisco', 'fc4_type_feature': 'ipfc '},
+            {'vsan_id': '13', 'fcid': '0x220000', 'type': 'N', 'pwwn': '10:00:00:de:fb:b1:86:a1', 'vendor': 'Cisco', 'fc4_type_feature': 'ipfc '},
             {'vsan_id': '14', 'fcid': '0x200000', 'type': 'N', 'pwwn': '10:00:00:de:fb:b1:86:a1', 'vendor': 'Cisco', 'fc4_type_feature': 'ipfc '}]
             >>>
 
@@ -48,7 +53,7 @@ class Fcns(object):
                 return out["TABLE_fcns_vsan"]["ROW_fcns_vsan"]
             else:
                 if type(out[0]) is str:
-                    if ("vsan not present" == out[0].strip()):
+                    if "vsan not present" == out[0].strip():
                         return {}
             return out
         else:
@@ -57,7 +62,7 @@ class Fcns(object):
     def statistics(self, vsan=None, detail=False):
         """
         Get fcns statistics
-        
+
         :param vsan: id of vsan (optional parameter, defaults to None)
         :type vsan: int or None
         :param detail: detail (optional parameter, defaults to False)
@@ -67,10 +72,10 @@ class Fcns(object):
         :example:
             >>> fcns_obj = Fcns(switch_obj)
             >>> print(fcns_obj.statistics())
-            [{'vsan_id': '1', 'registration_requests_received': '20', 'deregistration_requests_received': '0', 'queries_received': '0', 'queries_sent': '0', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '4'}, 
-            {'vsan_id': '9', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '0', 'queries_sent': '0', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '0'}, 
-            {'vsan_id': '13', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '1', 'queries_sent': '2', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '1'}, 
-            {'vsan_id': '14', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '1', 'queries_sent': '2', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '1'}, 
+            [{'vsan_id': '1', 'registration_requests_received': '20', 'deregistration_requests_received': '0', 'queries_received': '0', 'queries_sent': '0', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '4'},
+            {'vsan_id': '9', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '0', 'queries_sent': '0', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '0'},
+            {'vsan_id': '13', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '1', 'queries_sent': '2', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '1'},
+            {'vsan_id': '14', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '1', 'queries_sent': '2', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '1'},
             {'vsan_id': '4055', 'registration_requests_received': '0', 'deregistration_requests_received': '0', 'queries_received': '0', 'queries_sent': '0', 'reject_responses_sent': '0', 'rscns_received': '0', 'rscns_sent': '0'}]
             >>>
 
@@ -86,7 +91,7 @@ class Fcns(object):
                 return out["TABLE_fcns_vsan"]["ROW_fcns_vsan"]
             else:
                 if type(out[0]) is str:
-                    if ("vsan not present" == out[0].strip()):
+                    if "vsan not present" == out[0].strip():
                         return {}
             return out
         else:
@@ -99,7 +104,7 @@ class Fcns(object):
         set no_bulk_notify
 
         :getter:
-        :return: returns True if bulk notification for db changes is disabled, otherwise returns False 
+        :return: returns True if bulk notification for db changes is disabled, otherwise returns False
         :rtype: bool
 
         :example:
@@ -149,7 +154,7 @@ class Fcns(object):
         set zone_lookup_cache
 
         :getter:
-        :return: returns True if db uses Zone Lookup cache for NS queries, otherwise returns False 
+        :return: returns True if db uses Zone Lookup cache for NS queries, otherwise returns False
         :rtype: bool
 
         :example:
@@ -189,11 +194,11 @@ class Fcns(object):
     def proxy_port(self, pwwn, vsan):
         """
         Configure proxy port
-        
-        :param pwwn: pwwn 
+
+        :param pwwn: pwwn
         :type pwwn: str
-        :param name: id of vsan 
-        :type name: int 
+        :param name: id of vsan
+        :type name: int
         :return: None
         :example:
             >>> fcns_obj = Fcns(switch_obj)
@@ -209,7 +214,7 @@ class Fcns(object):
     def no_auto_poll(self, vsan=None, pwwn=None):
         """
         Disable auto polling
-        
+
         :param name: id of vsan (optional parameter, defaults to None)
         :type name: int or None
         :param pwwn: pwwn (optional parameter, defaults to None)
@@ -233,8 +238,8 @@ class Fcns(object):
     def reject_duplicate_pwwn(self, vsan):
         """
         Reject logging of ports with duplicate pwwn
-        
-        :param vsan: id of vsan 
+
+        :param vsan: id of vsan
         :type vsan: int
         :return: None
         :example:

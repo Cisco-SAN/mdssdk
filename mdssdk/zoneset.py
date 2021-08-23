@@ -1,12 +1,14 @@
 import logging
+
 import time
 
-from .connection_manager.errors import CLIError
+from .connection_manager.errors import CLIError, UnsupportedSwitch
 from .nxapikeys import zonekeys
 from .parsers.zoneset import ShowZonesetActive
 from .utility.utils import get_key
 from .vsan import Vsan
 from .zone import Zone
+from .constants import VALID_PIDS_MDS
 
 log = logging.getLogger(__name__)
 
@@ -34,8 +36,17 @@ class ZoneSet(object):
         self._SW_VER = switch._SW_VER
         self._vsan = vsan
         self._name = name
+        if not switch.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
         # Create a dummy zone obj to send zoneset cmds, DO NOT use 'create' method with it!!
-        log.debug("Init a dummy zone object for the zoneset with name " + self._name + " and vsan " + str(self._vsan))
+        log.debug(
+            "Init a dummy zone object for the zoneset with name "
+            + self._name
+            + " and vsan "
+            + str(self._vsan)
+        )
         self.__zoneObj = Zone(self.__swobj, name=None, vsan=self._vsan)
 
     @property
@@ -57,7 +68,7 @@ class ZoneSet(object):
         out = self.__show_zoneset_name_brief()
         if out:
             if self.__swobj.is_connection_type_ssh():
-                return out[0]['zonesetname']
+                return out[0]["zonesetname"]
             else:
                 out = out.get("TABLE_zoneset").get("ROW_zoneset")
                 if type(out) is list:
@@ -104,7 +115,7 @@ class ZoneSet(object):
         out = self.__show_zoneset_name_brief()
         if out:
             if self.__swobj.is_connection_type_ssh():
-                members = out[0]['zonename']
+                members = out[0]["zonename"]
                 for eachzmem in members:
                     zobj = Zone(self.__swobj, eachzmem, self._vsan)
                     retlist[eachzmem] = zobj
@@ -146,7 +157,7 @@ class ZoneSet(object):
         out = self.__show_zoneset_name_brief(active=True)
         if out:
             if self.__swobj.is_connection_type_ssh():
-                members = out[0]['zonename']
+                members = out[0]["zonename"]
                 for eachzmem in members:
                     zobj = Zone(self.__swobj, eachzmem, self._vsan)
                     retlist[eachzmem] = zobj
@@ -177,7 +188,7 @@ class ZoneSet(object):
             >>> zonesetObj = ZoneSet(switch_obj,"zoneset_fab_A",1)
             >>> zonesetObj.create()
             >>>
-         """
+        """
         cmd = "zoneset name " + self._name + " vsan " + str(self._vsan)
         self.__zoneObj._send_zone_cmd(cmd)
 
@@ -191,7 +202,7 @@ class ZoneSet(object):
             >>> zonesetObj = ZoneSet(switch_obj,"zoneset_fab_A",1)
             >>> zonesetObj.delete()
             >>>
-         """
+        """
         cmd = "no zoneset name " + self._name + " vsan " + str(self._vsan)
         self.__zoneObj._send_zone_cmd(cmd)
 
@@ -214,7 +225,7 @@ class ZoneSet(object):
             >>> zs.create()
             >>> zs.add_members([z1,z2])
             >>>
-         """
+        """
         self.__add_remove_members(members)
 
     def remove_members(self, members):
@@ -230,42 +241,42 @@ class ZoneSet(object):
             >>>
             >>> zs.remove_members([z1,z2])
             >>>
-         """
+        """
         self.__add_remove_members(members, remove=True)
 
     def activate(self, action=True):
         """
-         Activate or deactivate a zoneset
+        Activate or deactivate a zoneset
 
-         :param action: activate zoneset if set to True, else deactivate the zoneset
-         :type action: bool (deafult: True)
-         :return: None
-         :raises CLIError: if vsan is not present on the switch
-         :example:
-             >>>
-             >>> # Activate the zoneset
-             >>> zs.activate()
-             >>> # Deactivate the zoneset
-             >>> zs.activate(False)
-             >>>
+        :param action: activate zoneset if set to True, else deactivate the zoneset
+        :type action: bool (deafult: True)
+        :return: None
+        :raises CLIError: if vsan is not present on the switch
+        :example:
+            >>>
+            >>> # Activate the zoneset
+            >>> zs.activate()
+            >>> # Deactivate the zoneset
+            >>> zs.activate(False)
+            >>>
         """
         time.sleep(1)
         if self.name is not None:
             if action:
                 cmd = (
-                        "terminal dont-ask ; zoneset activate name "
-                        + self._name
-                        + " vsan "
-                        + str(self._vsan)
-                        + " ; no terminal dont-ask"
+                    "terminal dont-ask ; zoneset activate name "
+                    + self._name
+                    + " vsan "
+                    + str(self._vsan)
+                    + " ; no terminal dont-ask"
                 )
             else:
                 cmd = (
-                        "terminal dont-ask ; no zoneset activate name "
-                        + self._name
-                        + " vsan "
-                        + str(self._vsan)
-                        + " ; no terminal dont-ask"
+                    "terminal dont-ask ; no zoneset activate name "
+                    + self._name
+                    + " vsan "
+                    + str(self._vsan)
+                    + " ; no terminal dont-ask"
                 )
             try:
                 self.__zoneObj._send_zone_cmd(cmd)
@@ -279,16 +290,16 @@ class ZoneSet(object):
 
     def is_active(self):
         """
-         Check if the zoneset is active or not
+        Check if the zoneset is active or not
 
-         :return: True if zoneset is active, False otherwise
-         :rtype: bool
-         :raises CLIError: if vsan is not present on the switch
-         :example:
-             >>>
-             >>> zs.is_active()
-             True
-             >>>
+        :return: True if zoneset is active, False otherwise
+        :rtype: bool
+        :raises CLIError: if vsan is not present on the switch
+        :example:
+            >>>
+            >>> zs.is_active()
+            True
+            >>>
         """
         cmd = "show zoneset active vsan " + str(self._vsan)
         if self.__swobj.is_connection_type_ssh():
@@ -328,12 +339,18 @@ class ZoneSet(object):
 
     def __show_zoneset_name_brief(self, active=False):
         if active:
-            cmd = "show zoneset name " + self._name + " brief active vsan " + str(self._vsan)
+            cmd = (
+                "show zoneset name "
+                + self._name
+                + " brief active vsan "
+                + str(self._vsan)
+            )
         else:
             cmd = "show zoneset name " + self._name + " brief vsan " + str(self._vsan)
 
         out = self.__zoneObj._send_zone_show_cmd(cmd)
         return out
+
 
 # TODO active members and members when zs is not present
 # TODO in zone module to add active members

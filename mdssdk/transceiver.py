@@ -3,6 +3,8 @@ import re
 from .nxapikeys import interfacekeys
 from .parsers.interface import ShowInterfaceTransceiverDetail
 from .utility.utils import get_key
+from .connection_manager.errors import UnsupportedSwitch
+from .constants import VALID_PIDS_MDS
 
 
 class Transceiver(object):
@@ -18,6 +20,10 @@ class Transceiver(object):
         self.__fcobj = fcobj
         self._SW_VER = fcobj._SW_VER
         self.__swobj = fcobj._swobj
+        if not self.__swobj.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
 
     @property
     def sfp_present(self):
@@ -74,7 +80,7 @@ class Transceiver(object):
              >>> print(trans_handler.part_number)
              FTLF8532P4BCV-C1
              >>>
-         """
+        """
         out = self.__fcobj._execute_transceiver_cmd()
         if self.__swobj.is_connection_type_ssh():
             shintd = ShowInterfaceTransceiverDetail(out)

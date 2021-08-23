@@ -1,5 +1,6 @@
 import logging
 import re
+
 import time
 
 from .connection_manager.errors import (
@@ -7,8 +8,9 @@ from .connection_manager.errors import (
     InvalidZoneMode,
     InvalidDefaultZone,
     InvalidZoneMemberType,
+    UnsupportedSwitch,
 )
-from .constants import ENHANCED, BASIC, PERMIT, DENY, PAT_WWN
+from .constants import ENHANCED, BASIC, PERMIT, DENY, PAT_WWN, VALID_PIDS_MDS
 from .fc import Fc
 from .nxapikeys import zonekeys
 from .portchannel import PortChannel
@@ -45,6 +47,10 @@ class Zone(object):
         self.__rpc = None
         self.__method = u"cli_conf"
         self._part_of_active_zs = False
+        if not switch.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
         if check_npv:
             self._check_if_npv()
 
@@ -52,7 +58,9 @@ class Zone(object):
     def _check_if_npv(self):
         if self.__swobj.npv:
             raise TypeError(
-                "Switch(" + self.__swobj.ipaddr + ") is in NPV mode, hence cannot create zone/zoneset object"
+                "Switch("
+                + self.__swobj.ipaddr
+                + ") is in NPV mode, hence cannot create zone/zoneset object"
             )
 
     def _set_part_of_active(self, val):
@@ -197,10 +205,12 @@ class Zone(object):
                     fcaliasinfo = self.__get_fcalias_info_ssh(v)
                     if fcaliasinfo:
                         a = {}
-                        a['ROW_fcalias_member'] = fcaliasinfo
+                        a["ROW_fcalias_member"] = fcaliasinfo
                         mem_dict["TABLE_fcalias_member"] = a
                     mem_dict["fcalias_name"] = v  # get from fcaliaskeys
-                    mem_dict["fcalias_vsan_id"] = int(self._vsan)  # get from fcaliaskeys
+                    mem_dict["fcalias_vsan_id"] = int(
+                        self._vsan
+                    )  # get from fcaliaskeys
                 else:
                     mem_dict[k] = v
             if mem_dict:
@@ -215,11 +225,15 @@ class Zone(object):
         retout = []
         for eachmem in out:
             mem_dict = {}
-            if eachmem['fcalias_name'] == fcaliasname:
+            if eachmem["fcalias_name"] == fcaliasname:
                 for k, v in eachmem.items():
-                    if k == "fcalias_member_type" and v == "":  # if type is empty then exit from loop
+                    if (
+                        k == "fcalias_member_type" and v == ""
+                    ):  # if type is empty then exit from loop
                         break
-                    elif k == "fcalias_name" or k == "fcalias_vsan_id" or v == "":  # Dont req name/vsan or any value with null
+                    elif (
+                        k == "fcalias_name" or k == "fcalias_vsan_id" or v == ""
+                    ):  # Dont req name/vsan or any value with null
                         continue
                     else:
                         mem_dict[k] = v
@@ -304,11 +318,11 @@ class Zone(object):
     @mode.setter
     def mode(self, value):
         cmd = (
-                "terminal dont-ask ; zone mode "
-                + ENHANCED
-                + " vsan "
-                + str(self._vsan)
-                + " ; no terminal dont-ask"
+            "terminal dont-ask ; zone mode "
+            + ENHANCED
+            + " vsan "
+            + str(self._vsan)
+            + " ; no terminal dont-ask"
         )
         if value.lower() == ENHANCED:
             self._send_zone_cmd(cmd)
@@ -360,11 +374,11 @@ class Zone(object):
     @default_zone.setter
     def default_zone(self, value):
         cmd = (
-                "terminal dont-ask ; zone default-zone "
-                + PERMIT
-                + " vsan "
-                + str(self._vsan)
-                + " ; no terminal dont-ask"
+            "terminal dont-ask ; zone default-zone "
+            + PERMIT
+            + " vsan "
+            + str(self._vsan)
+            + " ; no terminal dont-ask"
         )
         if value.lower() == PERMIT:
             self._send_zone_cmd(cmd)
@@ -711,9 +725,9 @@ class Zone(object):
         """
 
         cmd = (
-                "terminal dont-ask ; clear zone lock vsan  "
-                + str(self._vsan)
-                + " ; no terminal dont-ask"
+            "terminal dont-ask ; clear zone lock vsan  "
+            + str(self._vsan)
+            + " ; no terminal dont-ask"
         )
         out = self.__swobj.config(cmd)
         if out:
@@ -742,7 +756,7 @@ class Zone(object):
             >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
             >>> zoneObj.create()
             >>>
-         """
+        """
 
         cmd = "zone name " + self._name + " vsan " + str(self._vsan)
         self._send_zone_cmd(cmd)
@@ -757,7 +771,7 @@ class Zone(object):
             >>> zoneObj = Zone(switch_obj,"zone_fab_a",1)
             >>> zoneObj.delete()
             >>>
-         """
+        """
 
         cmd = "no zone name " + self._name + " vsan " + str(self._vsan)
         self._send_zone_cmd(cmd)
@@ -794,7 +808,7 @@ class Zone(object):
             ... {'fcalias': 'somefcalias'}]
             >>> zoneObj.add_members(memlist)
             >>>
-         """
+        """
         self.__add_remove_members(members)
 
     def remove_members(self, members):
@@ -829,7 +843,7 @@ class Zone(object):
             ... {'fcalias': 'somefcalias'}]
             >>> zoneObj.remove_members(memlist)
             >>>
-         """
+        """
         self.__add_remove_members(members, remove=True)
 
     def __add_remove_members(self, members, remove=False):
@@ -927,8 +941,8 @@ class Zone(object):
             if self.__swobj.is_connection_type_ssh():
                 if type(out[0]) is str:
                     if (
-                            "VSAN " + str(self._vsan) + " is not configured"
-                            == out[0].strip()
+                        "VSAN " + str(self._vsan) + " is not configured"
+                        == out[0].strip()
                     ):
                         raise CLIError(cmd, out[0])
                     if "Zone not present" == out[0].strip():

@@ -1,4 +1,4 @@
-__author__ = 'Suhas Bharadwaj (subharad)'
+__author__ = "Suhas Bharadwaj (subharad)"
 
 import re
 

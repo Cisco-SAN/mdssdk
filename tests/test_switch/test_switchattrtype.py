@@ -33,8 +33,8 @@ class TestSwitchAttrType(unittest.TestCase):
         self.assertIsNotNone(snum)
         self.assertIsNotNone(pid)
         self.assertIsNotNone(sut)
-        #lbt can be none sometimes
-        #self.assertIsNotNone(lbt)
+        # lbt can be none sometimes
+        # self.assertIsNotNone(lbt)
 
     def tearDown(self) -> None:
         pass

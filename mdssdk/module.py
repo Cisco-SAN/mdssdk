@@ -1,30 +1,37 @@
 import logging
+
 import time
 
 from .nxapikeys import modulekeys
 from .utility.utils import get_key
+from .connection_manager.errors import UnsupportedSwitch
+from .constants import VALID_PIDS_MDS
 
 log = logging.getLogger(__name__)
 
 
 class Module(object):
     """
-        Switch's module class
+    Switch's module class
 
-        :example:
-            >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password )
-            >>> mod_handler = switch_obj.modules
-            >>> print(mod_handler)
-            [{1: <mdslib.module.Module object at 0x10ad710d0>}, {2: <mdslib.module.Module object at 0x10ad71190>},
-            {3: <mdslib.module.Module object at 0x10ad711d0>}, {4: <mdslib.module.Module object at 0x10ad71050>},
-            {5: <mdslib.module.Module object at 0x10abdf190>}]
+    :example:
+        >>> switch_obj = Switch(ip_address = switch_ip, username = switch_username, password = switch_password )
+        >>> mod_handler = switch_obj.modules
+        >>> print(mod_handler)
+        [{1: <mdslib.module.Module object at 0x10ad710d0>}, {2: <mdslib.module.Module object at 0x10ad71190>},
+        {3: <mdslib.module.Module object at 0x10ad711d0>}, {4: <mdslib.module.Module object at 0x10ad71050>},
+        {5: <mdslib.module.Module object at 0x10abdf190>}]
 
-        """
+    """
 
     def __init__(self, switch, mod_num, modinfo):
         self.__swobj = switch
         self.__modinfo = modinfo
         self._SW_VER = switch._SW_VER
+        if not switch.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
 
         self.__mod_num = mod_num
         if self.__swobj.is_connection_type_ssh():

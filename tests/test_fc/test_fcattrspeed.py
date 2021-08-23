@@ -62,8 +62,8 @@ class TestFcAttrSpeed(unittest.TestCase):
                     self.fc.speed = "auto"
                 else:
                     self.fc.speed = (
-                                        (int)(self.old)
-                                    ) * 1000  # read in Gbps, write in Mbps
+                        (int)(self.old)
+                    ) * 1000  # read in Gbps, write in Mbps
                 self.assertEqual(self.old, self.fc.speed)
             except CLIError as e:
                 if "port already in a port-channel, no config allowed" in str(e.msg):

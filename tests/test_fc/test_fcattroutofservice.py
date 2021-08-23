@@ -1,6 +1,7 @@
 import random
-import time
 import unittest
+
+import time
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
@@ -10,7 +11,6 @@ log = logging.getLogger(__name__)
 
 
 class TestFcAttrOutOfService(unittest.TestCase):
-
     def __init__(self, testName, sw):
         super().__init__(testName)
         self.switch = sw

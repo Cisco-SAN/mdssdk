@@ -1,4 +1,4 @@
-__author__ = 'Suhas Bharadwaj (subharad)'
+__author__ = "Suhas Bharadwaj (subharad)"
 
 import logging
 import multiprocessing
@@ -38,25 +38,25 @@ class Fabric(object):
 
     """
 
-    def __init__(
-            self,
-            ip_address,
-            username,
-            password,
-            timeout=30
-    ):
-        #log.debug("Fabric init method " + ip_address + " connection_type: " + connection_type)
+    def __init__(self, ip_address, username, password, timeout=30):
+        # log.debug("Fabric init method " + ip_address + " connection_type: " + connection_type)
         self.__ip_address = ip_address
         self.__username = username
         self.__password = password
         self.connection_type = "ssh"
-        #self.port = port
+        # self.port = port
         self.timeout = timeout
-        #self.__verify_ssl = verify_ssl
+        # self.__verify_ssl = verify_ssl
         self._switches = {}
         self._ips_to_be_discovered = [ip_address]
         self._ips_not_considered = {}
-        self.seed_switch = Switch(ip_address, username, password, connection_type=self.connection_type, timeout=timeout)
+        self.seed_switch = Switch(
+            ip_address,
+            username,
+            password,
+            connection_type=self.connection_type,
+            timeout=timeout,
+        )
 
     def discover_all_switches(self, npv_discovery=True):
         """
@@ -78,18 +78,32 @@ class Fabric(object):
             >>>
             >>>
         """
-        print("Discovering all switches in the fabric(seed ip: " + self.__ip_address + "). Please wait...")
+        print(
+            "Discovering all switches in the fabric(seed ip: "
+            + self.__ip_address
+            + "). Please wait..."
+        )
         npv = self.seed_switch.npv
         if npv:
             raise UnsupportedSeedSwitch(
-                "Cannot discover the fabric using an NPV switch, Please use an NPIV switch for discovery")
+                "Cannot discover the fabric using an NPV switch, Please use an NPIV switch for discovery"
+            )
         while self._ips_to_be_discovered.__len__() != 0:
             m = multiprocessing.Manager()
             lock = m.Lock()
             allfutures = []
             executor = ThreadPoolExecutor(len(self._ips_to_be_discovered))
             for ip in self._ips_to_be_discovered:
-                fut = executor.submit(self.__connect_to_switch, lock, ip, self.__username, self.__password,self.connection_type, self.timeout, npv_discovery)
+                fut = executor.submit(
+                    self.__connect_to_switch,
+                    lock,
+                    ip,
+                    self.__username,
+                    self.__password,
+                    self.connection_type,
+                    self.timeout,
+                    npv_discovery,
+                )
                 allfutures.append(fut)
             wait(allfutures)
             for fut in allfutures:
@@ -105,17 +119,20 @@ class Fabric(object):
                     z = self._extract_ip_from_exception_str(e)
                     if z is not None:
                         self._ips_to_be_discovered.remove(z)
-                    if 'UnsupportedSwitch' == type(e).__name__:
+                    if "UnsupportedSwitch" == type(e).__name__:
                         msg = z + ": is not an MDS switch, hence skipping it."
                         self._ips_not_considered[z] = msg
-                    elif 'NetmikoAuthenticationException' == type(e).__name__:
+                    elif "NetmikoAuthenticationException" == type(e).__name__:
                         msg = z + ": invalid username or password, hence skipping it."
                         self._ips_not_considered[z] = msg
-                    elif 'NetmikoTimeoutException' == type(e).__name__:
+                    elif "NetmikoTimeoutException" == type(e).__name__:
                         msg = z + ": unable to reach the switch, hence skipping it."
                         self._ips_not_considered[z] = msg
-                    elif 'ConnectionError' == type(e).__name__:
-                        msg = z + ": failed to establish http/https connection(check if nxapi is enabled), hence skipping it."
+                    elif "ConnectionError" == type(e).__name__:
+                        msg = (
+                            z
+                            + ": failed to establish http/https connection(check if nxapi is enabled), hence skipping it."
+                        )
                         self._ips_not_considered[z] = msg
 
             for eachip in self._switches.keys():
@@ -126,46 +143,56 @@ class Fabric(object):
                     self._ips_to_be_discovered.remove(eachip)
         if self._ips_not_considered:
             for val in self._ips_not_considered.values():
-                #print("_ips_not_considered")
+                # print("_ips_not_considered")
                 print(val)
         return self._switches
 
-    def __connect_to_switch(self, lock,
-                            ip_address,
-                            username,
-                            password,
-                            connection_type="ssh",
-                            timeout=30,
-                            discover_npv=True):
+    def __connect_to_switch(
+        self,
+        lock,
+        ip_address,
+        username,
+        password,
+        connection_type="ssh",
+        timeout=30,
+        discover_npv=True,
+    ):
 
-        switch = Switch(ip_address, username, password, connection_type=connection_type, timeout=timeout)
-        #print(ip_address)
+        switch = Switch(
+            ip_address,
+            username,
+            password,
+            connection_type=connection_type,
+            timeout=timeout,
+        )
+        # print(ip_address)
         npv = switch.npv
         if not npv:
             peerlist = switch.discover_peer_switches()
             if discover_npv:
                 peerlist = peerlist + switch.discover_peer_npv_switches()
             peerlist = list(set(peerlist))
-            #print(peerlist)
+            # print(peerlist)
         with lock:
-            #print("Discovered : " + ip_address)
-            #print(ip_address + " - " + ",".join(peerlist))
-            #print(" Before : " + ",".join(self._ips_to_be_discovered))
+            # print("Discovered : " + ip_address)
+            # print(ip_address + " - " + ",".join(peerlist))
+            # print(" Before : " + ",".join(self._ips_to_be_discovered))
             self._switches[ip_address] = switch
             self._ips_to_be_discovered.remove(ip_address)
             if not npv:
                 self._ips_to_be_discovered = self._ips_to_be_discovered + peerlist
-            #print(" After : " + ",".join(self._ips_to_be_discovered))
+            # print(" After : " + ",".join(self._ips_to_be_discovered))
 
     def _extract_ip_from_exception_str(self, e):
         # Example: Authentication failure: unable to connect cisco_nxos 10.126.95.203:22
         # Authentication failed.
         z = str(e)
-        m = re.search(r'((\d+\.){3}\d+)', z)
+        m = re.search(r"((\d+\.){3}\d+)", z)
         if m:
             found = m.group(1)
             return found
-        return 'NONE'
+        return "NONE"
+
 
 #######################################
 # ----- Placeholder for notes -----

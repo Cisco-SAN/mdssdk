@@ -67,8 +67,8 @@ class TestVsanAttrName(unittest.TestCase):
 
     def test_name_write_nonexistingvsan(self):
         self.v.name = (
-            "vsantest"
-        )  ## writing name creates vsan on switch if it doesn't exist
+            "vsantest"  ## writing name creates vsan on switch if it doesn't exist
+        )
         self.assertEqual(self.id, self.v.id)
         self.v.delete()
 

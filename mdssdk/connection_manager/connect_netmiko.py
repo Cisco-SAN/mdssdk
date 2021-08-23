@@ -1,8 +1,9 @@
 import logging
 import re
-from time import sleep
 
 from netmiko import ConnectHandler
+from time import sleep
+
 from ..constants import SSH_CONN_TIMEOUT
 
 log = logging.getLogger(__name__)
@@ -10,8 +11,8 @@ log = logging.getLogger(__name__)
 
 class SSHSession(object):
     """
-       Generic SSHSession which can be used to run commands
-       """
+    Generic SSHSession which can be used to run commands
+    """
 
     def __init__(self, host, username, password, timeout=SSH_CONN_TIMEOUT):
         """

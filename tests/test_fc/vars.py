@@ -31,7 +31,7 @@ status_values = [
     "isolated",
     "licenseNotAvail",
     "init",
-    "offline"
+    "offline",
 ]
 
 
