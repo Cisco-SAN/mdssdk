@@ -29,9 +29,9 @@ class SSHSession(object):
         }
 
         if key_file:
-            self._cisco_device["key_file"]= key_file
+            self._cisco_device["key_file"] = key_file
         else:
-            self._cisco_device["password"]= password
+            self._cisco_device["password"] = password
 
         self.anyerror = False
         self._connect()
