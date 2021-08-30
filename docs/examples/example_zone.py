@@ -1,6 +1,6 @@
 from mdssdk.switch import Switch
-from mdssdk.zone import Zone
 from mdssdk.vsan import Vsan
+from mdssdk.zone import Zone
 
 user = "yourswitchusername"
 pw = "yourswitchpassword"

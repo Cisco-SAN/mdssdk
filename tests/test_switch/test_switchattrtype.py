@@ -24,5 +24,17 @@ class TestSwitchAttrType(unittest.TestCase):
             self.switch.type = "mds"
         self.assertEqual("can't set attribute", str(e.exception))
 
+    def test_type_snum_and_others(self):
+        snum = str(self.switch.serial_num)
+        pid = str(self.switch.product_id)
+        sut = str(self.switch.system_uptime)
+        lbt = str(self.switch.last_boot_time)
+
+        self.assertIsNotNone(snum)
+        self.assertIsNotNone(pid)
+        self.assertIsNotNone(sut)
+        # lbt can be none sometimes
+        # self.assertIsNotNone(lbt)
+
     def tearDown(self) -> None:
         pass

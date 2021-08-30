@@ -1,9 +1,9 @@
-import unittest
-import random
-
-from mdssdk.fcns import Fcns
-from mdssdk.connection_manager.errors import CLIError
 import logging
+import random
+import unittest
+
+from mdssdk.connection_manager.errors import CLIError
+from mdssdk.fcns import Fcns
 
 log = logging.getLogger(__name__)
 

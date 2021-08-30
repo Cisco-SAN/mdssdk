@@ -1,4 +1,5 @@
 import unittest
+import logging
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.devicealias import DeviceAlias

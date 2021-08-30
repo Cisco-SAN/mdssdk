@@ -31,7 +31,7 @@ status_values = [
     "isolated",
     "licenseNotAvail",
     "init",
-    "offline"
+    "offline",
 ]
 
 
@@ -39,4 +39,3 @@ def get_mod_port(fcport):
     mod = fcport.split("/")[0].lstrip("fc")
     port = fcport.split("/")[1]
     return int(mod), int(port)
-

@@ -1,7 +1,8 @@
 import json
 import logging
-import time
 import unittest
+
+import time
 
 from custom_runner import MyTestLoader, TimeLoggingTestResult
 from mdssdk.switch import Switch
@@ -23,10 +24,10 @@ console.setFormatter(logFormatter)
 logging.getLogger(__name__).addHandler(console)
 
 # Add file handler, with level DEBUG
-fileHandler = logging.FileHandler("test.log", mode='w')
+fileHandler = logging.FileHandler("test.log", mode="w")
 fileHandler.setLevel(logging.DEBUG)
 fileHandler.setFormatter(logFormatter)
-logging.getLogger('mdssdk').addHandler(fileHandler)
+logging.getLogger("mdssdk").addHandler(fileHandler)
 logging.getLogger(__name__).addHandler(fileHandler)
 
 log = logging.getLogger(__name__)
@@ -36,13 +37,13 @@ log.info("Starting all tests...")
 
 def get_suite_list(sw):
     suiteList = []
-    #suiteList.append(MyTestLoader(sw).discover("test_device_alias", "test_*.py"))
-    suiteList.append(MyTestLoader(sw).discover("test_fc", "test_*.py"))
-    suiteList.append(MyTestLoader(sw).discover("test_port_channel", "test_*.py"))
-    #suiteList.append(MyTestLoader(sw).discover("test_fcns", "test_*.py"))
-    #suiteList.append(MyTestLoader(sw).discover("test_flogi", "test_*.py"))
-    suiteList.append(MyTestLoader(sw).discover("test_switch", "test_*.py"))
-    suiteList.append(MyTestLoader(sw).discover("test_vsan", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("test_device_alias", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("test_fc", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("test_port_channel", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("test_fcns", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("test_flogi", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("test_switch", "test_*.py"))
+    # suiteList.append(MyTestLoader(sw).discover("test_vsan", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_zone", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_zoneset", "test_*.py"))
     return suiteList
@@ -66,15 +67,20 @@ for conntype in ["https", "ssh"]:
             connection_type=conntype,
             port=data["port"],
             timeout=data["timeout"],
-            verify_ssl=False)
+            verify_ssl=False,
+        )
         log.info("Connection type for switch object is " + sw.connection_type)
         comboSuite = unittest.TestSuite(get_suite_list(sw))
-        unittest.TextTestRunner(verbosity=2, failfast=True, resultclass=TimeLoggingTestResult).run(comboSuite)
+        unittest.TextTestRunner(
+            verbosity=2, failfast=True, resultclass=TimeLoggingTestResult
+        ).run(comboSuite)
         time.sleep(0.01)
 
 END = time.perf_counter()
 hours, rem = divmod(END - START, 3600)
 minutes, seconds = divmod(rem, 60)
 log.info(
-    "End of Tests (Took " + ("{:0>1}h:{:0>1}m:{:02.1f}s".format(int(hours), int(minutes), seconds)) + " to complete)")
-
+    "End of Tests (Took "
+    + ("{:0>1}h:{:0>1}m:{:02.1f}s".format(int(hours), int(minutes), seconds))
+    + " to complete)"
+)

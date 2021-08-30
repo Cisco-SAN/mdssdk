@@ -59,5 +59,5 @@ class ShowTopology(object):
     def get_all_peer_ip_addrs(self):
         peer_ip_list = []
         for key, val in self._parse_data.items():
-            [peer_ip_list.append(v['peer_ip_address']) for v in val]
+            [peer_ip_list.append(v["peer_ip_address"]) for v in val]
         return list(set(peer_ip_list))

@@ -1,8 +1,8 @@
 import logging
 import re
 
-from .connection_manager.errors import InvalidProfile
 from .connection_manager.errors import CLIError
+from .connection_manager.errors import InvalidProfile
 
 log = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ class Analytics:
         """
         Sample output of this proc is as follows
 
-        sw129-Luke(config-if)# show analytics system-load 
+        sw129-Luke(config-if)# show analytics system-load
          n/a - not applicable
          ----------------------------------- Analytics System Load Info -------------------------------
          | Module | NPU Load (in %) | ITLs   ITNs   Both  |        Hosts        |       Targets       |
@@ -74,7 +74,7 @@ class Analytics:
          ----------------------------------------------------------------------------------------------
 
         As of Fri Mar  6 17:12:22 2020
-        sw129-Luke(config-if)# 
+        sw129-Luke(config-if)#
 
         [{'both_itls_itns': 15,
           'module': '1',
@@ -183,7 +183,8 @@ class Analytics:
         if where is not None:
             if type(where) is not dict:
                 raise InvalidProfile(
-                    "where clause details must be in dict format. Example where = {'port': 'fc1/1', 'vsan': '100'}")
+                    "where clause details must be in dict format. Example where = {'port': 'fc1/1', 'vsan': '100'}"
+                )
         if sort is not None:
             if type(sort) is not str:
                 raise InvalidProfile("sort can only be done on one coloumn")
@@ -208,17 +209,17 @@ class Analytics:
 
         if (metrics is None) or (len(metrics) == 0):
             selq = (
-                    "select all from fc-" + profile.get(PROTOCOL) + "." + profile.get(VIEW)
+                "select all from fc-" + profile.get(PROTOCOL) + "." + profile.get(VIEW)
             )
         else:
             allmetrics = ",".join(metrics)
             selq = (
-                    "select "
-                    + allmetrics
-                    + " from fc-"
-                    + profile.get(PROTOCOL)
-                    + "."
-                    + profile.get(VIEW)
+                "select "
+                + allmetrics
+                + " from fc-"
+                + profile.get(PROTOCOL)
+                + "."
+                + profile.get(VIEW)
             )
         return selq
 
@@ -256,12 +257,12 @@ class Analytics:
         if self._validate_profile(profile):
             selq = self._get_select_query_string(profile)
             cmd = (
-                    'analytics query "'
-                    + selq
-                    + '" name '
-                    + name
-                    + " type periodic interval "
-                    + str(interval)
+                'analytics query "'
+                + selq
+                + '" name '
+                + name
+                + " type periodic interval "
+                + str(interval)
             )
             if clear:
                 if differential:

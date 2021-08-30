@@ -2,14 +2,14 @@ import random
 import unittest
 
 from mdssdk.connection_manager.errors import CLIError
+from mdssdk.connection_manager.errors import UnsupportedFeature
 from mdssdk.fc import Fc, InvalidAnalyticsType
 from tests.test_fc.vars import *
-from mdssdk.connection_manager.errors import UnsupportedFeature
+
 log = logging.getLogger(__name__)
 
 
 class TestFcAttrAnalyticsType(unittest.TestCase):
-
     def __init__(self, testName, sw):
         super().__init__(testName)
         self.switch = sw
@@ -85,4 +85,3 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
             self.assertEqual(self.ana_before, self.switch.feature("analytics"))
         except CLIError as c:
             pass
-

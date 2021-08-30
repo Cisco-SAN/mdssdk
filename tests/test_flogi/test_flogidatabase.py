@@ -1,8 +1,8 @@
-import unittest
+import logging
 import random
+import unittest
 
 from mdssdk.flogi import Flogi
-import logging
 
 log = logging.getLogger(__name__)
 

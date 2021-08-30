@@ -1,8 +1,8 @@
-import unittest
+import logging
 import random
+import unittest
 
 from mdssdk.fcns import Fcns
-import logging
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class TestFcnsDatabase(unittest.TestCase):
             res = self.fcns_obj.database(vsan=vsan, detail=True)
             log.debug(res)
             self.assertNotEqual({}, res)
-            '''fcnsentry = fcnsdb[0]["TABLE_fcns_database"]["ROW_fcns_database"] #change
+            """fcnsentry = fcnsdb[0]["TABLE_fcns_database"]["ROW_fcns_database"] #change
             if type(fcnsentry) is dict:
                 fcnsentry = [fcnsentry]
             fcid = fcnsentry[0]["fcid"]
@@ -48,7 +48,7 @@ class TestFcnsDatabase(unittest.TestCase):
 
             res = self.fcns_obj.database(vsan=vsan, fcid=fcid, detail=True)
             log.debug(res)
-            self.assertNotEqual({}, res)'''
+            self.assertNotEqual({}, res)"""
         self.skipTest("need to fix assertion")
 
     def test_database_nonexistingentry(self):

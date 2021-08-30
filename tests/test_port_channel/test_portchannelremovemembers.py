@@ -1,5 +1,5 @@
-import unittest
 import random
+import unittest
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.fc import Fc
@@ -25,7 +25,7 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
         self.pc = PortChannel(self.switch, self.pc_id)
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if type(v) is Fc and v.status not in ['up', 'trunking']:
+            if type(v) is Fc and v.status not in ["up", "trunking"]:
                 self.fc = v
                 log.debug(k)
                 break
@@ -42,7 +42,11 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
         self.pc.create()
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if type(v) is Fc and k != self.fc.name and v.status not in ['up', 'trunking']:
+            if (
+                type(v) is Fc
+                and k != self.fc.name
+                and v.status not in ["up", "trunking"]
+            ):
                 fc2 = v
                 log.debug(k)
                 break
@@ -54,6 +58,7 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
                     "Skipping test as as port not compatible. Please rerun the test cases"
                 )
         self.pc.remove_members([self.fc])
+        # print(self.fc.name, self.pc.members)
         self.assertNotIn(self.fc.name, self.pc.members)
         self.assertIn(fc2.name, self.pc.members)
         self.pc.delete()
@@ -62,7 +67,11 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
         self.pc.create()
         while True:
             k, v = random.choice(list(self.interfaces.items()))
-            if type(v) is Fc and k != self.fc.name and v.status not in ['up', 'trunking']:
+            if (
+                type(v) is Fc
+                and k != self.fc.name
+                and v.status not in ["up", "trunking"]
+            ):
                 fc2 = v
                 log.debug(k)
                 break
@@ -74,7 +83,7 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
                     "Skipping test as as port not compatible. Please rerun the test cases"
                 )
         self.pc.remove_members([self.fc, fc2])
-        self.assertIsNone(self.pc.members)
+        self.assertEquals(self.pc.members, {})
         self.pc.delete()
 
     def test_remove_members_nonexistingpc(self):

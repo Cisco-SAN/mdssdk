@@ -1,8 +1,12 @@
 import logging
 import re
 
-from .connection_manager.errors import InvalidAnalyticsType, InvalidInterface
-from .constants import SHUTDOWN, NO_SHUTDOWN, PAT_FC
+from .connection_manager.errors import (
+    InvalidAnalyticsType,
+    InvalidInterface,
+    UnsupportedSwitch,
+)
+from .constants import SHUTDOWN, NO_SHUTDOWN, PAT_FC, VALID_PIDS_MDS
 from .interface import Interface
 from .transceiver import Transceiver
 
@@ -31,6 +35,11 @@ class Fc(Interface):
                 + str(name)
                 + " is not correct, name must be 'fc' interface. Example: 'fc1/2'.. fcobj = Fc(switch_obj,'fc1/2') "
             )
+        if not switch.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
+
         super().__init__(switch, name)
         self.__swobj = switch
         self._swobj = switch
@@ -40,9 +49,9 @@ class Fc(Interface):
         if type(value) is not bool:
             raise TypeError("Only bool value(true/false) supported.")
         cmd = (
-                "terminal dont-ask ; interface "
-                + self.name
-                + " ; out-of-service force ; no terminal dont-ask "
+            "terminal dont-ask ; interface "
+            + self.name
+            + " ; out-of-service force ; no terminal dont-ask "
         )
         if value:
             # First shutdown the port then
@@ -173,4 +182,3 @@ class Fc(Interface):
         else:
             result = out
         return result
-

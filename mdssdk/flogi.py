@@ -1,7 +1,8 @@
 import logging
 import re
 
-from .connection_manager.errors import CLIError
+from .connection_manager.errors import CLIError, UnsupportedSwitch
+from .constants import VALID_PIDS_MDS
 
 log = logging.getLogger(__name__)
 
@@ -9,11 +10,15 @@ log = logging.getLogger(__name__)
 class Flogi(object):
     def __init__(self, switch):
         self.__swobj = switch
+        if not switch.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
 
     def database(self, vsan=None, interface=None, fcid=None):
         """
         Get flogi database
-        
+
         :param vsan: id of vsan (optional parameter, defaults to None)
         :type vsan: int or None
         :param interface: interface name (optional parameter, defaults to None)
@@ -25,9 +30,9 @@ class Flogi(object):
         :example:
             >>> flogi_obj = Flogi(switch_obj)
             >>> print(flogi_obj.database())
-             [{'interface': 'fc1/17', 'vsan': 1, 'fcid': '0x2c0020', 'port_name': '10:00:54:7f:ee:eb:2c:25', 'node_name': '20:05:00:11:0d:fd:5f:00'}, 
+             [{'interface': 'fc1/17', 'vsan': 1, 'fcid': '0x2c0020', 'port_name': '10:00:54:7f:ee:eb:2c:25', 'node_name': '20:05:00:11:0d:fd:5f:00'},
              {'interface': 'fc1/17', 'vsan': 1, 'fcid': '0x2c0021', 'port_name': '10:00:54:7f:ee:eb:2d:25', 'node_name': '20:05:00:11:0d:fd:5f:00'},
-             {'interface': 'sup-fc0', 'vsan': 13, 'fcid': '0x220000', 'port_name': '10:00:00:de:fb:b1:86:a1', 'node_name': '20:00:00:de:fb:b1:86:a0'}, 
+             {'interface': 'sup-fc0', 'vsan': 13, 'fcid': '0x220000', 'port_name': '10:00:00:de:fb:b1:86:a1', 'node_name': '20:00:00:de:fb:b1:86:a0'},
              {'interface': 'sup-fc0', 'vsan': 14, 'fcid': '0x200000', 'port_name': '10:00:00:de:fb:b1:86:a1', 'node_name': '20:00:00:de:fb:b1:86:a0'}]
             >>>
 
@@ -107,7 +112,7 @@ class Flogi(object):
             >>>
 
         :setter:
-        :param value: True/False to enable/disable flogi scale enhancements 
+        :param value: True/False to enable/disable flogi scale enhancements
         :type value: bool
 
         :example:

@@ -1,6 +1,5 @@
 import unittest
 
-from mdssdk.connection_manager.errors import CLIError
 from mdssdk.vsan import Vsan
 from mdssdk.zone import Zone
 from mdssdk.zoneset import ZoneSet
@@ -36,7 +35,9 @@ class TestZoneSetAttrActiveMembers(unittest.TestCase):
         self.z.add_members(members)
         self.z.activate(True)
         if self.z.is_active():
-            self.assertEqual([m.name for m in members], list(self.z.active_members.keys()))
+            self.assertEqual(
+                [m.name for m in members], list(self.z.active_members.keys())
+            )
 
     def test_active_members_read_nonexisting(self):
         self.skipTest("not a correct test case Needs to be fixed")

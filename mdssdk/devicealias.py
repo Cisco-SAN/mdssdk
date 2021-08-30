@@ -1,8 +1,9 @@
 import logging
+
 import time
 
-from .connection_manager.errors import CLIError, InvalidMode
-from .constants import ENHANCED, BASIC
+from .connection_manager.errors import CLIError, InvalidMode, UnsupportedSwitch
+from .constants import ENHANCED, BASIC, VALID_PIDS_MDS
 from .nxapikeys import devicealiaskeys
 from .parsers.device_alias import ShowDeviceAliasDatabase, ShowDeviceAliasStatus
 from .utility.utils import get_key
@@ -25,6 +26,10 @@ class DeviceAlias(object):
     def __init__(self, switch):
         self.__swobj = switch
         self._SW_VER = switch._SW_VER
+        if not switch.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
 
     @property
     def mode(self):
@@ -215,7 +220,7 @@ class DeviceAlias(object):
             >>> da = DeviceAlias(switch = switch_obj)
             >>> da.create({'device1': '21:00:00:0e:1e:30:34:a5','device2': '21:00:00:0e:1e:30:3c:c5'})
             >>>
-         """
+        """
 
         for name, pwwn in namepwwn.items():
             log.debug("Creating device alias with name:pwwn  " + name + " : " + pwwn)
@@ -364,8 +369,8 @@ class DeviceAlias(object):
                 msg = c.message
             if msg is not None:
                 if (
-                        "The following device-alias changes are about to be committed"
-                        in msg
+                    "The following device-alias changes are about to be committed"
+                    in msg
                 ):
                     pass
                 elif "There are no pending changes" in msg:

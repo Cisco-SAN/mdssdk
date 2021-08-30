@@ -1,10 +1,9 @@
 import logging
 import re
 
-from .constants import PAT_PC, PAT_FC
+from .connection_manager.errors import CLIError, UnsupportedSwitch
+from .constants import PAT_PC, PAT_FC, VALID_PIDS_MDS
 from .nxapikeys import interfacekeys
-from .connection_manager.errors import CLIError
-
 from .parsers.interface import (
     ShowInterfaceBrief,
     ShowInterfaceDescription,
@@ -34,6 +33,10 @@ class Interface(object):
         self._name = name
         self._SW_VER = switch._SW_VER
         self._swobj = switch
+        if not switch.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
 
     # Interface is the base class for Fc and PortChannel.
     # So you cannot instantiate the base class(Interface), you have to instantiate the derived/child class (Fc,PortChannel)
@@ -273,11 +276,11 @@ class Interface(object):
     @status.setter
     def status(self, value):
         cmd = (
-                "terminal dont-ask ; interface "
-                + self._name
-                + " ; "
-                + value
-                + " ; no terminal dont-ask "
+            "terminal dont-ask ; interface "
+            + self._name
+            + " ; "
+            + value
+            + " ; no terminal dont-ask "
         )
         out = self.__swobj.config(cmd)
 
@@ -302,8 +305,8 @@ class Interface(object):
             out = out["TABLE_interface_brief_fc"]["ROW_interface_brief_fc"]
             for eachout in out:
                 if (
-                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
-                        == self._name
+                    eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                    == self._name
                 ):
                     return eachout
         elif pcmatch:
@@ -318,8 +321,8 @@ class Interface(object):
                 outlist = out
             for eachout in outlist:
                 if (
-                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
-                        == self._name
+                    eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                    == self._name
                 ):
                     return eachout
         return None
@@ -337,7 +340,10 @@ class Interface(object):
             if type(out) is dict:
                 out = [out]
             for eachout in out:
-                if (eachout[get_key(interfacekeys._INTERFACE, self._SW_VER)] == self._name):
+                if (
+                    eachout[get_key(interfacekeys._INTERFACE, self._SW_VER)]
+                    == self._name
+                ):
                     return eachout
         elif pcmatch:
             # Need to check if "sh int brief" has PC info
@@ -351,8 +357,8 @@ class Interface(object):
                 outlist = out
             for eachout in outlist:
                 if (
-                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
-                        == self._name
+                    eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                    == self._name
                 ):
                     return eachout
         return None
@@ -392,7 +398,7 @@ class Interface(object):
         def clear(self):
             """
             Clear the counters on the interface
-            
+
             :return: None
             :example:
                 >>>
@@ -552,5 +558,3 @@ class Interface(object):
             if total is not None:
                 return total.get("ROW_others", None)
             return None
-
-

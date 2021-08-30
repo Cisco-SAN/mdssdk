@@ -1,8 +1,8 @@
 import os
+import pathlib
 import re
 
 from setuptools import setup, find_packages
-import pathlib
 
 p = str(pathlib.Path(__file__).parent.absolute())
 

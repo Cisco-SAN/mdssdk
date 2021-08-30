@@ -1,0 +1,11 @@
+Value NAME (.*)
+Value DESC (.*)
+Value PRODUCTID (\S+)
+Value VENDORID (\S+)
+Value SERIALNUM (\S+)
+
+Start
+  ^NAME\:\s+\"${NAME}\".*DESCR\:\s+\"${DESC}\".*
+  ^PID\:\s+${PRODUCTID}.*VID\:\s+${VENDORID}.*SN\:\s+${SERIALNUM}.* -> Record
+
+EOF

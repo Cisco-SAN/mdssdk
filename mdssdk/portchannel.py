@@ -6,8 +6,9 @@ from .connection_manager.errors import (
     InvalidPortChannelRange,
     InvalidChannelMode,
     CLIError,
+    UnsupportedSwitch,
 )
-from .constants import ON, ACTIVE, PAT_FC, PAT_PC, VALID_PC_RANGE
+from .constants import ON, ACTIVE, PAT_FC, PAT_PC, VALID_PC_RANGE, VALID_PIDS_MDS
 from .fc import Fc
 from .interface import Interface
 from .nxapikeys import portchanelkeys
@@ -42,6 +43,11 @@ class PortChannel(Interface):
                 + " to "
                 + str(VALID_PC_RANGE[-1])
             )
+        if not switch.product_id.startswith(VALID_PIDS_MDS):
+            raise UnsupportedSwitch(
+                "Unsupported Switch. Current support of this class is only for MDS only switches."
+            )
+
         self._id = id
         name = "port-channel" + str(self._id)
 
@@ -149,12 +155,12 @@ class PortChannel(Interface):
         """
         Get the members of the port-channel
 
-        :return: members of the port-channel in dictionary format, None if port-channel is not present or port-channel has no members
+        :return: members of the port-channel in dictionary format
         :rtype: dict(name: obj(Fc))
         """
 
         if not self.__is_pc_present():
-            return None
+            return {}
         if self.__swobj.is_connection_type_ssh():
             outlines = self.__swobj.show(
                 "show port-channel database detail interface port-channel "
@@ -163,7 +169,7 @@ class PortChannel(Interface):
             shpc = ShowPortChannelDatabaseDetail(outlines)
             memdetail = shpc.members
             if memdetail is None:
-                return None
+                return {}
             else:
                 allintnames = []
                 for eachmem in memdetail:
@@ -172,7 +178,7 @@ class PortChannel(Interface):
             detailout = self.__get_pc_facts()
             memdetail = detailout.get("TABLE_port_channel_member_detail", None)
             if memdetail is None:
-                return None
+                return {}
             else:
                 allintnames = []
                 allmem = memdetail["ROW_port_channel_member_detail"]
@@ -229,10 +235,10 @@ class PortChannel(Interface):
                 self.__swobj.config(cmd)
             except CLIError as c:
                 if (
-                        not "port-channel "
-                            + str(self._id)
-                            + " deleted and all its members disabled"
-                            in c.message
+                    not "port-channel "
+                    + str(self._id)
+                    + " deleted and all its members disabled"
+                    in c.message
                 ):
                     raise CLIError(cmd, c.message)
 
@@ -262,21 +268,21 @@ class PortChannel(Interface):
             )
         for eachint in interfaces:
             cmd = (
-                    "interface "
-                    + eachint.name
-                    + " ; channel-group "
-                    + str(self._id)
-                    + " force "
+                "interface "
+                + eachint.name
+                + " ; channel-group "
+                + str(self._id)
+                + " force "
             )
             try:
                 out = self.__swobj.config(cmd)
             except CLIError as c:
                 if (
-                        str(eachint.name)
-                        + " added to port-channel "
-                        + str(self._id)
-                        + " and disabled"
-                        in c.message
+                    str(eachint.name)
+                    + " added to port-channel "
+                    + str(self._id)
+                    + " and disabled"
+                    in c.message
                 ):
                     continue
                 raise CLIError(cmd, c.message)
@@ -347,4 +353,3 @@ class PortChannel(Interface):
         else:
             # There are no PC in the switch
             return False
-

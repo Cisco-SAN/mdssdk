@@ -1,29 +1,43 @@
 import logging
 import re
-from time import sleep
-from ..constants import SSH_CONN_TIMEOUT
+import sys
+
 from netmiko import ConnectHandler
+from time import sleep
+
+from ..constants import SSH_CONN_TIMEOUT
 
 log = logging.getLogger(__name__)
 
 
 class SSHSession(object):
     """
-       Generic SSHSession which can be used to run commands
-       """
+    Generic SSHSession which can be used to run commands
+    """
 
-    def __init__(self, host, username, password, timeout=SSH_CONN_TIMEOUT):
+    def __init__(self, host, username, password, key_file, timeout=SSH_CONN_TIMEOUT):
         """
         Establish SSH Connection using given hostname, username and
         password which can be used to run commands.
         """
         self._host = host
         self.timeout = timeout
+
+        if password is None and key_file is None:
+            msg = "ERROR!! One of either password or key_file needs to be passed for SSH connection, both cant be None"
+            log.error(msg)
+            sys.exit(msg)
+        if password is not None and key_file is not None:
+            msg = "ERROR!! One of either password or key_file needs to be passed for SSH connection, not both"
+            log.error(msg)
+            sys.exit(msg)
+
         self._cisco_device = {
             "device_type": "cisco_nxos",
             "host": self._host,
             "username": username,
             "password": password,
+            "key_file": key_file,
             "timeout": self.timeout,
         }
         self.anyerror = False
@@ -66,9 +80,11 @@ class SSHSession(object):
             eachline = eachline.strip()
             eachline = eachline.replace("at '^' marker.", "")
             eachline = eachline.replace("^", "")
-            if "Invalid command" in eachline:
+            if "Invalid command".lower() in eachline.lower():
                 return True
-            if "Invalid range" in eachline:
+            if "Invalid range".lower() in eachline.lower():
+                return True
+            if "No such file or directory".lower() in eachline.lower():
                 return True
         return False
 
@@ -76,7 +92,7 @@ class SSHSession(object):
         if timeout is None:
             df = 1
         else:
-            df = int(timeout / 100)  # 100 beacause thats the timeout netmiko uses
+            df = int(timeout / 100)  # 100 because that's the timeout netmiko uses
             log.debug("Delay factor is " + str(df))
         output = self._connection.send_command(
             cmd,

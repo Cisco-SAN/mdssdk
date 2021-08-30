@@ -1,5 +1,5 @@
-import unittest
 import random
+import unittest
 
 from mdssdk.fc import Fc
 from tests.test_fc.vars import *
@@ -25,7 +25,9 @@ class TestFcAttrTransceiver(unittest.TestCase):
                     break
 
     def test_transceiver_read(self):
-        self.assertIsNotNone(self.fc.transceiver, "fc.transceiver did not get transceiver objects")
+        self.assertIsNotNone(
+            self.fc.transceiver, "fc.transceiver did not get transceiver objects"
+        )
         dir_trans = [x for x in dir(self.fc.transceiver) if not x.startswith("_")]
         log.debug(str(self.fc.name) + " transceiver : ")
         for t in dir_trans:
@@ -39,4 +41,3 @@ class TestFcAttrTransceiver(unittest.TestCase):
 
     def tearDown(self) -> None:
         pass
-

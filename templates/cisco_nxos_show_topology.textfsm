@@ -1,0 +1,12 @@
+Value Filldown VSAN (\d+)
+Value INTERFACE (\S+)
+Value PEER_DOMAIN (0x\S+)
+Value PEER_INTERFACE (\S+)
+Value PEER_IP_ADDRESS (\d+\.\d+\.\d+\.\d+)
+Value PEER_SWITCH_NAME (\S+)
+
+Start
+  ^FC Topology for VSAN\s+${VSAN}
+  ^\s+${INTERFACE}\s+${PEER_DOMAIN}\s+${PEER_INTERFACE}\s+${PEER_IP_ADDRESS}(\(${PEER_SWITCH_NAME}\))? -> Record
+
+EOF

@@ -1,7 +1,7 @@
 import unittest
 
 from mdssdk.vsan import Vsan
-from mdssdk.zoneset import ZoneSet, CLIError
+from mdssdk.zoneset import ZoneSet
 from tests.test_zoneset.vars import *
 
 log = logging.getLogger(__name__)

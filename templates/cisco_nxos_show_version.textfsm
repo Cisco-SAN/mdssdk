@@ -3,11 +3,21 @@ Value KICKSTART_IMAGE (\S+)
 Value SYSTEM_IMAGE (\S+)
 Value FORM_FACTOR (.*)
 Value TYPE (\S+)
-Value MODEL (MDS\s+.*Chassis)
+# Kernel uptime is 0 day(s), 5 hour(s), 55 minute(s), 5 second(s)
+Value UPTIME_DAYS (\d+)
+Value UPTIME_HOURS (\d+)
+Value UPTIME_MINS (\d+)
+Value UPTIME_SECS (\d+)
+# Last reset at 512666 usecs after  Tue Jun 22 22:32:25 2021
+Value LAST_RESET_USECS (\d+)
+Value LAST_RESET_TIME (.*)
 
 Start
   ^\s+system:\s+version\s+${VERSION}
+  ^\s+NXOS:\s+version\s+${VERSION}
   ^\s+kickstart image file is:\s+${KICKSTART_IMAGE}
   ^\s+system image file is:\s+${SYSTEM_IMAGE}
+  ^\s+NXOS image file is:\s+${SYSTEM_IMAGE}
   ^\s+cisco\s+MDS\s+${TYPE}.*\(${FORM_FACTOR}\).*Chassis -> Continue
-  ^\s+cisco\s+${MODEL}\s+.* -> Record
+  ^Kernel uptime is\s+${UPTIME_DAYS}\s+day.*${UPTIME_HOURS}\s+hour.*${UPTIME_MINS}\s+minute.*${UPTIME_SECS}\s+second.*
+  ^Last reset at\s+${LAST_RESET_USECS}\s+usecs after\s+${LAST_RESET_TIME}.*
