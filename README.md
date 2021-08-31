@@ -6,6 +6,7 @@ This library will be useful for automating day to day tasks or developing new to
 
 * Python version: 3.6 and above
 * Supports both NXAPI and SSH
+* Limited support for N9K and FI 
 * Apache License, Version 2.0 (the "License")
 
 ## Installation Steps
@@ -43,7 +44,7 @@ This library will be useful for automating day to day tasks or developing new to
         ---------- ----------
         .
         . 
-        mdssdk     1.0.1       <---
+        mdssdk     1.3.0       <---
         .
         .
 

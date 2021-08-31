@@ -22,7 +22,7 @@ import mdssdk
 # -- Project information -----------------------------------------------------
 
 project = "mdssdk"
-copyright = "2020 by Cisco Systems, Inc.* All rights reserved"
+copyright = "2021 by Cisco Systems, Inc.* All rights reserved"
 author = "Suhas Bharadwaj"
 
 # readthedocs start point
