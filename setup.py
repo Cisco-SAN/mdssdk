@@ -3,11 +3,11 @@ import re
 
 from setuptools import setup, find_packages
 
-with open("requirements.txt") as rf:
-    requirements = rf.readlines()
-
 with open("README.md") as readme_file:
     readme = readme_file.read()
+
+with open("requirements.txt") as rf:
+    requirements = rf.readlines()
 
 with open("HISTORY.rst") as history_file:
     history = history_file.read().replace(".. :changelog:", "")
