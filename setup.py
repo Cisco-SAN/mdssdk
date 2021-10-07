@@ -1,5 +1,4 @@
 import os
-import pathlib
 import re
 
 from setuptools import setup, find_packages
@@ -34,7 +33,7 @@ def find_version(*file_paths):
 
 setup(
     name="mdssdk",
-    version=find_version(p, "mdssdk", "__init__.py"),
+    version=find_version("mdssdk", "__init__.py"),
     description="Python SDK for Cisco MDS Switches",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/markdown",
