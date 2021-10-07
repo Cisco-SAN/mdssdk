@@ -1,6 +1,8 @@
 # Python SDK/API library for Cisco MDS Switches.
 
 ![Python](https://img.shields.io/badge/python-v3.6+-blue.svg)
+[![](https://img.shields.io/pypi/v/mdssdk.svg)](https://pypi.python.org/pypi/mdssdk)
+[![Documentation Status](https://readthedocs.org/projects/mdssdk/badge/?version=latest)](http://mdssdk.readthedocs.io/en/latest/?badge=latest)
 
 This library will be useful for automating day to day tasks or developing new tools which involve Cisco MDS switches
 
@@ -11,24 +13,25 @@ This library will be useful for automating day to day tasks or developing new to
 
 ## Installation Steps
 
-1) First create a virtual environment with python3
+### From pip:
 
-       virtualenv testmdssdk -p python3
+Installs the last released version,
 
-2) Activate the virtual env
+```
+    pip install mdssdk
+```
 
-       cd testmdssdk/
-       source bin/activate
-
-3) Next download the zip file from the github
+### From github:
+   
+1) Download the zip file from the github
 
        wget https://github.com/Cisco-SAN/mdssdk/archive/master.zip
 
-4) Unzip the file
+2) Unzip the file
 
        unzip master.zip 
 
-5) Execute `source install.sh`
+3) Execute `source install.sh`
 
        cd mdssdk-master/
        source install.sh
@@ -37,14 +40,14 @@ This library will be useful for automating day to day tasks or developing new to
        or 
        . ./install.sh
 
-6) Once successfully done issue `pip list` and you should see mdssdk package installed
+4) Once successfully done issue `pip list` and you should see mdssdk package installed
 
         >>> pip list
         Package    Version   
         ---------- ----------
         .
         . 
-        mdssdk     1.3.0       <---
+        mdssdk     1.3.1       <---
         .
         .
 
@@ -62,7 +65,7 @@ To uninstall mdssdk,
 
 |**NXOS Version**|**SDK Version** |
 | :------: | :------:  |
-| 9.2(1) and below | v1.3.0 |
+| 9.2(1) and below | v1.3.1 |
 | 8.5(1) and below | v1.2.0 |
 | 8.4(2b) and below | v1.1.0 |
 | 8.4(2a) and below | v1.0.1 |

@@ -146,16 +146,16 @@ class Fc(Interface):
         if type is None:
             cmd = "no analytics type fc-all"
         elif type == "scsi":
-            cmd = "no analytics type fc-all ; analytics type fc-scsi"
+            cmd = "analytics type fc-scsi"
         elif type == "nvme":
-            cmd = "no analytics type fc-all ; analytics type fc-nvme"
+            cmd = "analytics type fc-nvme"
         elif type == "all":
             cmd = "analytics type fc-all"
         else:
             raise InvalidAnalyticsType(
-                "Invalid analytics type '"
+                "Invalid analytics type:('"
                 + type
-                + "'. Valid types are scsi,nvme,all,None(to disable analytics type)"
+                + ")'. Valid types are scsi,nvme,all,None(to disable any analytics type)"
             )
 
         cmdtosend = "interface " + self.name + " ; " + cmd

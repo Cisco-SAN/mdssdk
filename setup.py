@@ -37,7 +37,7 @@ def find_version(*file_paths):
 setup(
     name="mdssdk",
     version=find_version(p, "mdssdk", "__init__.py"),
-    description="Generic Python SDK/API library for Cisco MDS Switches",
+    description="Python SDK for Cisco MDS Switches",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/markdown",
     author="Cisco Systems, Inc.",

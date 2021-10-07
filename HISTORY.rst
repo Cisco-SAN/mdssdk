@@ -4,6 +4,12 @@
 History
 =======
 
+v1.3.1 (2021-8-23)
+---------------------
+
+* Fix analytics setter api
+* added setup.cfg for pypi
+
 v1.3.0 (2021-8-23)
 ---------------------
 
