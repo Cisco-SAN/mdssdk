@@ -4,15 +4,13 @@ import re
 
 from setuptools import setup, find_packages
 
-p = str(pathlib.Path(__file__).parent.absolute())
-
-with open(p + "/requirements.txt") as rf:
+with open("requirements.txt") as rf:
     requirements = rf.readlines()
 
-with open(p + "/README.md") as readme_file:
+with open("README.md") as readme_file:
     readme = readme_file.read()
 
-with open(p + "/HISTORY.rst") as history_file:
+with open("HISTORY.rst") as history_file:
     history = history_file.read().replace(".. :changelog:", "")
 
 

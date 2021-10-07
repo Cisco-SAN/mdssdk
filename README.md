@@ -16,40 +16,16 @@ This library will be useful for automating day to day tasks or developing new to
 ### From pip:
 
 Installs the last released version,
-
 ```
     pip install mdssdk
 ```
 
 ### From github:
-   
-1) Download the zip file from the github
-
-       wget https://github.com/Cisco-SAN/mdssdk/archive/master.zip
-
-2) Unzip the file
-
-       unzip master.zip 
-
-3) Execute `source install.sh`
-
-       cd mdssdk-master/
-       source install.sh
-       or
-       source ./install.sh
-       or 
-       . ./install.sh
-
-4) Once successfully done issue `pip list` and you should see mdssdk package installed
-
-        >>> pip list
-        Package    Version   
-        ---------- ----------
-        .
-        . 
-        mdssdk     1.3.1       <---
-        .
-        .
+```
+   git clone https://github.com/Cisco-SAN/mdssdk.git
+   cd mdssdk
+   source install.sh
+```
 
 ## Uninstallation Steps
 
