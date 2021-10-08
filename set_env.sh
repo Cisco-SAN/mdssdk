@@ -1,7 +1,6 @@
 #!/bin/bash
-DIR="$HOME"
 unset NET_TEXTFSM
-export NET_TEXTFSM=$DIR/mdssdk-templates/
+export NET_TEXTFSM=$HOME/mdssdk-templates/
 echo ""
 echo "PLEASE NOTE:"
 echo "- 'mdssdk' requires NET_TEXTFSM environment variable to be set"

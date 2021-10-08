@@ -45,7 +45,7 @@ class PostInstallCommand(install):
         SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
         print("in PostInstall with " + SDK_TEMPLATE_PATH)
         self.copytree("templates/", SDK_TEMPLATE_PATH)
-        subprocess.call(["source","set_env.sh"])
+        self.shell_source("set_env.sh")
 
     # From : https://stackoverflow.com/a/22331852
     def copytree(self, src, dst, symlinks=False, ignore=None):
@@ -74,6 +74,15 @@ class PostInstallCommand(install):
             else:
                 shutil.copy2(s, d)
 
+    # From : https://stackoverflow.com/a/12708396
+    def shell_source(self,script):
+        """Sometime you want to emulate the action of "source" in bash,
+        settings some environment variables. Here is a way to do it."""
+        import subprocess, os
+        pipe = subprocess.Popen(". %s; env" % script, stdout=subprocess.PIPE, shell=True)
+        output = pipe.communicate()[0]
+        env = dict((line.split("=", 1) for line in output.splitlines()))
+        os.environ.update(env)
 
 setup(
     name="mdssdk",
