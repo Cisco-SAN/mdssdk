@@ -1,5 +1,5 @@
 #!/bin/bash
-DIR="echo $HOME"
+DIR="$HOME"
 unset NET_TEXTFSM
 export NET_TEXTFSM=$DIR/mdssdk-templates/
 echo ""
