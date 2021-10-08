@@ -1,7 +1,10 @@
 import os
 import re
+import shutil
+import stat
 
 from setuptools import setup, find_packages
+from setuptools.command.install import install
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -11,6 +14,8 @@ with open("requirements.txt") as rf:
 
 with open("HISTORY.rst") as history_file:
     history = history_file.read().replace(".. :changelog:", "")
+
+SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
 
 
 def find_version(*file_paths):
@@ -29,6 +34,44 @@ def find_version(*file_paths):
     if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
+
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+
+    def run(self):
+        install.run(self)
+        # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
+        self.copytree("templates/", SDK_TEMPLATE_PATH)
+        os.environ["NET_TEXTFSM"] = SDK_TEMPLATE_PATH
+
+    # From : https://stackoverflow.com/a/22331852
+    #
+    def copytree(self, src, dst, symlinks=False, ignore=None):
+        if not os.path.exists(dst):
+            os.makedirs(dst)
+            shutil.copystat(src, dst)
+        lst = os.listdir(src)
+        if ignore:
+            excl = ignore(src, lst)
+            lst = [x for x in lst if x not in excl]
+        for item in lst:
+            s = os.path.join(src, item)
+            d = os.path.join(dst, item)
+            if symlinks and os.path.islink(s):
+                if os.path.lexists(d):
+                    os.remove(d)
+                os.symlink(os.readlink(s), d)
+                try:
+                    st = os.lstat(s)
+                    mode = stat.S_IMODE(st.st_mode)
+                    os.lchmod(d, mode)
+                except:
+                    pass  # lchmod not available
+            elif os.path.isdir(s):
+                self.copytree(s, d, symlinks, ignore)
+            else:
+                shutil.copy2(s, d)
 
 
 setup(
