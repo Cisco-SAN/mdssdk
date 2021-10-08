@@ -41,9 +41,9 @@ class PostInstallCommand(install):
         # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
         SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
         self.copytree("templates/", SDK_TEMPLATE_PATH)
-        os.environ["NET_TEXTFSM"] = SDK_TEMPLATE_PATH
         exportcmd = "export NET_TEXTFSM=" + SDK_TEMPLATE_PATH
         os.system(exportcmd)
+        print("in PostInstall with {}".exportcmd)
         print("\nPLEASE NOTE: \n"
               "- 'mdssdk' requires NET_TEXTFSM environment variable to be set\n"
               "- This variable points to the directory where the textfsm templates are copied to\n"
