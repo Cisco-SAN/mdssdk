@@ -2,10 +2,6 @@ import os
 import re
 import shutil
 import stat
-import shlex
-import subprocess
-from subprocess import Popen, PIPE
-from os import environ
 
 from setuptools import setup, find_packages
 from setuptools.command.install import install
@@ -46,6 +42,14 @@ class PostInstallCommand(install):
         print("in PostInstall with " + SDK_TEMPLATE_PATH)
         self.copytree("templates/", SDK_TEMPLATE_PATH)
 
+        print("PLEASE NOTE:")
+        print("- 'mdssdk' requires NET_TEXTFSM environment variable to be set")
+        print("- This variable points to the directory where the textfsm templates are copied to")
+        print("- Please execute the below command")
+        print("      export NET_TEXTFSM=$HOME/mdssdk-templates/")
+        print("- It is recommended that you add this env permanently into your .bashrc file")
+        print("")
+
     # From : https://stackoverflow.com/a/22331852
     def copytree(self, src, dst, symlinks=False, ignore=None):
         if not os.path.exists(dst):
@@ -72,14 +76,6 @@ class PostInstallCommand(install):
                 self.copytree(s, d, symlinks, ignore)
             else:
                 shutil.copy2(s, d)
-
-    print("PLEASE NOTE:")
-    print("- 'mdssdk' requires NET_TEXTFSM environment variable to be set")
-    print("- This variable points to the directory where the textfsm templates are copied to")
-    print("- Please execute the below command")
-    print("      export NET_TEXTFSM=$DIR/mdssdk-templates/")
-    print("- It is recommended that you add this env permanently into your .bashrc file")
-    print("")
 
 setup(
     name="mdssdk",
