@@ -3,7 +3,7 @@ include HISTORY.rst
 include LICENSE
 include README.md
 include requirements.txt
-
+include install.sh
 
 recursive-include tests *
 recursive-include templates *
