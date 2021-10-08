@@ -33,6 +33,32 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
+# From : https://stackoverflow.com/a/22331852
+def copytree(src, dst, symlinks=False, ignore=None):
+        if not os.path.exists(dst):
+            os.makedirs(dst)
+            shutil.copystat(src, dst)
+        lst = os.listdir(src)
+        if ignore:
+            excl = ignore(src, lst)
+            lst = [x for x in lst if x not in excl]
+        for item in lst:
+            s = os.path.join(src, item)
+            d = os.path.join(dst, item)
+            if symlinks and os.path.islink(s):
+                if os.path.lexists(d):
+                    os.remove(d)
+                os.symlink(os.readlink(s), d)
+                try:
+                    st = os.lstat(s)
+                    mode = stat.S_IMODE(st.st_mode)
+                    os.lchmod(d, mode)
+                except:
+                    pass  # lchmod not available
+            elif os.path.isdir(s):
+                copytree(s, d, symlinks, ignore)
+            else:
+                shutil.copy2(s, d)
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
@@ -90,6 +116,7 @@ setup(
     url="https://github.com/Cisco-SAN/mdslib",
     license="http://www.apache.org/licenses/LICENSE-2.0",
     install_requires=requirements,
+    #setup_requires=requirements,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -98,7 +125,10 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-    cmdclass={
-        "install": PostInstallCommand,
-    },
+    #cmdclass={
+    #    "install": PostInstallCommand,
+    #},
 )
+SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
+print("in PostInstall with " + SDK_TEMPLATE_PATH)
+copytree("templates/", SDK_TEMPLATE_PATH)
