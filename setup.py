@@ -43,7 +43,7 @@ class PostInstallCommand(install):
         SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
         print("in PostInstall with " + SDK_TEMPLATE_PATH)
         self.copytree("templates/", SDK_TEMPLATE_PATH)
-        subprocess.call(["source install.sh"])
+        subprocess.call(["./set_env.sh"])
 
     # From : https://stackoverflow.com/a/22331852
     def copytree(self, src, dst, symlinks=False, ignore=None):
