@@ -10,6 +10,7 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 with open("requirements.txt") as rf:
+    print("in requirements.txt with")
     requirements = rf.readlines()
 
 with open("HISTORY.rst") as history_file:
