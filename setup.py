@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import stat
+import subprocess
 
 from setuptools import setup, find_packages
 from setuptools.command.install import install
@@ -40,20 +41,9 @@ class PostInstallCommand(install):
         install.run(self)
         # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
         SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
-        print("in PostInstall with {}".SDK_TEMPLATE_PATH)
+        print("in PostInstall with " + SDK_TEMPLATE_PATH)
         self.copytree("templates/", SDK_TEMPLATE_PATH)
-        exportcmd = "export NET_TEXTFSM=" + SDK_TEMPLATE_PATH
-        os.system(exportcmd)
-        print("in PostInstall with {}".exportcmd)
-
-        print("\nPLEASE NOTE: \n"
-              "- 'mdssdk' requires NET_TEXTFSM environment variable to be set\n"
-              "- This variable points to the directory where the textfsm templates are copied to\n"
-              "- Currently the templates are copied to - " + SDK_TEMPLATE_PATH + "\n"
-              "- This variable is automatically set when you install 'mdssdk'\n"
-              "- Its recommended that you add this env permanently into your .bashrc file\n"
-              "- This can be done by adding the below line to your .bashrc file\n"
-              + exportcmd + "\n")
+        subprocess.call(["source install.sh"])
 
     # From : https://stackoverflow.com/a/22331852
     def copytree(self, src, dst, symlinks=False, ignore=None):
