@@ -38,47 +38,14 @@ def find_version(*file_paths):
 
 
 class PostInstallCommand(install):
-    def source(self,script, update=True, clean=True):
-        """
-        Source variables from a shell script
-        import them in the environment (if update==True)
-        and report only the script variables (if clean==True)
-        """
-
-        global environ
-        if clean:
-            environ_back = dict(environ)
-            environ.clear()
-
-        pipe = Popen(". %s; env" % script, stdout=PIPE, shell=True)
-        data = pipe.communicate()[0]
-
-        env = dict((line.split("=", 1) for line in data.splitlines()))
-
-        if clean:
-            # remove unwanted minimal vars
-            env.pop('LINES', None)
-            env.pop('COLUMNS', None)
-            environ = dict(environ_back)
-
-        if update:
-            environ.update(env)
-
-        return env
-
     """Post-installation for installation mode."""
-
     def run(self):
         install.run(self)
         # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
         SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
         print("in PostInstall with " + SDK_TEMPLATE_PATH)
         self.copytree("templates/", SDK_TEMPLATE_PATH)
-        z = self.source("set_env.sh")
-        print(z)
-
-
-
+        subprocess.call(["source","set_env.sh"])
 
     # From : https://stackoverflow.com/a/22331852
     def copytree(self, src, dst, symlinks=False, ignore=None):
