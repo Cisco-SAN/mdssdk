@@ -27,6 +27,12 @@ unset NET_TEXTFSM
 #echo $(pwd)
 export NET_TEXTFSM=$DIR/templates/
 echo ""
-echo "NOTE: You could add the below to your env permanently if needed"
+echo "PLEASE NOTE:"
+echo "- 'mdssdk' requires NET_TEXTFSM environment variable to be set"
+echo "- This variable points to the directory where the textfsm templates are copied to"
+echo "- Currently the templates are copied to - $DIR/templates/"
+echo "- This variable is automatically set when you install 'mdssdk'"
+echo "- Its recommended that you add this env permanently into your .bashrc file"
+echo "- This can be done by adding the below line to your .bashrc file"
 echo "      export NET_TEXTFSM=$DIR/templates/"
 echo ""

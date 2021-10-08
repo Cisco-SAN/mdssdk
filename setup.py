@@ -15,9 +15,6 @@ with open("requirements.txt") as rf:
 with open("HISTORY.rst") as history_file:
     history = history_file.read().replace(".. :changelog:", "")
 
-SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
-
-
 def find_version(*file_paths):
     """
     This pattern was modeled on a method from the Python Packaging User Guide:
@@ -42,11 +39,21 @@ class PostInstallCommand(install):
     def run(self):
         install.run(self)
         # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
+        SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
         self.copytree("templates/", SDK_TEMPLATE_PATH)
         os.environ["NET_TEXTFSM"] = SDK_TEMPLATE_PATH
+        exportcmd = "export NET_TEXTFSM=" + SDK_TEMPLATE_PATH
+        os.system(exportcmd)
+        print("\nPLEASE NOTE: \n"
+              "- 'mdssdk' requires NET_TEXTFSM environment variable to be set\n"
+              "- This variable points to the directory where the textfsm templates are copied to\n"
+              "- Currently the templates are copied to - " + SDK_TEMPLATE_PATH + "\n"
+              "- This variable is automatically set when you install 'mdssdk'\n"
+              "- Its recommended that you add this env permanently into your .bashrc file\n"
+              "- This can be done by adding the below line to your .bashrc file\n"
+              + exportcmd + "\n")
 
     # From : https://stackoverflow.com/a/22331852
-    #
     def copytree(self, src, dst, symlinks=False, ignore=None):
         if not os.path.exists(dst):
             os.makedirs(dst)
@@ -95,6 +102,6 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     cmdclass={
-        'install': PostInstallCommand,
+        "install": PostInstallCommand,
     },
 )

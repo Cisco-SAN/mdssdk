@@ -74,8 +74,9 @@ class Switch(SwitchUtils):
         # Check if "NET_TEXTFSM" is set
         if "NET_TEXTFSM" not in os.environ:
             msg = (
-                "ERROR!! SDK is not installed correctly (NET_TEXTFSM is not set), please uninstall and follow the "
-                "correct instructions from https://mdssdk.readthedocs.io/en/latest/readme.html#installation-steps "
+                "ERROR!! NET_TEXTFSM is not set, SDK needs NET_TEXTFSM environment variable to be set."
+                " You can uninstall and install the sdk again if required, "
+                "follow the correct instructions from https://mdssdk.readthedocs.io/en/latest/readme.html#installation-steps"
             )
             log.error(msg)
             sys.exit(msg)
