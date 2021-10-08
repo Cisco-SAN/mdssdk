@@ -45,7 +45,6 @@ class PostInstallCommand(install):
         SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
         print("in PostInstall with " + SDK_TEMPLATE_PATH)
         self.copytree("templates/", SDK_TEMPLATE_PATH)
-        self.shell_source("set_env.sh")
 
     # From : https://stackoverflow.com/a/22331852
     def copytree(self, src, dst, symlinks=False, ignore=None):
@@ -74,15 +73,13 @@ class PostInstallCommand(install):
             else:
                 shutil.copy2(s, d)
 
-    # From : https://stackoverflow.com/a/12708396
-    def shell_source(self,script):
-        """Sometime you want to emulate the action of "source" in bash,
-        settings some environment variables. Here is a way to do it."""
-        import subprocess, os
-        pipe = subprocess.Popen(". %s; env" % script, stdout=subprocess.PIPE, shell=True)
-        output = pipe.communicate()[0]
-        env = dict((line.split("=", 1) for line in output.splitlines()))
-        os.environ.update(env)
+    print("PLEASE NOTE:")
+    print("- 'mdssdk' requires NET_TEXTFSM environment variable to be set")
+    print("- This variable points to the directory where the textfsm templates are copied to")
+    print("- Please execute the below command")
+    print("      export NET_TEXTFSM=$DIR/mdssdk-templates/")
+    print("- It is recommended that you add this env permanently into your .bashrc file")
+    print("")
 
 setup(
     name="mdssdk",
