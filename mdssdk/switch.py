@@ -73,14 +73,14 @@ class Switch(SwitchUtils):
             verify_ssl=True,
     ):
         # Check if "NET_TEXTFSM" is set
-        if "NET_TEXTFSM" not in os.environ:
-            msg = (
-                "ERROR!! NET_TEXTFSM is not set, SDK needs NET_TEXTFSM environment variable to be set."
-                " You can uninstall and install the sdk again if required, "
-                "follow the correct instructions from https://mdssdk.readthedocs.io/en/latest/readme.html#installation-steps"
-            )
-            log.error(msg)
-            sys.exit(msg)
+        # if "NET_TEXTFSM" not in os.environ:
+        #     msg = (
+        #         "ERROR!! NET_TEXTFSM is not set, SDK needs NET_TEXTFSM environment variable to be set."
+        #         " You can uninstall and install the sdk again if required, "
+        #         "follow the correct instructions from https://mdssdk.readthedocs.io/en/latest/readme.html#installation-steps"
+        #     )
+        #     log.error(msg)
+        #     sys.exit(msg)
 
         self.__ip_address = ip_address
         self.__username = username
