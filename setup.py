@@ -62,6 +62,32 @@ def copytree(src, dst, symlinks=False, ignore=None):
         else:
             shutil.copy2(s, d)
 
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        install.run(self)
+        # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
+        # SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
+        SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/ntc-templates/templates/"
+        print("in PostInstall with " + SDK_TEMPLATE_PATH)
+        copytree("templates/", SDK_TEMPLATE_PATH)
+        print("PLEASE NOTE:")
+        print("'mdssdk' has copied the ntc templates to the path " + SDK_TEMPLATE_PATH)
+        print(
+            "'mdssdk' has been configured to automatically look in " + SDK_TEMPLATE_PATH + "for the ntc-templates index "
+                                                                                           "file. Alternatively, "
+                                                                                           "you can explicitly tell mdssdk "
+                                                                                           "where to look for the TextFSM "
+                                                                                           "template directory by setting "
+                                                                                           "the following environment "
+                                                                                           "variable (note, there must be "
+                                                                                           "an index file in this "
+                                                                                           "directory):")
+        print("      export NET_TEXTFSM=/path/to/ntc-templates/templates/  ")
+        print("If using this environment variable then it is recommended that you add this env permanently into your "
+              ".bashrc/.cshrc file")
+        print("")
+
 
 setup(
     name="mdssdk",
@@ -84,23 +110,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
+    cmdclass={
+        'install': PostInstallCommand,
+    },
 )
-# SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
-SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/ntc-templates/templates/"
-print("in PostInstall with " + SDK_TEMPLATE_PATH)
-copytree("templates/", SDK_TEMPLATE_PATH)
-print("PLEASE NOTE:")
-print("'mdssdk' has copied the ntc templates to the path " + SDK_TEMPLATE_PATH)
-print("'mdssdk' has been configured to automatically look in " + SDK_TEMPLATE_PATH + "for the ntc-templates index "
-                                                                                     "file. Alternatively, "
-                                                                                     "you can explicitly tell mdssdk "
-                                                                                     "where to look for the TextFSM "
-                                                                                     "template directory by setting "
-                                                                                     "the following environment "
-                                                                                     "variable (note, there must be "
-                                                                                     "an index file in this "
-                                                                                     "directory):")
-print("      export NET_TEXTFSM=/path/to/ntc-templates/templates/  ")
-print("If using this environment variable then it is recommended that you add this env permanently into your "
-      ".bashrc/.cshrc file")
-print("")

@@ -87,6 +87,7 @@ class Switch(SwitchUtils):
         self.__password = password
         self.__ssh_key_file = ssh_key_file
         self.connection_type = connection_type
+        print("start " + self.connection_type)
         if connection_type not in ['http', 'https', 'ssh']:
             print(
                 f"ERROR!!! Unsupported connection_type parameter ({connection_type}), supported values are 'http' or 'https' or 'ssh'")
@@ -103,10 +104,10 @@ class Switch(SwitchUtils):
         self.timeout = timeout
         self.__verify_ssl = verify_ssl
         self.__supported = None
-
+        print("before connect to ssh " + self.connection_type)
         # Connect to ssh
         self._connect_via_ssh()
-
+        print("after connect to ssh " + self.connection_type)
         try:
             # from datetime import datetime
             # print("Current Time-parse =" + datetime.now().strftime("%H:%M:%S:%s"))
