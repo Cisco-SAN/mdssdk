@@ -86,7 +86,7 @@ setup(
     ],
 )
 # SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
-SDK_TEMPLATE_PATH = os.path.expanduser("~") + "ntc-templates/templates/"
+SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/ntc-templates/templates/"
 print("in PostInstall with " + SDK_TEMPLATE_PATH)
 copytree("templates/", SDK_TEMPLATE_PATH)
 print("PLEASE NOTE:")
