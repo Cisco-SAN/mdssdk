@@ -33,7 +33,7 @@ class SwitchUtils:
 
     def _parse_sh_inv(self, use_ssh=False):
         cmd = "show inventory"
-        print("show inventory "+self.connection_type)
+        print("show inventory " + self.connection_type)
         if use_ssh or self.connection_type == "ssh":
             inv = self.show(command=cmd, use_ssh=True)
             self.inv_details = inv
