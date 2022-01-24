@@ -17,6 +17,7 @@ from .connection_manager.errors import (
     UnsupportedFeature,
     UnsupportedConfig,
     UnsupportedSwitch,
+    FeatureNotEnabled
 )
 from .constants import *
 from .nxapikeys import versionkeys
@@ -61,15 +62,15 @@ class Switch(SwitchUtils):
     """
 
     def __init__(
-        self,
-        ip_address,
-        username,
-        password=None,
-        connection_type="https",
-        ssh_key_file=None,
-        port=None,
-        timeout=NXAPI_CONN_TIMEOUT,
-        verify_ssl=True,
+            self,
+            ip_address,
+            username,
+            password=None,
+            connection_type="https",
+            ssh_key_file=None,
+            port=None,
+            timeout=NXAPI_CONN_TIMEOUT,
+            verify_ssl=True,
     ):
         # Check if "NET_TEXTFSM" is set
         if "NET_TEXTFSM" not in os.environ:
@@ -86,6 +87,10 @@ class Switch(SwitchUtils):
         self.__password = password
         self.__ssh_key_file = ssh_key_file
         self.connection_type = connection_type
+        if connection_type not in ['http', 'https', 'ssh']:
+            print(
+                f"ERROR!!! Unsupported connection_type parameter ({connection_type}), supported values are 'http' or 'https' or 'ssh'")
+            exit()
         if port is None:
             if self.connection_type == "https":
                 self.port = HTTPS_PORT
@@ -103,7 +108,10 @@ class Switch(SwitchUtils):
         self._connect_via_ssh()
 
         try:
+            # from datetime import datetime
+            # print("Current Time-parse =" + datetime.now().strftime("%H:%M:%S:%s"))
             self._parse_sh_inv(use_ssh=True)
+            # print("Current Time-parse =" + datetime.now().strftime("%H:%M:%S:%s"))
             # Check if its of type MDS
             if self._product_id.startswith(VALID_PIDS_MDS):
                 # Its MDS switch
@@ -120,7 +128,7 @@ class Switch(SwitchUtils):
                 raise UnsupportedSwitch(
                     self.__ip_address
                     + "Unsupported Switch or device found, SDK supports only "
-                    "MDS/FI/N9k switches."
+                      "MDS/FI/N9k switches."
                 )
         except CLIError as c:
             # Could be a FI box
@@ -131,7 +139,7 @@ class Switch(SwitchUtils):
                 raise UnsupportedSwitch(
                     self.__ip_address
                     + "Unsupported Switch or device found, SDK supports only "
-                    "MDS/FI/N9k switches."
+                      "MDS/FI/N9k switches."
                 )
 
         log.debug("is_connection_type_ssh " + str(self.is_connection_type_ssh()))
@@ -192,21 +200,21 @@ class Switch(SwitchUtils):
         RE_COMP = re.compile(PAT_VER)
         result_ver = RE_COMP.match(ver)
         supported = (
-            "Ip: "
-            + self.__ip_address
-            + " Version: "
-            + ver
-            + ", it is 8.4(2a) or above. This is a supported version for using NXAPI"
+                "Ip: "
+                + self.__ip_address
+                + " Version: "
+                + ver
+                + ", it is 8.4(2a) or above. This is a supported version for using NXAPI"
         )
         not_supported_str = (
-            "NOTE: Ip: "
-            + self.__ip_address
-            + " Version: "
-            + ver
-            + ", it is below 8.4(2a). This is NOT a supported version for using NXAPI, hence connection_type is set to 'ssh'"
+                "NOTE: Ip: "
+                + self.__ip_address
+                + " Version: "
+                + ver
+                + ", it is below 8.4(2a). This is NOT a supported version for using NXAPI, hence connection_type is set to 'ssh'"
         )
         not_supported = (
-            utils.color.BOLD + utils.color.RED + not_supported_str + utils.color.END
+                utils.color.BOLD + utils.color.RED + not_supported_str + utils.color.END
         )
         if result_ver:
             try:
@@ -728,8 +736,9 @@ class Switch(SwitchUtils):
             >>> ana_handler = switch_obj.analytics
             >>>
         """
-
-        return Analytics(self)
+        if self.feature("analytics"):
+            return Analytics(self)
+        raise FeatureNotEnabled("Analytics feature is not enabled")
 
     @SwitchUtils._check_for_support
     def feature(self, name, enable=None):
@@ -838,7 +847,7 @@ class Switch(SwitchUtils):
             raise CLIError(command, error)
 
     def _cli_command(
-        self, commands, rpc=u"2.0", method=u"cli", timeout=CLI_CMD_TIMEOUT
+            self, commands, rpc=u"2.0", method=u"cli", timeout=CLI_CMD_TIMEOUT
     ):
         if not isinstance(commands, list):
             commands = [commands]
@@ -883,12 +892,12 @@ class Switch(SwitchUtils):
         return outlines
 
     def show(
-        self,
-        command,
-        raw_text=False,
-        use_ssh=False,
-        expect_string=None,
-        timeout=CLI_CMD_TIMEOUT,
+            self,
+            command,
+            raw_text=False,
+            use_ssh=False,
+            expect_string=None,
+            timeout=CLI_CMD_TIMEOUT,
     ):
         """
         Send a show command to the switch
@@ -943,7 +952,7 @@ class Switch(SwitchUtils):
                 return {}
 
     def _show_list(
-        self, commands, raw_text=False, use_ssh=False, timeout=CLI_CMD_TIMEOUT
+            self, commands, raw_text=False, use_ssh=False, timeout=CLI_CMD_TIMEOUT
     ):
         """
         Send a list of show commands to the switch
@@ -994,7 +1003,7 @@ class Switch(SwitchUtils):
         return return_list
 
     def config(
-        self, command, rpc=u"2.0", method=u"cli", use_ssh=False, timeout=CLI_CMD_TIMEOUT
+            self, command, rpc=u"2.0", method=u"cli", use_ssh=False, timeout=CLI_CMD_TIMEOUT
     ):
         """
         Send any command to run from the config mode
@@ -1021,12 +1030,12 @@ class Switch(SwitchUtils):
         return list_result[0]
 
     def _config_list(
-        self,
-        commands,
-        rpc=u"2.0",
-        method=u"cli",
-        use_ssh=False,
-        timeout=CLI_CMD_TIMEOUT,
+            self,
+            commands,
+            rpc=u"2.0",
+            method=u"cli",
+            use_ssh=False,
+            timeout=CLI_CMD_TIMEOUT,
     ):
         """
         Send any list of commands to run from the config mode
@@ -1064,12 +1073,12 @@ class Switch(SwitchUtils):
 
     @SwitchUtils._check_for_support
     def reload(
-        self,
-        module=None,
-        timeout=RELOAD_TIMEOUT,
-        non_disruptive=False,
-        copyrs=True,
-        basic_verification=False,
+            self,
+            module=None,
+            timeout=RELOAD_TIMEOUT,
+            non_disruptive=False,
+            copyrs=True,
+            basic_verification=False,
     ):
         """
         Reload a switch or a module
@@ -1176,10 +1185,10 @@ class Switch(SwitchUtils):
     def issu(self, kickstart, system, timeout=ISSU_TIMEOUT, expect_string=r".*"):
         self.curr_status = None
         cmd = (
-            "terminal dont-ask ; install all kickstart "
-            + kickstart
-            + " system "
-            + system
+                "terminal dont-ask ; install all kickstart "
+                + kickstart
+                + " system "
+                + system
         )
         self.show(command=cmd, expect_string=expect_string, timeout=timeout)
         return True
@@ -1224,7 +1233,7 @@ class Switch(SwitchUtils):
                         temp = eachline
                         continue
                     elif (
-                        "Module" in eachline and "<" in eachline
+                            "Module" in eachline and "<" in eachline
                     ):  # Module 2: <Mon Sep 14 12:50:06>
                         z = eachline.split("<")[0].strip() + temp
                         self.curr_status = z[:60]
@@ -1234,7 +1243,7 @@ class Switch(SwitchUtils):
                     elif "#" in eachline:
                         continue
                     elif (
-                        "(" in eachline
+                            "(" in eachline
                     ):  # 2      slcf32                                   8.4(2a)               8.4(2b)
                         continue
                     elif "Module" in eachline:  # Module       Image

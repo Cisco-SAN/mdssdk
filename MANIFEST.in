@@ -1,9 +1,10 @@
 include AUTHORS.rst
+include CONTRIBUTING.rst
 include HISTORY.rst
 include LICENSE
 include README.md
 include requirements.txt
-include set_env.sh
+include requirements_dev.txt
 
 recursive-include tests *
 recursive-include templates *

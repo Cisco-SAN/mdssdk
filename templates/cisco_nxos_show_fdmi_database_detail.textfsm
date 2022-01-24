@@ -1,0 +1,51 @@
+Value Filldown vsan ([0-9]+)
+Value Required hba (([0-9a-f]{2}:){7}([0-9a-f]{2}))
+Value node_name (\S+)
+Value manufacturer (.*)
+Value serial_num (.*)
+Value model (.*)
+Value model_description (.*)
+Value hardware_ver (.*)
+Value driver_ver (.*)
+Value rom_ver (.*)
+Value firmware_ver (.*)
+Value os_name_ver (.*)
+Value ct_payload_len (.*)
+Value port (.*)
+Value supported_fc4_types (.*)
+Value supported_speeds (.*)
+Value current_speed (.*)
+Value maximum_frame_size (.*)
+Value os_device_name (.*)
+Value host_name (.*)
+
+Start
+  ^Registered HBA List for VSAN ${vsan}
+  ^-+ -> HBA
+
+HBA
+  ^HBA-ID:\s+${hba}
+  ^-+ -> OtherData
+
+OtherData
+  ^Node Name\s*:\s*${node_name}
+  ^Manufacturer\s*:\s*${manufacturer}
+  ^Serial Num\s*:\s*${serial_num}
+  ^Model\s*:\s*${model}
+  ^Model Description\s*:\s*${model_description}
+  ^Hardware Ver\s*:\s*${hardware_ver}
+  ^Driver Ver\s*:\s*${driver_ver}
+  ^ROM Ver\s*:\s*${rom_ver}
+  ^Firmware Ver\s*:\s*${firmware_ver}
+  ^OS Name/Ver\s*:\s*${os_name_ver}
+  ^CT Payload Len\s*:\s*${ct_payload_len}
+  ^\s*Port-id\s*:\s*${port}
+  ^\s*Supported FC4 types\s*:\s*${supported_fc4_types}
+  ^\s*Supported Speed\s*:\s*${supported_speeds}
+  ^\s*Current Speed\s*:\s*${current_speed}
+  ^\s*Maximum Frame Size\s*:\s*${maximum_frame_size}
+  ^\s*OS Device Name\s*:\s*${os_device_name}
+  ^\s*Host Name\s*:\s*${host_name}
+  ^-+ -> Record HBA
+  ^Registered HBA List -> Continue.Record
+  ^Registered HBA List for VSAN ${vsan} -> Start

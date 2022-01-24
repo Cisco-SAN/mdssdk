@@ -16,6 +16,7 @@ with open("requirements.txt") as rf:
 with open("HISTORY.rst") as history_file:
     history = history_file.read().replace(".. :changelog:", "")
 
+
 def find_version(*file_paths):
     """
     This pattern was modeled on a method from the Python Packaging User Guide:
@@ -33,49 +34,34 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
+
 # From : https://stackoverflow.com/a/22331852
 def copytree(src, dst, symlinks=False, ignore=None):
-        if not os.path.exists(dst):
-            os.makedirs(dst)
-            shutil.copystat(src, dst)
-        lst = os.listdir(src)
-        if ignore:
-            excl = ignore(src, lst)
-            lst = [x for x in lst if x not in excl]
-        for item in lst:
-            s = os.path.join(src, item)
-            d = os.path.join(dst, item)
-            if symlinks and os.path.islink(s):
-                if os.path.lexists(d):
-                    os.remove(d)
-                os.symlink(os.readlink(s), d)
-                try:
-                    st = os.lstat(s)
-                    mode = stat.S_IMODE(st.st_mode)
-                    os.lchmod(d, mode)
-                except:
-                    pass  # lchmod not available
-            elif os.path.isdir(s):
-                copytree(s, d, symlinks, ignore)
-            else:
-                shutil.copy2(s, d)
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+        shutil.copystat(src, dst)
+    lst = os.listdir(src)
+    if ignore:
+        excl = ignore(src, lst)
+        lst = [x for x in lst if x not in excl]
+    for item in lst:
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if symlinks and os.path.islink(s):
+            if os.path.lexists(d):
+                os.remove(d)
+            os.symlink(os.readlink(s), d)
+            try:
+                st = os.lstat(s)
+                mode = stat.S_IMODE(st.st_mode)
+                os.lchmod(d, mode)
+            except:
+                pass  # lchmod not available
+        elif os.path.isdir(s):
+            copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
 
-class PostInstallCommand(install):
-    """Post-installation for installation mode."""
-    def run(self):
-        install.run(self)
-        # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
-        SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
-        print("in PostInstall with " + SDK_TEMPLATE_PATH)
-        copytree("templates/", SDK_TEMPLATE_PATH)
-
-        print("PLEASE NOTE:")
-        print("- 'mdssdk' requires NET_TEXTFSM environment variable to be set")
-        print("- This variable points to the directory where the textfsm templates are copied to")
-        print("- Please execute the below command")
-        print("      export NET_TEXTFSM=$HOME/mdssdk-templates/")
-        print("- It is recommended that you add this env permanently into your .bashrc file")
-        print("")
 
 setup(
     name="mdssdk",
@@ -89,7 +75,7 @@ setup(
     url="https://github.com/Cisco-SAN/mdslib",
     license="http://www.apache.org/licenses/LICENSE-2.0",
     install_requires=requirements,
-    #setup_requires=requirements,
+    # setup_requires=requirements,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -98,8 +84,23 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-    cmdclass={
-       "install": PostInstallCommand,
-    },
 )
-print("DONE!!!!")
+# SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
+SDK_TEMPLATE_PATH = os.path.expanduser("~") + "ntc-templates/templates/"
+print("in PostInstall with " + SDK_TEMPLATE_PATH)
+copytree("templates/", SDK_TEMPLATE_PATH)
+print("PLEASE NOTE:")
+print("'mdssdk' has copied the ntc templates to the path " + SDK_TEMPLATE_PATH)
+print("'mdssdk' has been configured to automatically look in " + SDK_TEMPLATE_PATH + "for the ntc-templates index "
+                                                                                     "file. Alternatively, "
+                                                                                     "you can explicitly tell mdssdk "
+                                                                                     "where to look for the TextFSM "
+                                                                                     "template directory by setting "
+                                                                                     "the following environment "
+                                                                                     "variable (note, there must be "
+                                                                                     "an index file in this "
+                                                                                     "directory):")
+print("      export NET_TEXTFSM=/path/to/ntc-templates/templates/  ")
+print("If using this environment variable then it is recommended that you add this env permanently into your "
+      ".bashrc/.cshrc file")
+print("")

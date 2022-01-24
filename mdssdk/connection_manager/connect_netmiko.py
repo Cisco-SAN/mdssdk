@@ -39,6 +39,7 @@ class SSHSession(object):
             "password": password,
             "key_file": key_file,
             "timeout": self.timeout,
+            "fast_cli": False,  # https://github.com/ktbyers/netmiko/issues/2008
         }
         self.anyerror = False
         self._connect()
@@ -71,9 +72,10 @@ class SSHSession(object):
 
     def _connect(self):
         log.debug("Inside Connect " + self._host)
+        # from datetime import datetime
+        # print("Current Time-nmk =" + datetime.now().strftime("%H:%M:%S:%s"))
         self._connection = ConnectHandler(**self._cisco_device)
-        self.prompt = self._connection.find_prompt()
-        log.debug("Prompt is " + self.prompt)
+        # print("Current Time -nmk =" + datetime.now().strftime("%H:%M:%S:%s"))
 
     def _check_error(self, output):
         for eachline in output.strip().splitlines():
@@ -111,6 +113,8 @@ class SSHSession(object):
             return output, None
 
     def config_change_switch_name(self, cmd):
+        self.prompt = self._connection.find_prompt()
+        log.debug("Prompt is " + self.prompt)
         cmd = "configure terminal ; " + cmd + " ; end"
         out, err = self.show(cmd, expect_string="#")
         # Need to reconnect to get the prompt to reset

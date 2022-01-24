@@ -209,17 +209,17 @@ class Analytics:
 
         if (metrics is None) or (len(metrics) == 0):
             selq = (
-                "select all from fc-" + profile.get(PROTOCOL) + "." + profile.get(VIEW)
+                    "select all from fc-" + profile.get(PROTOCOL) + "." + profile.get(VIEW)
             )
         else:
             allmetrics = ",".join(metrics)
             selq = (
-                "select "
-                + allmetrics
-                + " from fc-"
-                + profile.get(PROTOCOL)
-                + "."
-                + profile.get(VIEW)
+                    "select "
+                    + allmetrics
+                    + " from fc-"
+                    + profile.get(PROTOCOL)
+                    + "."
+                    + profile.get(VIEW)
             )
         return selq
 
@@ -257,12 +257,12 @@ class Analytics:
         if self._validate_profile(profile):
             selq = self._get_select_query_string(profile)
             cmd = (
-                'analytics query "'
-                + selq
-                + '" name '
-                + name
-                + " type periodic interval "
-                + str(interval)
+                    'analytics query "'
+                    + selq
+                    + '" name '
+                    + name
+                    + " type periodic interval "
+                    + str(interval)
             )
             if clear:
                 if differential:

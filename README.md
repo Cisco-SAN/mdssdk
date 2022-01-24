@@ -8,7 +8,7 @@ This library will be useful for automating day to day tasks or developing new to
 
 * Python version: 3.6 and above
 * Supports both NXAPI and SSH
-* Limited support for N9K and FI 
+* Limited support for N9K and FI
 * Apache License, Version 2.0 (the "License")
 
 ## Installation Steps
@@ -16,16 +16,28 @@ This library will be useful for automating day to day tasks or developing new to
 ### From pip:
 
 Installs the last released version,
+
 ```
     pip install mdssdk
+    export NET_TEXTFSM=$HOME/mdssdk-templates/
 ```
 
 ### From github:
+
 ```
    git clone https://github.com/Cisco-SAN/mdssdk.git
    cd mdssdk
-   source install.sh
+   python setup.py install
+   pip install -r requirements.txt
+   export NET_TEXTFSM=$HOME/mdssdk-templates/
 ```
+
+> ### Note:
+> * `mdssdk` requires `NET_TEXTFSM` environment variable to be set
+> * This variable points to the directory where the textfsm templates are copied to
+> * To set the env please execute the below command after installing `mdssdk`
+>> `export NET_TEXTFSM=$HOME/mdssdk-templates/`
+> * It is recommended that you add this env permanently into your `.bashrc` file
 
 ## Uninstallation Steps
 

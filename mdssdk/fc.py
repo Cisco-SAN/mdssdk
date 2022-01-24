@@ -5,6 +5,7 @@ from .connection_manager.errors import (
     InvalidAnalyticsType,
     InvalidInterface,
     UnsupportedSwitch,
+    FeatureNotEnabled
 )
 from .constants import SHUTDOWN, NO_SHUTDOWN, PAT_FC, VALID_PIDS_MDS
 from .interface import Interface
@@ -49,9 +50,9 @@ class Fc(Interface):
         if type(value) is not bool:
             raise TypeError("Only bool value(true/false) supported.")
         cmd = (
-            "terminal dont-ask ; interface "
-            + self.name
-            + " ; out-of-service force ; no terminal dont-ask "
+                "terminal dont-ask ; interface "
+                + self.name
+                + " ; out-of-service force ; no terminal dont-ask "
         )
         if value:
             # First shutdown the port then
@@ -143,6 +144,8 @@ class Fc(Interface):
 
     @analytics_type.setter
     def analytics_type(self, type):
+        if not self.__swobj.feature("analytics"):
+            raise FeatureNotEnabled("Analytics feature is not enabled")
         if type is None:
             cmd = "no analytics type fc-all"
         elif type == "scsi":
@@ -157,7 +160,6 @@ class Fc(Interface):
                 + type
                 + ")'. Valid types are scsi,nvme,all,None(to disable any analytics type)"
             )
-
         cmdtosend = "interface " + self.name + " ; " + cmd
         self.__swobj.config(cmdtosend)
 

@@ -228,11 +228,11 @@ class Zone(object):
             if eachmem["fcalias_name"] == fcaliasname:
                 for k, v in eachmem.items():
                     if (
-                        k == "fcalias_member_type" and v == ""
+                            k == "fcalias_member_type" and v == ""
                     ):  # if type is empty then exit from loop
                         break
                     elif (
-                        k == "fcalias_name" or k == "fcalias_vsan_id" or v == ""
+                            k == "fcalias_name" or k == "fcalias_vsan_id" or v == ""
                     ):  # Dont req name/vsan or any value with null
                         continue
                     else:
@@ -318,11 +318,11 @@ class Zone(object):
     @mode.setter
     def mode(self, value):
         cmd = (
-            "terminal dont-ask ; zone mode "
-            + ENHANCED
-            + " vsan "
-            + str(self._vsan)
-            + " ; no terminal dont-ask"
+                "terminal dont-ask ; zone mode "
+                + ENHANCED
+                + " vsan "
+                + str(self._vsan)
+                + " ; no terminal dont-ask"
         )
         if value.lower() == ENHANCED:
             self._send_zone_cmd(cmd)
@@ -374,11 +374,11 @@ class Zone(object):
     @default_zone.setter
     def default_zone(self, value):
         cmd = (
-            "terminal dont-ask ; zone default-zone "
-            + PERMIT
-            + " vsan "
-            + str(self._vsan)
-            + " ; no terminal dont-ask"
+                "terminal dont-ask ; zone default-zone "
+                + PERMIT
+                + " vsan "
+                + str(self._vsan)
+                + " ; no terminal dont-ask"
         )
         if value.lower() == PERMIT:
             self._send_zone_cmd(cmd)
@@ -725,9 +725,9 @@ class Zone(object):
         """
 
         cmd = (
-            "terminal dont-ask ; clear zone lock vsan  "
-            + str(self._vsan)
-            + " ; no terminal dont-ask"
+                "terminal dont-ask ; clear zone lock vsan  "
+                + str(self._vsan)
+                + " ; no terminal dont-ask"
         )
         out = self.__swobj.config(cmd)
         if out:
@@ -941,8 +941,8 @@ class Zone(object):
             if self.__swobj.is_connection_type_ssh():
                 if type(out[0]) is str:
                     if (
-                        "VSAN " + str(self._vsan) + " is not configured"
-                        == out[0].strip()
+                            "VSAN " + str(self._vsan) + " is not configured"
+                            == out[0].strip()
                     ):
                         raise CLIError(cmd, out[0])
                     if "Zone not present" == out[0].strip():

@@ -94,6 +94,10 @@ class UnsupportedFeature(CustomException):
     pass
 
 
+class FeatureNotEnabled(CustomException):
+    pass
+
+
 class UnsupportedConfig(CustomException):
     pass
 

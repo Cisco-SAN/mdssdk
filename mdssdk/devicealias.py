@@ -369,8 +369,8 @@ class DeviceAlias(object):
                 msg = c.message
             if msg is not None:
                 if (
-                    "The following device-alias changes are about to be committed"
-                    in msg
+                        "The following device-alias changes are about to be committed"
+                        in msg
                 ):
                     pass
                 elif "There are no pending changes" in msg:

@@ -177,6 +177,10 @@ class Module(object):
             ]
         return self.__mod_status
 
+    # TODO
+    # def reload(self, non_disruptive=False):
+    #     pass
+
     def __get_modinfo(self):
         cmd = "show module " + str(self.__mod_num)
         out = self.__swobj.show(cmd)

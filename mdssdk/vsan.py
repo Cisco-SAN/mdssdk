@@ -269,12 +269,12 @@ class Vsan(object):
                 pcmatch = re.match(PAT_PC, eachint.name)
                 if fcmatch or pcmatch:
                     cmd = (
-                        cmd
-                        + "terminal dont-ask ; vsan database ; vsan "
-                        + str(self._id)
-                        + " interface "
-                        + eachint.name
-                        + " ; no terminal dont-ask ; "
+                            cmd
+                            + "terminal dont-ask ; vsan database ; vsan "
+                            + str(self._id)
+                            + " interface "
+                            + eachint.name
+                            + " ; no terminal dont-ask ; "
                     )
                     # cmdlist.append(cmd)
                 else:
@@ -282,15 +282,15 @@ class Vsan(object):
                         "Interface "
                         + str(eachint.name)
                         + " is not supported, and hence cannot be added to the vsan, "
-                        "supported interface types are 'fc' amd 'port-channel'"
+                          "supported interface types are 'fc' amd 'port-channel'"
                     )
             try:
                 # self.__swobj._config_list(cmdlist)
                 self.__swobj.config(cmd)
             except CLIError as c:
                 if (
-                    "membership being configured is already configured for the interface"
-                    in c.message
+                        "membership being configured is already configured for the interface"
+                        in c.message
                 ):
                     return
                 else:

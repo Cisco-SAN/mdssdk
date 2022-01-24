@@ -43,9 +43,9 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
         while True:
             k, v = random.choice(list(self.interfaces.items()))
             if (
-                type(v) is Fc
-                and k != self.fc.name
-                and v.status not in ["up", "trunking"]
+                    type(v) is Fc
+                    and k != self.fc.name
+                    and v.status not in ["up", "trunking"]
             ):
                 fc2 = v
                 log.debug(k)
@@ -68,9 +68,9 @@ class TestPortChannelRemoveMembers(unittest.TestCase):
         while True:
             k, v = random.choice(list(self.interfaces.items()))
             if (
-                type(v) is Fc
-                and k != self.fc.name
-                and v.status not in ["up", "trunking"]
+                    type(v) is Fc
+                    and k != self.fc.name
+                    and v.status not in ["up", "trunking"]
             ):
                 fc2 = v
                 log.debug(k)
