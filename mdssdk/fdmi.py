@@ -67,7 +67,7 @@ class Fdmi:
         :return: Returns all the hba's that are registered
         :rtype: dict(vsan:hba list)
         :example:
-            >>> allhbas = fdmi.hbas
+            >>> allhbas = fdmi.hbas()
             >>> print(allhbas)
             {1: ['10:00:00:10:9b:95:41:9c', '20:05:00:11:0d:fd:4f:00'],
              167: ['20:02:00:11:0d:5a:35:00',
@@ -90,7 +90,7 @@ class Fdmi:
             tmpdict = {v: retdict[v] for v in vsan if v in retdict}
             return tmpdict
 
-    def database_details(self, vsan=None, hbaid=None):
+    def database_detail(self, vsan=None, hbaid=None):
         """
         Returns all the hba details registered in a dict format
 
@@ -101,7 +101,7 @@ class Fdmi:
         :return: Returns all the hba's discovered
         :rtype: dict(vsan:hba details)
         :example:
-            >>> allhbas = fdmi.hbas
+            >>> allhbas = fdmi.database_detail()
             >>> print(allhbas)
             {1: [{'current_speed': '32G',
               'driver_ver': '8.07.00.34.Trunk-SCST.18-k',
