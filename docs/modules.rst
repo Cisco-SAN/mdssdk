@@ -10,6 +10,9 @@ Switch
    :members:
    :inherited-members:
 
+.. autoclass:: from mdssdk.utility.switch_utility.SwitchUtils
+   :members:
+
 Module
 ------
 
@@ -86,3 +89,10 @@ Analytics
 .. autoclass:: mdssdk.analytics.Analytics
     :members:
    
+
+Fdmi
+---------
+
+.. automodule:: mdssdk.fdmi
+.. autoclass:: mdssdk.fdmi.Fdmi
+    :members:

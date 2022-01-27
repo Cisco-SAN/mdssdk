@@ -15,7 +15,7 @@ This library will be useful for automating day to day tasks or developing new to
 
 ### From pip:
 
-Installs the last released version,
+Installs the latest version.
 
 ```
     pip install mdssdk
@@ -37,7 +37,7 @@ Installs the last released version,
 > * This variable points to the directory where the textfsm templates are copied to
 > * To set the env please execute the below command after installing `mdssdk`
 >> `export NET_TEXTFSM=$HOME/mdssdk-templates/`
-> * It is recommended that you add this env permanently into your `.bashrc` file
+> * It is recommended that you add this env permanently into your `.bashrc` or `.cshrc` file
 
 ## Uninstallation Steps
 
@@ -53,6 +53,7 @@ To uninstall mdssdk,
 
 |**NXOS Version**|**SDK Version** |
 | :------: | :------:  |
+| 9.2(2) and below | v1.4.0 |
 | 9.2(1) and below | v1.3.3 |
 | 8.5(1) and below | v1.2.0 |
 | 8.4(2b) and below | v1.1.0 |
