@@ -355,7 +355,7 @@ class Switch(SwitchUtils):
 
         cmd = "switchname " + swname
         if self.is_connection_type_ssh():
-            outlines, error = self._ssh_handle.config_change_switch_name(cmd)
+            outlines, error = self._ssh_handle.config_change_switch_name(swname)
             if error is not None:
                 raise CLIError(cmd, error)
         else:

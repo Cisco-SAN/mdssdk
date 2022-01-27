@@ -112,10 +112,10 @@ class SSHSession(object):
             # Output did go through textFSM, as maybe there was no template
             return output, None
 
-    def config_change_switch_name(self, cmd):
+    def config_change_switch_name(self, swname):
         self.prompt = self._connection.find_prompt()
         log.debug("Prompt is " + self.prompt)
-        cmd = "configure terminal ; " + cmd + " ; end"
+        cmd = "configure terminal ; switchname " + swname + " ; end"
         out, err = self.show(cmd, expect_string="#")
         # Need to reconnect to get the prompt to reset
         self._reconnect()
@@ -129,6 +129,8 @@ class SSHSession(object):
             if re.match(r"^\s*$", eachline):
                 continue
             if self.prompt in eachline:
+                continue
+            if swname in eachline:
                 continue
             if re.match(r"^.*$", eachline):
                 retout.append(eachline)

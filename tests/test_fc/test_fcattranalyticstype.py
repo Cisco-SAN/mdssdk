@@ -52,6 +52,12 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
         try:
             for val in self.values:
                 try:
+                    self.fc.analytics_type = None
+                except CLIError as e:
+                    if "Unsupported Port mode of interface" in str(e.message):
+                        self.skipTest("Skipping test, port mode is unsupported")
+                self.assertEqual(None, self.fc.analytics_type, "port is: " + self.fc.name)
+                try:
                     self.fc.analytics_type = val
                 except CLIError as e:
                     if "Unsupported Port mode of interface" in str(e.message):
@@ -71,9 +77,9 @@ class TestFcAttrAnalyticsType(unittest.TestCase):
         with self.assertRaises(InvalidAnalyticsType) as e:
             self.fc.analytics_type = analytics_type
         self.assertEqual(
-            "InvalidAnalyticsType: Invalid analytics type '"
+            "InvalidAnalyticsType: Invalid analytics type:('"
             + analytics_type
-            + "'. Valid types are scsi,nvme,all,None(to disable analytics type)",
+            + ")'. Valid types are scsi,nvme,all,None(to disable any analytics type)",
             str(e.exception),
         )
 
