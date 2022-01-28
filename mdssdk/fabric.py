@@ -130,8 +130,8 @@ class Fabric(object):
                         self._ips_not_considered[z] = msg
                     elif "ConnectionError" == type(e).__name__:
                         msg = (
-                            z
-                            + ": failed to establish http/https connection(check if nxapi is enabled), hence skipping it."
+                                z
+                                + ": failed to establish http/https connection(check if nxapi is enabled), hence skipping it."
                         )
                         self._ips_not_considered[z] = msg
 
@@ -148,14 +148,14 @@ class Fabric(object):
         return self._switches
 
     def __connect_to_switch(
-        self,
-        lock,
-        ip_address,
-        username,
-        password,
-        connection_type="ssh",
-        timeout=30,
-        discover_npv=True,
+            self,
+            lock,
+            ip_address,
+            username,
+            password,
+            connection_type="ssh",
+            timeout=30,
+            discover_npv=True,
     ):
 
         switch = Switch(
@@ -192,7 +192,6 @@ class Fabric(object):
             found = m.group(1)
             return found
         return "NONE"
-
 
 #######################################
 # ----- Placeholder for notes -----

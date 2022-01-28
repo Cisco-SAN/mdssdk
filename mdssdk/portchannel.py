@@ -235,10 +235,10 @@ class PortChannel(Interface):
                 self.__swobj.config(cmd)
             except CLIError as c:
                 if (
-                    not "port-channel "
-                    + str(self._id)
-                    + " deleted and all its members disabled"
-                    in c.message
+                        not "port-channel "
+                            + str(self._id)
+                            + " deleted and all its members disabled"
+                            in c.message
                 ):
                     raise CLIError(cmd, c.message)
 
@@ -268,21 +268,21 @@ class PortChannel(Interface):
             )
         for eachint in interfaces:
             cmd = (
-                "interface "
-                + eachint.name
-                + " ; channel-group "
-                + str(self._id)
-                + " force "
+                    "interface "
+                    + eachint.name
+                    + " ; channel-group "
+                    + str(self._id)
+                    + " force "
             )
             try:
                 out = self.__swobj.config(cmd)
             except CLIError as c:
                 if (
-                    str(eachint.name)
-                    + " added to port-channel "
-                    + str(self._id)
-                    + " and disabled"
-                    in c.message
+                        str(eachint.name)
+                        + " added to port-channel "
+                        + str(self._id)
+                        + " and disabled"
+                        in c.message
                 ):
                     continue
                 raise CLIError(cmd, c.message)

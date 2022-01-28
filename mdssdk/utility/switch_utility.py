@@ -7,7 +7,7 @@ from .. import constants
 from ..connection_manager.errors import CLIError, UnsupportedSwitch
 from ..fc import Fc
 from ..module import Module
-from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys
+from ..nxapikeys import interfacekeys, vsankeys, zonekeys, modulekeys, inventorykeys
 from ..parsers.interface import ShowInterfaceBrief
 from ..parsers.vsan import ShowVsan
 from ..portchannel import PortChannel
@@ -50,11 +50,18 @@ class SwitchUtils:
         # print(self.inv_details)
         for eachline in self.inv_details:
             if eachline["name"] == "Chassis":
-                # Not using get_key here because this is run before we get the sw version
-                # Hence 'productid' is hardcoded here
-                self._product_id = eachline["productid"]
-                self._serial_num = eachline["serialnum"]
-                self._model_desc = eachline["desc"]
+                if use_ssh or self.connection_type == "ssh":
+                    self._product_id = eachline["productid"]
+                    self._serial_num = eachline["serialnum"]
+                    self._model_desc = eachline["desc"]
+                else:
+                    if hasattr(self, '_SW_VER'):
+                        v = self._SW_VER
+                    else:
+                        v = None
+                    self._product_id = get_key(inventorykeys.PRODUCT_ID, v)
+                    self._serial_num = get_key(inventorykeys.SERIAL_NUMBER, v)
+                    self._model_desc = get_key(inventorykeys.DESCRIPTION, v)
                 return
 
     def _is_fabric_interconnect(self):

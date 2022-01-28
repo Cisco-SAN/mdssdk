@@ -17,7 +17,7 @@ class ConnectNxapi(object):
     """ """
 
     def __init__(
-        self, host, username, password, transport=u"https", port=None, verify_ssl=True
+            self, host, username, password, transport=u"https", port=None, verify_ssl=True
     ):
 
         if transport not in ["http", "https"]:
@@ -81,7 +81,7 @@ class ConnectNxapi(object):
             return payload
 
     def send_request(
-        self, commands, rpc_version=u"2.0", method=u"cli", timeout=CLI_CMD_TIMEOUT
+            self, commands, rpc_version=u"2.0", method=u"cli", timeout=CLI_CMD_TIMEOUT
     ):
         """
         :param commands:

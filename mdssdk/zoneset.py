@@ -264,19 +264,19 @@ class ZoneSet(object):
         if self.name is not None:
             if action:
                 cmd = (
-                    "terminal dont-ask ; zoneset activate name "
-                    + self._name
-                    + " vsan "
-                    + str(self._vsan)
-                    + " ; no terminal dont-ask"
+                        "terminal dont-ask ; zoneset activate name "
+                        + self._name
+                        + " vsan "
+                        + str(self._vsan)
+                        + " ; no terminal dont-ask"
                 )
             else:
                 cmd = (
-                    "terminal dont-ask ; no zoneset activate name "
-                    + self._name
-                    + " vsan "
-                    + str(self._vsan)
-                    + " ; no terminal dont-ask"
+                        "terminal dont-ask ; no zoneset activate name "
+                        + self._name
+                        + " vsan "
+                        + str(self._vsan)
+                        + " ; no terminal dont-ask"
                 )
             try:
                 self.__zoneObj._send_zone_cmd(cmd)
@@ -340,17 +340,16 @@ class ZoneSet(object):
     def __show_zoneset_name_brief(self, active=False):
         if active:
             cmd = (
-                "show zoneset name "
-                + self._name
-                + " brief active vsan "
-                + str(self._vsan)
+                    "show zoneset name "
+                    + self._name
+                    + " brief active vsan "
+                    + str(self._vsan)
             )
         else:
             cmd = "show zoneset name " + self._name + " brief vsan " + str(self._vsan)
 
         out = self.__zoneObj._send_zone_show_cmd(cmd)
         return out
-
 
 # TODO active members and members when zs is not present
 # TODO in zone module to add active members

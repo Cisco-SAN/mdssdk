@@ -1,52 +1,43 @@
 # Python SDK/API library for Cisco MDS Switches.
 
 ![Python](https://img.shields.io/badge/python-v3.6+-blue.svg)
+[![](https://img.shields.io/pypi/v/mdssdk.svg)](https://pypi.python.org/pypi/mdssdk)
+[![Documentation Status](https://readthedocs.org/projects/mdssdk/badge/?version=latest)](http://mdssdk.readthedocs.io/en/latest/?badge=latest)
 
 This library will be useful for automating day to day tasks or developing new tools which involve Cisco MDS switches
 
 * Python version: 3.6 and above
 * Supports both NXAPI and SSH
-* Limited support for N9K and FI 
+* Limited support for N9K and FI
 * Apache License, Version 2.0 (the "License")
 
 ## Installation Steps
 
-1) First create a virtual environment with python3
+### From pip:
 
-       virtualenv testmdssdk -p python3
+Installs the latest version.
 
-2) Activate the virtual env
+```
+    pip install mdssdk
+    export NET_TEXTFSM=$HOME/mdssdk-templates/
+```
 
-       cd testmdssdk/
-       source bin/activate
+### From github:
 
-3) Next download the zip file from the github
+```
+   git clone https://github.com/Cisco-SAN/mdssdk.git
+   cd mdssdk
+   python setup.py install
+   pip install -r requirements.txt
+   export NET_TEXTFSM=$HOME/mdssdk-templates/
+```
 
-       wget https://github.com/Cisco-SAN/mdssdk/archive/master.zip
-
-4) Unzip the file
-
-       unzip master.zip 
-
-5) Execute `source install.sh`
-
-       cd mdssdk-master/
-       source install.sh
-       or
-       source ./install.sh
-       or 
-       . ./install.sh
-
-6) Once successfully done issue `pip list` and you should see mdssdk package installed
-
-        >>> pip list
-        Package    Version   
-        ---------- ----------
-        .
-        . 
-        mdssdk     1.3.0       <---
-        .
-        .
+> ### Note:
+> * `mdssdk` requires `NET_TEXTFSM` environment variable to be set
+> * This variable points to the directory where the textfsm templates are copied to
+> * To set the env please execute the below command after installing `mdssdk`
+>> `export NET_TEXTFSM=$HOME/mdssdk-templates/`
+> * It is recommended that you add this env permanently into your `.bashrc` or `.cshrc` file
 
 ## Uninstallation Steps
 
@@ -62,7 +53,8 @@ To uninstall mdssdk,
 
 |**NXOS Version**|**SDK Version** |
 | :------: | :------:  |
-| 9.2(1) and below | v1.3.0 |
+| 9.2(2) and below | v1.4.0 |
+| 9.2(1) and below | v1.3.3 |
 | 8.5(1) and below | v1.2.0 |
 | 8.4(2b) and below | v1.1.0 |
 | 8.4(2a) and below | v1.0.1 |

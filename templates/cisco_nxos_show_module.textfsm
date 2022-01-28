@@ -7,6 +7,7 @@ Value STATUS (ok|active \*|ha-standby|powered-dn|active|failure|powered-up)
 Start
   ^Xbar\s+Ports\s+Module-Type\s+Model\s+Status -> Fail
   ^${MODULE}\s+${PORTS}\s+${TYPE}\s+${MODEL}\s+${STATUS} -> Record
+  ^${MODULE}\s+${PORTS}\s+${TYPE}\s+${STATUS} -> Record
 
 Fail
   ^.* -> NoRecord

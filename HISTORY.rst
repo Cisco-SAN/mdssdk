@@ -4,6 +4,13 @@
 History
 =======
 
+v1.4.0 (2022-1-27)
+---------------------
+
+* Support for installation via pip install
+* Fix analytics setter api
+* added setup.cfg for pypi upload
+
 v1.3.0 (2021-8-23)
 ---------------------
 

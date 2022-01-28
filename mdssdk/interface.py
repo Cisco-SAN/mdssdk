@@ -276,11 +276,11 @@ class Interface(object):
     @status.setter
     def status(self, value):
         cmd = (
-            "terminal dont-ask ; interface "
-            + self._name
-            + " ; "
-            + value
-            + " ; no terminal dont-ask "
+                "terminal dont-ask ; interface "
+                + self._name
+                + " ; "
+                + value
+                + " ; no terminal dont-ask "
         )
         out = self.__swobj.config(cmd)
 
@@ -305,8 +305,8 @@ class Interface(object):
             out = out["TABLE_interface_brief_fc"]["ROW_interface_brief_fc"]
             for eachout in out:
                 if (
-                    eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
-                    == self._name
+                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                        == self._name
                 ):
                     return eachout
         elif pcmatch:
@@ -321,8 +321,8 @@ class Interface(object):
                 outlist = out
             for eachout in outlist:
                 if (
-                    eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
-                    == self._name
+                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                        == self._name
                 ):
                     return eachout
         return None
@@ -341,8 +341,8 @@ class Interface(object):
                 out = [out]
             for eachout in out:
                 if (
-                    eachout[get_key(interfacekeys._INTERFACE, self._SW_VER)]
-                    == self._name
+                        eachout[get_key(interfacekeys._INTERFACE, self._SW_VER)]
+                        == self._name
                 ):
                     return eachout
         elif pcmatch:
@@ -357,8 +357,8 @@ class Interface(object):
                 outlist = out
             for eachout in outlist:
                 if (
-                    eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
-                    == self._name
+                        eachout[get_key(interfacekeys.INTERFACE, self._SW_VER)]
+                        == self._name
                 ):
                     return eachout
         return None
