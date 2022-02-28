@@ -11,11 +11,11 @@
 #
 Template, Hostname, Platform, Command
 
-# IMPORTANT NOTE --- Please check if parsers are present under mdssdk/parsers before adding any templates as this will break sdk
-# IMPORTANT NOTE --- Please check if parsers are present under mdssdk/parsers before adding any templates as this will break sdk
-# IMPORTANT NOTE --- Please check if parsers are present under mdssdk/parsers before adding any templates as this will break sdk
+# This is copied/forked from mdssdk project. It is not a part of the official distribution.
+# The original project warns about creating templates that have parsers already - I don't care
 
 cisco_nxos_show_zoneset_brief.textfsm, .*, cisco_nxos, sh[[ow]] zones[[et]] (n[[ame]] (\S+) )?b[[rief]]\s*.*
+cisco_nxos_show_zoneset_active.textfsm, .*, cisco_nxos, sh[[ow]] zones[[et]] act[[ive]]
 cisco_nxos_show_incompat_all_system.textfsm, .*, cisco_nxos, sh[[ow]] incompatibility-[[all]] [[system]] (\S+)
 cisco_nxos_show_zone_name_active.textfsm, .*, cisco_nxos, sh[[ow]] zo[[ne]] n[[ame]] (\S+) a[[ctive]] *
 cisco_nxos_show_install_all_impact.textfsm, .*, cisco_nxos, sh[[ow]] in[[stall]] al[[l]] im[[pact]] *
