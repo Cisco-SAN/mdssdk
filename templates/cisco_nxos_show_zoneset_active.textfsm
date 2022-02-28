@@ -1,0 +1,12 @@
+Value Filldown ZONESETNAME (\S+)
+Value Filldown VSAN (\d+)
+Value Filldown ZONENAME (\S+)
+Value Required PWWN ([a-f0-9:]+)
+Value FCID (0x[0-9a-f]{6})
+Value ALIAS (\S+)
+
+Start
+  ^zoneset name\s+${ZONESETNAME}\s+vsan\s+${VSAN}
+  ^\s+zone\s+name\s+${ZONENAME}
+  ^\s+(\*\s+fcid\s+${FCID}\s+)?\[?pwwn\s+${PWWN}\]?(\s+\[${ALIAS}\])? -> Record Start
+
