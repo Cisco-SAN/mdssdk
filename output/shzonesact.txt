@@ -1,0 +1,50 @@
+zoneset name WSDC_FG_V3_20220214 vsan 3
+  zone name au2106spe001_hba0_auwvmax0854_fa1d4_3d4 vsan 3
+    pwwn 21:00:00:1b:32:98:5e:0d [au2106spe001_hba0]
+  * fcid 0xdf0700 [pwwn 50:00:09:75:a8:0d:58:04] [auwvmax0854_fa1d4]
+  * fcid 0xe90e20 [pwwn 50:00:09:75:a8:0d:58:84] [auwvmax0854_fa3d4]
+
+  zone name pvsxs8511_hba0_auwvmax0854_fa1d4_3d4 vsan 3
+  * fcid 0xe90e06 [pwwn 20:00:07:25:b5:b1:10:00] [pvsxs8511_hba0]
+  * fcid 0xdf0700 [pwwn 50:00:09:75:a8:0d:58:04] [auwvmax0854_fa1d4]
+  * fcid 0xe90e20 [pwwn 50:00:09:75:a8:0d:58:84] [auwvmax0854_fa3d4]
+
+  zone name auaeuap420wbcx2_hba0_auwvmax0292_fa11d25 vsan 3
+    pwwn c0:50:76:04:08:61:00:0c [auaeuap420wbcx2_hba0]
+  * fcid 0xdf0d80 [pwwn 50:00:09:75:78:04:92:99] [auwvmax0292_fa11d25]
+
+  zone name auaeuap420wbcx2_hba4_auwvmax0292_fa11d25 vsan 3
+  * fcid 0xb74a98 [pwwn c0:50:76:04:08:61:00:0d] [auaeuap420wbcx2_hba4]
+  * fcid 0xdf0d80 [pwwn 50:00:09:75:78:04:92:99] [auwvmax0292_fa11d25]
+
+  zone name pvsxs8512_hba0_auwvmax0854_fa1d4_3d4 vsan 3
+  * fcid 0xe90e05 [pwwn 20:00:07:25:b5:b1:10:01] [pvsxs8512_hba0]
+  * fcid 0xdf0700 [pwwn 50:00:09:75:a8:0d:58:04] [auwvmax0854_fa1d4]
+  * fcid 0xe90e20 [pwwn 50:00:09:75:a8:0d:58:84] [auwvmax0854_fa3d4]
+
+  zone name auaeuap484wbcx2_hba0_auwvmax0292_fa11d25 vsan 3
+    pwwn c0:50:76:04:08:b1:00:14 [auaeuap484wbcx2_hba0]
+  * fcid 0xdf0d80 [pwwn 50:00:09:75:78:04:92:99] [auwvmax0292_fa11d25]
+
+  zone name auaeuap484wbcx2_hba4_auwvmax0292_fa11d25 vsan 3
+  * fcid 0xb74a88 [pwwn c0:50:76:04:08:b1:00:15] [auaeuap484wbcx2_hba4]
+  * fcid 0xdf0d80 [pwwn 50:00:09:75:78:04:92:99] [auwvmax0292_fa11d25]
+
+  zone name auaeuap485wbcx2_hba0_auwvmax0292_fa11d25 vsan 3
+  * fcid 0xb70116 [pwwn c0:50:76:04:08:b1:00:04] [auaeuap485wbcx2_hba0]
+  * fcid 0xdf0d80 [pwwn 50:00:09:75:78:04:92:99] [auwvmax0292_fa11d25]
+
+  zone name pvsxs8513_hba0_auwvmax0854_fa1d4_3d4 vsan 3
+  * fcid 0xe90e03 [pwwn 20:00:07:25:b5:b1:10:02] [pvsxs8513_hba0]
+  * fcid 0xdf0700 [pwwn 50:00:09:75:a8:0d:58:04] [auwvmax0854_fa1d4]
+  * fcid 0xe90e20 [pwwn 50:00:09:75:a8:0d:58:84] [auwvmax0854_fa3d4]
+
+  zone name pvsxs8514_hba0_auwvmax0854_fa1d4_3d4 vsan 3
+  * fcid 0xe90e02 [pwwn 20:00:07:25:b5:b1:10:03] [pvsxs8514_hba0]
+  * fcid 0xdf0700 [pwwn 50:00:09:75:a8:0d:58:04] [auwvmax0854_fa1d4]
+  * fcid 0xe90e20 [pwwn 50:00:09:75:a8:0d:58:84] [auwvmax0854_fa3d4]
+
+  zone name pvsxs8515_hba0_auwvmax0854_fa1d4_3d4 vsan 3
+  * fcid 0xe90e01 [pwwn 20:00:07:25:b5:b1:10:04] [pvsxs8515_hba0]
+  * fcid 0xdf0700 [pwwn 50:00:09:75:a8:0d:58:04] [auwvmax0854_fa1d4]
+  * fcid 0xe90e20 [pwwn 50:00:09:75:a8:0d:58:84] [auwvmax0854_fa3d4]
