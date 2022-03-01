@@ -14,8 +14,9 @@ Template, Hostname, Platform, Command
 # This is copied/forked from mdssdk project. It is not a part of the official distribution.
 # The original project warns about creating templates that have parsers already - I don't care
 
+cisco_nxos_show_interface_brief.textfsm, .*, cisco_nxos, sh[[ow]] int[[erface]] br[[ief]]
+cisco_nxos_show_zoneset_active.textfsm, .*, cisco_nxos, sh[[ow]] zones[[et]] ac[[tive]]
 cisco_nxos_show_zoneset_brief.textfsm, .*, cisco_nxos, sh[[ow]] zones[[et]] (n[[ame]] (\S+) )?b[[rief]]\s*.*
-cisco_nxos_show_zoneset_active.textfsm, .*, cisco_nxos, sh[[ow]] zones[[et]] act[[ive]]
 cisco_nxos_show_incompat_all_system.textfsm, .*, cisco_nxos, sh[[ow]] incompatibility-[[all]] [[system]] (\S+)
 cisco_nxos_show_zone_name_active.textfsm, .*, cisco_nxos, sh[[ow]] zo[[ne]] n[[ame]] (\S+) a[[ctive]] *
 cisco_nxos_show_install_all_impact.textfsm, .*, cisco_nxos, sh[[ow]] in[[stall]] al[[l]] im[[pact]] *
@@ -34,6 +35,9 @@ cisco_nxos_show_fcns_statistics.textfsm, .*, cisco_nxos, sh[[ow]] fcn[[s]] s[[ta
 cisco_nxos_show_inventory.textfsm, .*, cisco_nxos, sh[[ow]] inventory
 cisco_nxos_show_topology.textfsm, .*, cisco_nxos, sh[[ow]] topology(?: v[[san]] (\d+))?
 cisco_nxos_show_fdmi_database_detail.textfsm, .*, cisco_nxos, sh[[ow]] fdmi database detail *
+# cisco_nxos_show_system_internal_kernel_meminfo.textfsm, .*, cisco_nxos, sh[[ow]] sy[[stem]] i[[nternal]] k[[ernel]] memi[[nfo]]
+# cisco_nxos_show_device=alias_database.textfsm, .*, cisco_nxos, sh[[ow]] dev[[ice-alias]] da[[tabase]]
+
 
 
 
