@@ -1,0 +1,15 @@
+Value INTERFACE (\S+)
+Value VSAN (\d+)
+Value ADMIN_MODE (\S+)
+Value ADMIN_TRUNK_MODE (on|off)
+Value STATUS (\S+)
+Value SFP (\S+)
+Value OPER_MODE (\S+)
+Value OPER_SPEED_GBPS (\S+)
+Value PORT_CHANNEL (\S+)
+Value IP_ADDRESS (\S+)
+Value LOGICAL_TYPE (core|edge|--)
+
+Start
+  ^${INTERFACE}\s+${VSAN}\s+${ADMIN_MODE}\s+${ADMIN_TRUNK_MODE}\s+${STATUS}\s+${SFP}\s+${OPER_MODE}\s+${OPER_SPEED_GBPS}\s+${PORT_CHANNEL}(\s+${LOGICAL_TYPE})? -> Record
+  ^${INTERFACE}\s+${VSAN}\s+${ADMIN_TRUNK_MODE}\s+${STATUS}\s+${OPER_MODE}\s+${OPER_SPEED_GBPS}\s+${IP_ADDRESS}(\s+${LOGICAL_TYPE})? -> Record
