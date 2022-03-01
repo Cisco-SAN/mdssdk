@@ -1,0 +1,160 @@
+
+-----------------------------------------------------------------------------------------
+Interface  Vsan   Admin  Admin   Status       SFP    Oper  Oper   Port     Logical
+                  Mode   Trunk                       Mode  Speed  Channel   Type
+                         Mode                              (Gbps)
+-----------------------------------------------------------------------------------------
+fc1/1       1      E      on      trunking     swl   TE     4      31       core
+fc1/2       1      E      on      trunking     swl   TE     4      31       core
+fc1/3       1      E      on      trunking     swl   TE     4      31       core
+fc1/4       1      E      on      trunking     swl   TE     4      31       core
+fc1/5       3      FX     on      notConnected swl    --    --     --       --
+fc1/6       1      FX     on      down         swl    --    --     --       --
+fc1/7       3      FX     on      up           swl   F      4      --       edge
+fc1/8       3      FX     on      notConnected swl    --    --     --       --
+fc1/9       1      FX     on      down         swl    --    --     --       --
+fc1/10      1      FX     on      down         swl    --    --     --       --
+fc1/11      1      FX     on      down         swl    --    --     --       --
+fc1/12      3      FX     on      up           swl   F      4      --       edge
+fc1/13      3      FX     on      notConnected swl    --    --     --       --
+fc1/14      3      FX     on      up           swl   F      4      --       edge
+fc1/15      1      FX     on      down         swl    --    --     --       --
+fc1/16      3      FX     on      up           swl   F      4      --       edge
+fc1/17      3      FX     on      up           swl   F      4      --       edge
+fc1/18      1      FX     on      down         swl    --    --     --       --
+fc1/19      1      FX     on      down         swl    --    --     --       --
+fc1/20      3      FX     on      up           swl   F      4      --       edge
+fc1/21      3      FX     on      up           swl   F      4      --       edge
+fc1/22      3      FX     on      up           swl   F      4      --       edge
+fc1/23      3      FX     on      notConnected swl    --    --     --       --
+fc1/24      1      FX     on      down         swl    --    --     --       --
+fc1/25      1      E      on      trunking     swl   TE     4      33       core
+fc1/26      1      E      on      trunking     swl   TE     4      33       core
+fc1/27      1      E      on      trunking     swl   TE     4      33       core
+fc1/28      1      E      on      trunking     swl   TE     4      33       core
+fc1/29      3      FX     on      up           swl   F      4      --       edge
+fc1/30      1      FX     on      down         swl    --    --     --       --
+fc1/31      3      FX     on      up           swl   F      4      --       edge
+fc1/32      3      FX     on      up           swl   F      4      --       edge
+fc1/33      3      FX     on      notConnected swl    --    --     --       --
+fc1/34      1      FX     on      down         swl    --    --     --       --
+fc1/35      3      FX     on      notConnected swl    --    --     --       --
+fc1/36      1      FX     on      down         swl    --    --     --       --
+fc1/37      1      FX     on      down         swl    --    --     --       --
+fc1/38      3      FX     on      up           swl   F      4      --       edge
+fc1/39      3      FX     on      up           swl   F      4      --       edge
+fc1/40      3      FX     on      up           swl   F      4      --       edge
+fc1/41      3      FX     on      up           swl   F      4      --       edge
+fc1/42      1      FX     on      down         swl    --    --     --       --
+fc1/43      3      FX     on      up           swl   F      4      --       edge
+fc1/44      3      FX     on      up           swl   F      4      --       edge
+fc1/45      1      FX     on      down         swl    --    --     --       --
+fc1/46      1      FX     on      down         swl    --    --     --       --
+fc1/47      3      FX     on      up           swl   F      4      --       edge
+fc1/48      1      FX     on      down         swl    --    --     --       --
+fc2/1       1      E      on      trunking     swl   TE     4      31       core
+fc2/2       1      E      on      trunking     swl   TE     4      31       core
+fc2/3       1      E      on      trunking     swl   TE     4      31       core
+fc2/4       1      E      on      trunking     swl   TE     4      31       core
+fc2/5       1      FX     on      down         swl    --    --     --       --
+fc2/6       3      FX     on      notConnected swl    --    --     --       --
+fc2/7       3      FX     on      notConnected swl    --    --     --       --
+fc2/8       1      FX     on      down         swl    --    --     --       --
+fc2/9       3      FX     on      notConnected swl    --    --     --       --
+fc2/10      3      FX     on      notConnected swl    --    --     --       --
+fc2/11      3      FX     on      notConnected swl    --    --     --       --
+fc2/12      1      auto   on      down         swl    --    --     --       --
+fc2/13      1      FX     on      down         swl    --    --     --       --
+fc2/14      1      auto   on      down         swl    --    --     --       --
+fc2/15      1      FX     on      down         swl    --    --     --       --
+fc2/16      1      auto   on      down         swl    --    --     --       --
+fc2/17      1      auto   on      down         swl    --    --     --       --
+fc2/18      1      auto   on      down         swl    --    --     --       --
+fc2/19      1      auto   on      down         swl    --    --     --       --
+fc2/20      1      auto   on      down         swl    --    --     --       --
+fc2/21      1      FX     on      down         swl    --    --     --       --
+fc2/22      1      auto   on      down         swl    --    --     --       --
+fc2/23      1      FX     on      down         swl    --    --     --       --
+fc2/24      1      FX     on      down         swl    --    --     --       --
+fc2/25      1      E      on      trunking     swl   TE     4      33       core
+fc2/26      1      E      on      trunking     swl   TE     4      33       core
+fc2/27      1      E      on      trunking     swl   TE     4      33       core
+fc2/28      1      E      on      trunking     swl   TE     4      33       core
+fc2/29      1      FX     on      down         swl    --    --     --       --
+fc2/30      1      FX     on      down         swl    --    --     --       --
+fc2/31      1      FX     on      down         swl    --    --     --       --
+fc2/32      1      auto   on      down         swl    --    --     --       --
+fc2/33      1      FX     on      down         swl    --    --     --       --
+fc2/34      1      auto   on      down         swl    --    --     --       --
+fc2/35      1      auto   on      down         swl    --    --     --       --
+fc2/36      1      auto   on      down         swl    --    --     --       --
+fc2/37      1      FX     on      down         swl    --    --     --       --
+fc2/38      1      FX     on      down         swl    --    --     --       --
+fc2/39      1      FX     on      down         swl    --    --     --       --
+fc2/40      1      auto   on      down         swl    --    --     --       --
+fc2/41      1      auto   on      down         swl    --    --     --       --
+fc2/42      1      auto   on      down         swl    --    --     --       --
+fc2/43      1      auto   on      down         swl    --    --     --       --
+fc2/44      1      auto   on      down         swl    --    --     --       --
+fc2/45      3      FX     on      notConnected swl    --    --     --       --
+fc2/46      1      auto   on      down         swl    --    --     --       --
+fc2/47      1      FX     on      down         swl    --    --     --       --
+fc2/48      3      FX     on      notConnected swl    --    --     --       --
+fc3/1       3      FX     on      up           swl   F      2      --       edge
+fc3/2       3      FX     on      notConnected swl    --    --     --       --
+fc3/3       3      FX     on      up           swl   F      2      --       edge
+fc3/4       3      FX     on      up           swl   F      2      --       edge
+fc3/5       1      auto   on      down         swl    --    --     --       --
+fc3/6       1      auto   on      down         swl    --    --     --       --
+fc3/7       1      auto   on      down         swl    --    --     --       --
+fc3/8       1      auto   on      down         swl    --    --     --       --
+fc3/9       1      auto   on      down         swl    --    --     --       --
+fc3/10      1      auto   on      down         swl    --    --     --       --
+fc3/11      1      auto   on      down         swl    --    --     --       --
+fc3/12      1      auto   on      down         swl    --    --     --       --
+fc3/13      1      auto   on      down         swl    --    --     --       --
+fc3/14      1      auto   on      down         swl    --    --     --       --
+fc3/15      1      auto   on      down         swl    --    --     --       --
+fc3/16      3      FX     on      notConnected swl    --    --     --       --
+fc3/17      1      FX     on      down         swl    --    --     --       --
+fc3/18      1      FX     on      down         swl    --    --     --       --
+fc3/19      1      FX     on      down         swl    --    --     --       --
+fc3/20      3      FX     on      notConnected swl    --    --     --       --
+fc3/21      3      FX     on      notConnected swl    --    --     --       --
+fc3/22      3      FX     on      notConnected swl    --    --     --       --
+fc3/23      3      FX     on      notConnected swl    --    --     --       --
+fc3/24      3      FX     on      notConnected swl    --    --     --       --
+
+-------------------------------------------------------------------------------
+Interface                Status                            Speed
+                                                           (Gbps)
+-------------------------------------------------------------------------------
+sup-fc0                  up                                1
+
+--------------------------------------------------------------------------------
+Interface                Status     IP Address        Speed    MTU
+--------------------------------------------------------------------------------
+IPStorage3/1             down       --                  auto     1500
+IPStorage3/2             sfpAbsent  --                  auto     1500
+IPStorage3/3             sfpAbsent  --                  auto     1500
+IPStorage3/4             sfpAbsent  --                  auto     1500
+IPStorage3/5             sfpAbsent  --                  auto     1500
+IPStorage3/6             sfpAbsent  --                  auto     1500
+IPStorage3/7             sfpAbsent  --                  auto     1500
+IPStorage3/8             sfpAbsent  --                  auto     1500
+IPStorage3/9             outOfServc --                  auto     1500
+IPStorage3/10            outOfServc --                  auto     1500
+
+-------------------------------------------------------------------------------
+Interface               Status     IP Address         Speed     MTU
+-------------------------------------------------------------------------------
+mgmt0                    up         10.2.108.181/26     1 Gbps   1500
+
+-----------------------------------------------------------------------------------------
+Interface             Vsan  Admin  Status        Oper  Oper    IP              Logical
+                            Trunk                Mode  Speed   Address         Type
+                            Mode                       (Gbps)
+-----------------------------------------------------------------------------------------
+port-channel31        1     on     trunking       TE   32      --              core
+port-channel33        1     on     trunking       TE   32      --              core
+
