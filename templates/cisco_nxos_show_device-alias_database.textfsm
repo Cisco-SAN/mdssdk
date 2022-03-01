@@ -1,0 +1,5 @@
+Value ALIAS (\S+)
+Value PWWN ([0-9a-f:]+)
+
+Start
+  ^device-alias\s+name\s+${ALIAS}\s+pwwn\s+${PWWN} -> Record
