@@ -12,6 +12,7 @@ Switch
 
 .. autoclass:: mdssdk.utility.switch_utility.SwitchUtils
    :members:
+   :inherited-members:
 
 Module
 ------
