@@ -6,7 +6,8 @@ Value VENDOR (\w+)
 Value FC4_TYPE_FEATURE ((([\w\-]+)(:(\w+))?\s?)+)
 
 Start
-  ^VSAN\s${VSAN_ID}  
+  ^VSAN\s${VSAN_ID}
   ^${FCID}\s+${TYPE}\s+${PWWN}\s+\(?${VENDOR}?\)?\s+${FC4_TYPE_FEATURE} -> Record
 
-  
+
+

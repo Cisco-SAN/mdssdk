@@ -546,22 +546,26 @@ class Switch(SwitchUtils):
                 elif "Supervisor Module-4" in eachmod.type:
                     return "m9700-sf4ek9"
             return None
-        elif "9132T".lower() in ff:
-            return "m9100-s6ek9"
-        elif "9148S".lower() in ff:
-            return "m9100-s5ek9"
-        elif "9148T".lower() in ff:
-            return "m9148-s6ek9"
-        elif "9250i".lower() in ff:
-            return "m9250-s5ek9"
-        elif "9396S".lower() in ff:
-            return "m9300-s1ek9"
-        elif "9396T".lower() in ff:
-            return "m9300-s2ek9"
-        elif "9148".lower() in ff:
-            return "m9100-s3ek9"
+        elif "9124V".lower() in ff:
+            return "m9124v-s8ek9"
+        elif "9148V".lower() in ff:
+            return "m9148v-s8ek9"
         elif "9220i".lower() in ff:
             return "m9220-s7ek9"
+        elif "9132T".lower() in ff:
+            return "m9100-s6ek9"
+        elif "9148T".lower() in ff:
+            return "m9148-s6ek9"
+        elif "9148S".lower() in ff:
+            return "m9100-s5ek9"
+        elif "9250i".lower() in ff:
+            return "m9250-s5ek9"
+        elif "9148".lower() in ff:
+            return "m9100-s3ek9"
+        elif "9396T".lower() in ff:
+            return "m9300-s2ek9"
+        elif "9396S".lower() in ff:
+            return "m9300-s1ek9"
         else:
             return None
 

@@ -29,6 +29,7 @@ _INT_LOGICAL_TYPE = {DEFAULT: "logical_type"}
 # ------------------------------------ #
 # show interface <> transceiver details
 # ------------------------------------ #
+INTERFACE = {DEFAULT: "interface_sfp"}
 SFP = {DEFAULT: "sfp"}
 NAME = {DEFAULT: "name"}
 PART_NUM = {DEFAULT: "partnum"}
@@ -42,3 +43,5 @@ CURRENT = {DEFAULT: "current"}
 BIT_RATE = {DEFAULT: "nominal_bitrate"}
 TX_POWER = {DEFAULT: "tx_pwr"}
 RX_POWER = {DEFAULT: "rx_pwr"}
+
+
