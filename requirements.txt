@@ -1,2 +1,4 @@
 requests
 netmiko>=3.1.0
+m2r
+mistune>=2.0.3

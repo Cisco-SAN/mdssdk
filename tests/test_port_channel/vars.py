@@ -5,6 +5,7 @@ log = logging.getLogger(__name__)
 trunk_values = ["on", "off", "auto"]
 
 channel_mode_values = ["active", "on"]
+channel_mode_values_npv = ["active"]
 
 mode_values = ["E", "F", "Fx", "NP", "SD", "auto"]
 

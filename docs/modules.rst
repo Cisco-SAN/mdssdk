@@ -10,7 +10,7 @@ Switch
    :members:
    :inherited-members:
 
-.. autoclass:: from mdssdk.utility.switch_utility.SwitchUtils
+.. autoclass:: mdssdk.utility.switch_utility.SwitchUtils
    :members:
 
 Module

@@ -21,7 +21,10 @@ class TestPortChannelAttrChannelMode(unittest.TestCase):
             if "port-channel" + str(self.pc_id) not in self.interfaces.keys():
                 break
         self.pc = PortChannel(self.switch, self.pc_id)
-        self.channel_mode_values = channel_mode_values
+        if self.switch.npv:
+            self.channel_mode_values = channel_mode_values_npv
+        else:
+            self.channel_mode_values = channel_mode_values
 
     def test_channel_mode_read_nonexisting(self):
         self.assertIsNone(self.pc.channel_mode)

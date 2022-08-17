@@ -37,19 +37,20 @@ log.info("Starting all tests...")
 
 def get_suite_list(sw):
     suiteList = []
-    # suiteList.append(MyTestLoader(sw).discover("test_device_alias", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_fc", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_port_channel", "test_*.py"))
-    suiteList.append(MyTestLoader(sw).discover("test_fcns", "test_*.py"))
-    suiteList.append(MyTestLoader(sw).discover("test_flogi", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_switch", "test_*.py"))
     suiteList.append(MyTestLoader(sw).discover("test_vsan", "test_*.py"))
-    # suiteList.append(MyTestLoader(sw).discover("test_zone", "test_*.py"))
-    # suiteList.append(MyTestLoader(sw).discover("test_zoneset", "test_*.py"))
+    if not sw.npv:
+        suiteList.append(MyTestLoader(sw).discover("test_device_alias", "test_*.py"))
+        suiteList.append(MyTestLoader(sw).discover("test_fcns", "test_*.py"))
+        suiteList.append(MyTestLoader(sw).discover("test_flogi", "test_*.py"))
+        suiteList.append(MyTestLoader(sw).discover("test_zone", "test_*.py"))
+        suiteList.append(MyTestLoader(sw).discover("test_zoneset", "test_*.py"))
     return suiteList
 
 
-for conntype in ["https", "ssh"]:
+for conntype in ["https"]:
     with open("switch_details.json", "r+", encoding="utf-8") as f:
         data = json.load(f)
         print(

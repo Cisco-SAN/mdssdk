@@ -27,7 +27,7 @@ class TestFcAttrMode(unittest.TestCase):
         self.mode_values = mode_values
 
     def test_mode_read(self):
-        self.assertIn(self.fc.mode, self.mode_values + ["TE", "TF", "--", " --"])
+        self.assertIn(self.fc.mode, self.mode_values + ["TE", "TF", "TNP", "--", " --"])
 
     def test_mode_write(self):
         try:
@@ -39,7 +39,7 @@ class TestFcAttrMode(unittest.TestCase):
                     + self.fc.name
                     + " is part of a PC and hence cannot set mode to auto, Please rerun the tests"
                 )
-        self.assertIn(self.fc.mode, self.mode_values + ["TE", "TF", "--", " --"])
+        self.assertIn(self.fc.mode, self.mode_values + ["TE", "TF", "TNP", "--", " --"])
 
     def test_mode_write_invalid(self):
         mode = "asdf"

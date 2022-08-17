@@ -26,7 +26,8 @@ class TestSwitchAttrActiveZonesets(unittest.TestCase):
         self.v.create()
 
     def test_active_zonesets_read(self):
-        # self.skipTest("need to check")
+        if self.switch.npv:
+            self.skipTest("Switch in NPV mode")
         zone = Zone(self.switch, "test_zone", self.id)
         zone.create()
         zoneset = ZoneSet(self.switch, "test_zoneset", self.id)
@@ -38,6 +39,8 @@ class TestSwitchAttrActiveZonesets(unittest.TestCase):
         self.assertIn(self.v.id, list(active_zonesets.keys()))
 
     def test_active_zonesets_write_error(self):
+        if self.switch.npv:
+            self.skipTest("Switch in NPV mode")
         with self.assertRaises(AttributeError) as e:
             self.switch.active_zonesets = "asdf"
         self.assertEqual("can't set attribute", str(e.exception))
