@@ -29,7 +29,6 @@ _INT_LOGICAL_TYPE = {DEFAULT: "logical_type"}
 # ------------------------------------ #
 # show interface <> transceiver details
 # ------------------------------------ #
-INTERFACE = {DEFAULT: "interface_sfp"}
 SFP = {DEFAULT: "sfp"}
 NAME = {DEFAULT: "name"}
 PART_NUM = {DEFAULT: "partnum"}
