@@ -163,7 +163,7 @@ class SSHSession(object):
             if cmd.strip() in eachline:
                 start = True
                 continue
-            if "# end" in eachline:
+            if re.match(r".*#\s+end.*", eachline):
                 break
             if start:
                 retout.append(eachline)

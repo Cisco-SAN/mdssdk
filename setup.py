@@ -69,7 +69,7 @@ class PostInstallCommand(install):
     def run(self):
         install.run(self)
         SDK_TEMPLATE_PATH = os.path.expanduser("~") + "/mdssdk-templates/"
-        #print("in PostInstall with " + SDK_TEMPLATE_PATH)
+        # print("in PostInstall with " + SDK_TEMPLATE_PATH)
         copytree("templates/", SDK_TEMPLATE_PATH)
 
         print("PLEASE NOTE:")
