@@ -42,5 +42,3 @@ CURRENT = {DEFAULT: "current"}
 BIT_RATE = {DEFAULT: "nominal_bitrate"}
 TX_POWER = {DEFAULT: "tx_pwr"}
 RX_POWER = {DEFAULT: "rx_pwr"}
-
-

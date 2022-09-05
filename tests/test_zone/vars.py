@@ -1,5 +1,8 @@
 import random
 import string
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def get_random_id(start=2, end=400):

@@ -1,4 +1,5 @@
 import unittest
+import re
 
 from mdssdk.connection_manager.errors import CLIError
 from mdssdk.devicealias import DeviceAlias
@@ -77,6 +78,32 @@ class TestDeviceAliasCreate(unittest.TestCase):
         self.d.clear_lock()
 
     def test_create_name_beyondmax(self):
+        def isVersionGreaterThanEqual922():
+            retval = False
+            PAT_VER = "(?P<major_plus>\d+)\.(?P<major>\d+)\((?P<minor>\d+)(?P<patch>[a-z+])?\)(?P<other>.*)"
+            RE_COMP = re.compile(PAT_VER)
+            result_ver = RE_COMP.match(self.switch.version)
+            result_dict = result_ver.groupdict()
+            majorplus = int(result_dict["major_plus"])
+            major = int(result_dict["major"])
+            minor = int(result_dict["minor"])
+            if majorplus > 9:
+                retval = True
+            elif majorplus < 9:
+                retval = False
+            elif major > 2:
+                retval = True
+            elif major < 2:
+                retval = False
+            elif minor >= 2:
+                retval = True
+            return retval
+
+        if isVersionGreaterThanEqual922():
+            maxlen = 63
+        else:
+            maxlen = 64
+
         beyondmax = {
             "da123456789123456789123456789123456789123456789123456789123456789": get_random_pwwn()
         }
@@ -89,7 +116,7 @@ class TestDeviceAliasCreate(unittest.TestCase):
             + str(name)
             + " pwwn "
             + str(pwwn)
-            + ' ; " gave the error " % String exceeded max length of (64) ".',
+            + ' ; " gave the error " % String exceeded max length of (' + str(maxlen) + ') ".',
             str(e.exception),
         )
 
