@@ -103,6 +103,7 @@ class Switch(SwitchUtils):
         self.timeout = timeout
         self.__verify_ssl = verify_ssl
         self.__supported = None
+        self.__npv = None
         # Connect to ssh
         self._connect_via_ssh()
         try:
@@ -128,6 +129,7 @@ class Switch(SwitchUtils):
                     + "Unsupported Switch or device found, SDK supports only "
                       "MDS/FI/N9k switches."
                 )
+            self.__npv=self._is_npv()
         except CLIError as c:
             # Could be a FI box
             if self._is_fabric_interconnect():
@@ -374,6 +376,9 @@ class Switch(SwitchUtils):
             False
             >>>
         """
+        
+        if self.__npv is not None:
+            return self.__npv
 
         if self._sw_type == "MDS":
             out = self.feature("npv")
