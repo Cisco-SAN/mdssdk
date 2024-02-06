@@ -1015,7 +1015,7 @@ class Zone(object):
             log.debug("Sending commit cmd as lock is acquired")
             cmd = "show zone pending-diff vsan " + str(self._vsan)
             out = self.__swobj.show(cmd, raw_text=True)
-            cmd = "zone commit vsan " + str(self._vsan)
+            cmd =" ;terminal dont-ask ; zone commit vsan " + str(self._vsan)+"; no terminal dont-ask"
             try:
                 o = self.__swobj.config(cmd)
                 if o is not None:
