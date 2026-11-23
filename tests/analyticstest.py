@@ -55,9 +55,9 @@ scsi_initiator_io_profile = {
 }
 
 sw = Switch(
-    ip_address="10.126.94.184",
-    username="admin",
-    password="nbv!2345",
+    ip_address="",
+    username="",
+    password="",
     connection_type="https",
     port=8443,
     timeout=30,
